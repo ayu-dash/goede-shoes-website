@@ -1445,13 +1445,13 @@ ul {
 
 .auth-minimal-desc {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   line-height: 1.7;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .btn-auth--compact {
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 /* Back link */

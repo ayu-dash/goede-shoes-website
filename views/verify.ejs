@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<!-- VERIFY ACCOUNT PAGE -->
+<section class="auth-minimal-page">
+  <div class="auth-minimal-card">
+    <h1 class="auth-minimal-title">Verifikasi Akun Anda</h1>
+    <p class="auth-minimal-desc">Kami telah mengirimkan kode verifikasi ke email Anda.<br>Silakan masukkan 6 digit kode tersebut di bawah ini.</p>
+
+    <form action="/verify" method="POST" class="auth-form" id="verify-form">
+      <div class="otp-group" id="otp-group">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" required />
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
+      </div>
+      <input type="hidden" name="otp" id="otp-hidden" />
+
+      <button type="submit" class="btn btn-primary btn-auth btn-auth--compact" id="btn-verify">Verifikasi Sekarang</button>
+    </form>
+
+    <p class="auth-switch">Belum menerima kode? <a href="#" class="auth-switch-link" id="resend-code">Kirim Ulang</a></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
