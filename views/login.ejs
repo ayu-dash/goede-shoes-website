@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+
+<!-- LOGIN PAGE -->
+<section class="auth-page">
+  <div class="auth-layout">
+    <!-- Left: Hero Image Section -->
+    <div class="auth-hero">
+      <img src="/images/auth-login.png" alt="Goede Shoes" class="auth-hero-img" />
+      <div class="auth-hero-overlay"></div>
+      <div class="auth-hero-content">
+        <h2 class="auth-hero-title">Presisi dalam <br>setiap <em>perawatan.</em></h2>
+        <span class="auth-hero-label-bottom">LAYANAN CUCI SEPATU PREMIUM</span>
+      </div>
+    </div>
+
+    <!-- Right: Form Section -->
+    <div class="auth-form-section">
+      <div class="auth-form-wrapper auth-form-wrapper--login">
+        <h1 class="auth-form-title">Masuk ke Akun Anda</h1>
+
+        <form action="/login" method="POST" class="auth-form" id="login-form">
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email" class="form-label form-label--upper">Email</label>
+            <div class="form-input-wrap form-input-icon">
+              <i class="fa-regular fa-envelope input-icon"></i>
+              <input type="email" id="email" name="email" class="form-input form-input--icon" placeholder="nama@email.com" required />
+            </div>
+          </div>
+
+          <!-- Kata Sandi -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="password" class="form-label form-label--upper">Kata Sandi</label>
+              <a href="/forgot-password" class="form-link form-link--small">Lupa Kata Sandi?</a>
+            </div>
+            <div class="form-input-wrap form-input-icon">
+              <i class="fa-solid fa-lock input-icon"></i>
+              <input type="password" id="password" name="password" class="form-input form-input--icon" placeholder="••••••••" required />
+              <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary btn-auth" id="btn-login">Masuk Sekarang <span class="btn-arrow">→</span></button>
+        </form>
+
+        <p class="auth-switch">Belum punya akun? <a href="/register" class="auth-switch-link">Daftar Sekarang</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

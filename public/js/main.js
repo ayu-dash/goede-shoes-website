@@ -44,3 +44,89 @@ if (hamburger) {
     hamburger.classList.toggle("active");
   });
 }
+
+// ===========================
+// AUTH PAGES INTERACTIONS
+// ===========================
+
+// Password toggle visibility
+document.querySelectorAll(".password-toggle").forEach((toggle) => {
+  toggle.addEventListener("click", () => {
+    const input = toggle.parentElement.querySelector("input");
+    const icon = toggle.querySelector("i");
+
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("fa-eye");
+      icon.classList.add("fa-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.remove("fa-eye-slash");
+      icon.classList.add("fa-eye");
+    }
+  });
+});
+
+// OTP Input auto-focus & behavior
+const otpGroup = document.getElementById("otp-group");
+if (otpGroup) {
+  const otpInputs = otpGroup.querySelectorAll(".otp-input");
+
+  otpInputs.forEach((input, index) => {
+    // Auto-focus to next input on entry
+    input.addEventListener("input", (e) => {
+      const value = e.target.value;
+
+      // Only allow digits
+      e.target.value = value.replace(/[^0-9]/g, "");
+
+      if (e.target.value && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+
+      // Add filled class
+      if (e.target.value) {
+        e.target.classList.add("filled");
+      } else {
+        e.target.classList.remove("filled");
+      }
+    });
+
+    // Handle backspace to go to previous input
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !e.target.value && index > 0) {
+        otpInputs[index - 1].focus();
+        otpInputs[index - 1].value = "";
+        otpInputs[index - 1].classList.remove("filled");
+      }
+    });
+
+    // Handle paste
+    input.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasteData = e.clipboardData.getData("text").replace(/[^0-9]/g, "");
+      pasteData.split("").forEach((char, i) => {
+        if (otpInputs[index + i]) {
+          otpInputs[index + i].value = char;
+          otpInputs[index + i].classList.add("filled");
+          if (index + i < otpInputs.length - 1) {
+            otpInputs[index + i + 1].focus();
+          }
+        }
+      });
+    });
+  });
+
+  // Combine OTP values on form submit
+  const verifyForm = document.getElementById("verify-form");
+  if (verifyForm) {
+    verifyForm.addEventListener("submit", (e) => {
+      const otpHidden = document.getElementById("otp-hidden");
+      let otp = "";
+      otpInputs.forEach((input) => {
+        otp += input.value;
+      });
+      otpHidden.value = otp;
+    });
+  }
+}

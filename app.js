@@ -19,6 +19,9 @@ app.use(express.json());
 app.get("/", (req, res) => res.render("index"));
 app.get("/login", (req, res) => res.render("login"));
 app.get("/register", (req, res) => res.render("register"));
+app.get("/verify", (req, res) => res.render("verify"));
+app.get("/forgot-password", (req, res) => res.render("forgot-password"));
+app.get("/reset-password", (req, res) => res.render("reset-password"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Goede Shoes running on port ${PORT}`));
