@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
-    // ... (existing fields)
     name: {
         type: String,
         required: [true, "Please tell us your name!"],
@@ -36,18 +35,22 @@ const userSchema = new mongoose.Schema({
     otpExpires: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    role: {
+        type: String,
+        enum: ["customer", "staff", "admin"],
+        default: "customer",
+    },
 }, {
     timestamps: true
 });
 
-// Hash password before saving
+
 userSchema.pre("save", async function() {
     if (!this.isModified("password")) return;
     this.password = await bcrypt.hash(this.password, 12);
 });
 
 
-// Method to compare password
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
     return await bcrypt.compare(candidatePassword, userPassword);
 };
