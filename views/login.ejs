@@ -18,7 +18,7 @@
       <div class="auth-form-wrapper auth-form-wrapper--login">
         <h1 class="auth-form-title">Masuk ke Akun Anda</h1>
 
-        <form action="/login" method="POST" class="auth-form" id="login-form">
+        <form id="login-form" class="auth-form">
           <!-- Email -->
           <div class="form-group">
             <label for="email" class="form-label form-label--upper">Email</label>
@@ -46,6 +46,58 @@
           <!-- Submit -->
           <button type="submit" class="btn btn-primary btn-auth" id="btn-login">Masuk Sekarang <span class="btn-arrow">→</span></button>
         </form>
+
+        <script>
+          document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Menghubungkan...';
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+              const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+              });
+
+              const result = await res.json();
+
+              if (result.status === 'success') {
+                localStorage.setItem('token', result.token);
+                window.location.href = '/';
+              } else if (result.status === 'unverified') {
+                alert(result.message);
+                localStorage.setItem('tempEmail', data.email);
+                window.location.href = '/verify';
+              } else {
+                alert(result.message);
+              }
+            } catch (err) {
+              alert('Terjadi kesalahan, silakan coba lagi.');
+            } finally {
+              btn.disabled = false;
+              btn.textContent = 'Masuk Sekarang →';
+            }
+          });
+
+          // Password toggle
+          document.querySelector('.password-toggle').addEventListener('click', function() {
+            const passInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            if (passInput.type === 'password') {
+              passInput.type = 'text';
+              icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+              passInput.type = 'password';
+              icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+          });
+        </script>
+
 
         <p class="auth-switch">Belum punya akun? <a href="/register" class="auth-switch-link">Daftar Sekarang</a></p>
       </div>

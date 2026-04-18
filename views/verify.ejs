@@ -6,7 +6,7 @@
     <h1 class="auth-minimal-title">Verifikasi Akun Anda</h1>
     <p class="auth-minimal-desc">Kami telah mengirimkan kode verifikasi ke email Anda.<br>Silakan masukkan 6 digit kode tersebut di bawah ini.</p>
 
-    <form action="/verify" method="POST" class="auth-form" id="verify-form">
+    <form id="verify-form" class="auth-form">
       <div class="otp-group" id="otp-group">
         <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" required />
         <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" required />
@@ -20,8 +20,112 @@
       <button type="submit" class="btn btn-primary btn-auth btn-auth--compact" id="btn-verify">Verifikasi Sekarang</button>
     </form>
 
+    <script>
+      const inputs = document.querySelectorAll('.otp-input');
+      const hiddenInput = document.getElementById('otp-hidden');
+
+      inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          if (e.target.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+          }
+          updateHidden();
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            inputs[index - 1].focus();
+          }
+        });
+      });
+
+      function updateHidden() {
+        let otp = '';
+        inputs.forEach(input => otp += input.value);
+        hiddenInput.value = otp;
+      }
+
+      document.getElementById('verify-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = localStorage.getItem('tempEmail');
+        if (!email) {
+          alert('Sesi verifikasi berakhir. Silakan daftar ulang.');
+          window.location.href = '/register';
+          return;
+        }
+
+        const btn = document.getElementById('btn-verify');
+        btn.disabled = true;
+        btn.textContent = 'Memverifikasi...';
+
+        try {
+          const res = await fetch('/api/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp: hiddenInput.value })
+          });
+
+          const result = await res.json();
+          if (result.status === 'success') {
+            localStorage.removeItem('tempEmail');
+            localStorage.setItem('token', result.token);
+            alert('Verifikasi berhasil!');
+            window.location.href = '/';
+          } else {
+            alert(result.message);
+          }
+        } catch (err) {
+          alert('Terjadi kesalahan, silakan coba lagi.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Verifikasi Sekarang';
+        }
+      });
+    </script>
+
+
     <p class="auth-switch">Belum menerima kode? <a href="#" class="auth-switch-link" id="resend-code">Kirim Ulang</a></p>
-  </div>
-</section>
+
+    <script>
+      // ... (existing code for OTP inputs)
+
+      document.getElementById('resend-code').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = localStorage.getItem('tempEmail');
+        if (!email) {
+          alert('Sesi verifikasi berakhir. Silakan daftar ulang.');
+          window.location.href = '/register';
+          return;
+        }
+
+        const link = e.target;
+        const originalText = link.textContent;
+        link.style.pointerEvents = 'none';
+        link.style.opacity = '0.5';
+        link.textContent = 'Mengirim ulang...';
+
+        try {
+          const res = await fetch('/api/auth/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+
+          const result = await res.json();
+          if (result.status === 'success') {
+            alert('Kode OTP baru telah dikirim ke email Anda!');
+          } else {
+            alert(result.message);
+          }
+        } catch (err) {
+          alert('Terjadi kesalahan, silakan coba lagi.');
+        } finally {
+          link.style.pointerEvents = 'auto';
+          link.style.opacity = '1';
+          link.textContent = originalText;
+        }
+      });
+    </script>
+
 
 <%- include('partials/footer') %>
