@@ -35,22 +35,15 @@ const createSendToken = (user, statusCode, req, res) => {
 
 exports.register = async (req, res) => {
     try {
-        const { name, email, phone, address, password } = req.body;
+        const { name, email, phone, password } = req.body;
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpires = Date.now() + 10 * 60 * 1000; 
+        const otpExpires = Date.now() + 10 * 60 * 1000;
 
         const newUser = await User.create({
             name,
             email,
             phone,
-            addresses: [
-                {
-                    label: "Utama",
-                    recipientName: name,
-                    fullAddress: address,
-                },
-            ],
             password,
             otp,
             otpExpires,
@@ -58,7 +51,7 @@ exports.register = async (req, res) => {
 
 
         const message = `Your Goede Shoes verification code is: ${otp}. It will expire in 10 minutes.`;
-        
+
         try {
             await sendEmail({
                 email: newUser.email,
@@ -96,16 +89,26 @@ exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        const user = await User.findOne({
-            email,
-            otp,
-            otpExpires: { $gt: Date.now() },
-        });
+        const user = await User.findOne({ email });
 
         if (!user) {
+            return res.status(404).json({
+                status: "fail",
+                message: "Email tidak ditemukan.",
+            });
+        }
+
+        if (user.otp !== otp) {
             return res.status(400).json({
                 status: "fail",
-                message: "OTP is invalid or has expired",
+                message: "Kode OTP salah.",
+            });
+        }
+
+        if (user.otpExpires < Date.now()) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Kode OTP telah kedaluwarsa. Silakan kirim ulang.",
             });
         }
 
@@ -122,6 +125,7 @@ exports.verifyOTP = async (req, res) => {
         });
     }
 };
+
 
 exports.resendOTP = async (req, res) => {
     try {
@@ -151,7 +155,7 @@ exports.resendOTP = async (req, res) => {
         await user.save();
 
         const message = `Your new Goede Shoes verification code is: ${otp}. It will expire in 10 minutes.`;
-        
+
         try {
             await sendEmail({
                 email: user.email,
@@ -205,7 +209,7 @@ exports.login = async (req, res) => {
             await user.save();
 
             const message = `Your account is not verified. Your new verification code is: ${otp}`;
-            
+
             try {
                 await sendEmail({
                     email: user.email,

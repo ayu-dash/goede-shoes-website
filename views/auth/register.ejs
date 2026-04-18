@@ -1,131 +1,127 @@
 <%- include('../partials/header') %>
 
-<!-- REGISTER PAGE -->
-<section class="auth-page">
-  <div class="auth-layout">
-    <!-- Left: Hero Image Section -->
-    <div class="auth-hero">
-      <img src="/images/auth-register.png" alt="Goede Shoes" class="auth-hero-img" />
-      <div class="auth-hero-overlay"></div>
-      <div class="auth-hero-content">
-        <span class="auth-hero-label">KUALITAS TANPA KOMPROMI</span>
-        <h2 class="auth-hero-title">Setiap Langkah Adalah <br>Pernyataan.</h2>
-        <p class="auth-hero-desc">Di Goede, kami tidak hanya membersihkan sepatu, kami merestorasi kepercayaan diri Anda melalui presisi yang tak tertanding.</p>
+  <!-- REGISTER PAGE -->
+  <section class="auth-page">
+    <div class="auth-layout">
+      <!-- Left: Hero Image Section -->
+      <div class="auth-hero">
+        <img src="/images/auth-register.png" alt="Goede Shoes" class="auth-hero-img" />
+        <div class="auth-hero-overlay"></div>
+        <div class="auth-hero-content">
+          <span class="auth-hero-label">KUALITAS TANPA KOMPROMI</span>
+          <h2 class="auth-hero-title">Setiap Langkah Adalah <br>Pernyataan.</h2>
+          <p class="auth-hero-desc">Di Goede, kami tidak hanya membersihkan sepatu, kami merestorasi kepercayaan diri
+            Anda melalui presisi yang tak tertanding.</p>
+        </div>
       </div>
-    </div>
 
-    <!-- Right: Form Section -->
-    <div class="auth-form-section">
-      <div class="auth-form-wrapper">
-        <h1 class="auth-form-title">Buat Akun</h1>
-        <p class="auth-form-subtitle">Bergabunglah dengan standar baru dalam perawatan sepatu eksklusif.</p>
+      <!-- Right: Form Section -->
+      <div class="auth-form-section">
+        <div class="auth-form-wrapper">
+          <h1 class="auth-form-title">Buat Akun</h1>
+          <p class="auth-form-subtitle">Bergabunglah dengan standar baru dalam perawatan sepatu eksklusif.</p>
 
-        <form id="register-form" class="auth-form">
-          <!-- Nama Lengkap -->
-          <div class="form-group">
-            <label for="nama" class="form-label">Nama Lengkap</label>
-            <div class="form-input-wrap">
-              <input type="text" id="nama" name="name" class="form-input" placeholder="John Doe" required />
+          <form id="register-form" class="auth-form">
+            <!-- Nama Lengkap -->
+            <div class="form-group">
+              <label for="nama" class="form-label">Nama Lengkap</label>
+              <div class="form-input-wrap">
+                <input type="text" id="nama" name="name" class="form-input" placeholder="John Doe" required />
+              </div>
             </div>
-          </div>
 
-          <!-- Email -->
-          <div class="form-group">
-            <label for="email" class="form-label">Email</label>
-            <div class="form-input-wrap">
-              <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required />
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email" class="form-label">Email</label>
+              <div class="form-input-wrap">
+                <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required />
+              </div>
             </div>
-          </div>
 
-          <!-- Nomor Telepon -->
-          <div class="form-group">
-            <label for="phone" class="form-label">Nomor Telepon</label>
-            <div class="form-input-wrap">
-              <input type="tel" id="phone" name="phone" class="form-input" placeholder="+62 812 3456 7890" required />
+            <!-- Nomor Telepon -->
+            <div class="form-group">
+              <label for="phone" class="form-label">Nomor Telepon</label>
+              <div class="form-input-wrap">
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="+62 812 3456 7890" required />
+              </div>
             </div>
-          </div>
 
-          <!-- Kata Sandi -->
-          <div class="form-group">
-            <label for="password" class="form-label">Kata Sandi</label>
-            <div class="form-input-wrap">
-              <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required />
+            <!-- Kata Sandi -->
+            <div class="form-group">
+              <label for="password" class="form-label">Kata Sandi</label>
+              <div class="form-input-wrap">
+                <input type="password" id="password" name="password" class="form-input" placeholder="••••••••"
+                  required />
+              </div>
             </div>
-          </div>
 
-          <!-- Ulangi Kata Sandi -->
-          <div class="form-group">
-            <label for="confirmPassword" class="form-label">Ulangi Kata Sandi</label>
-            <div class="form-input-wrap">
-              <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="••••••••" required />
+            <!-- Ulangi Kata Sandi -->
+            <div class="form-group">
+              <label for="confirmPassword" class="form-label">Ulangi Kata Sandi</label>
+              <div class="form-input-wrap">
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
+                  placeholder="••••••••" required />
+              </div>
             </div>
-          </div>
 
-          <!-- Alamat -->
-          <div class="form-group">
-            <label for="alamat" class="form-label">Alamat</label>
-            <div class="form-input-wrap">
-              <textarea id="alamat" name="address" class="form-input form-textarea" placeholder="Masukkan alamat lengkap Anda..." rows="3" required></textarea>
+            <!-- Terms Checkbox -->
+            <div class="form-check">
+              <input type="checkbox" id="terms" name="terms" class="form-checkbox" required />
+              <label for="terms" class="form-check-label">
+                Saya setuju dengan <a href="#" class="form-link">Syarat & Ketentuan</a> serta kebijakan <a href="#"
+                  class="form-link">Privasi Goede</a>
+              </label>
             </div>
-          </div>
 
-          <!-- Terms Checkbox -->
-          <div class="form-check">
-            <input type="checkbox" id="terms" name="terms" class="form-checkbox" required />
-            <label for="terms" class="form-check-label">
-              Saya setuju dengan <a href="#" class="form-link">Syarat & Ketentuan</a> serta kebijakan <a href="#" class="form-link">Privasi Goede</a>
-            </label>
-          </div>
+            <!-- Submit -->
+            <button type="submit" class="btn btn-primary btn-auth" id="btn-register">Daftar Sekarang</button>
+          </form>
 
-          <!-- Submit -->
-          <button type="submit" class="btn btn-primary btn-auth" id="btn-register">Daftar Sekarang</button>
-        </form>
+          <script>
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+              const btn = document.getElementById('btn-register');
+              btn.disabled = true;
+              btn.textContent = 'Sedang Memproses...';
 
-        <script>
-          document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-register');
-            btn.disabled = true;
-            btn.textContent = 'Sedang Memproses...';
+              const formData = new FormData(e.target);
+              const data = Object.fromEntries(formData.entries());
 
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-
-            if (data.password !== data.confirmPassword) {
-              alert('Kata sandi tidak cocok!');
-              btn.disabled = false;
-              btn.textContent = 'Daftar Sekarang';
-              return;
-            }
-
-            try {
-              const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-              });
-
-              const result = await res.json();
-              if (result.status === 'success') {
-                localStorage.setItem('tempEmail', data.email);
-                window.location.href = '/verify';
-              } else {
-                alert(result.message);
+              if (data.password !== data.confirmPassword) {
+                alert('Kata sandi tidak cocok!');
+                btn.disabled = false;
+                btn.textContent = 'Daftar Sekarang';
+                return;
               }
-            } catch (err) {
-              alert('Terjadi kesalahan, silakan coba lagi.');
-            } finally {
-              btn.disabled = false;
-              btn.textContent = 'Daftar Sekarang';
-            }
-          });
-        </script>
+
+              try {
+                const res = await fetch('/api/auth/register', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (result.status === 'success') {
+                  localStorage.setItem('tempEmail', data.email);
+                  window.location.href = '/verify';
+                } else {
+                  alert(result.message);
+                }
+              } catch (err) {
+                alert('Terjadi kesalahan, silakan coba lagi.');
+              } finally {
+                btn.disabled = false;
+                btn.textContent = 'Daftar Sekarang';
+              }
+            });
+          </script>
 
 
-        <p class="auth-switch">Sudah punya akun? <a href="/login" class="auth-switch-link">Masuk</a></p>
+          <p class="auth-switch">Sudah punya akun? <a href="/login" class="auth-switch-link">Masuk</a></p>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<%- include('../partials/footer') %>
+  <%- include('../partials/footer') %>
