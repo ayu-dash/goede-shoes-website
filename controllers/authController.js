@@ -87,9 +87,25 @@ exports.register = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
     try {
-        const { email, otp } = req.body;
+        let { email, otp } = req.body;
+
+        // Trim input just in case
+        email = email ? email.trim() : email;
+        otp = otp ? otp.trim() : otp;
 
         const user = await User.findOne({ email });
+
+        // DEBUG LOGS - Monitor your terminal console
+        console.log('--- OTP VERIFICATION TRACE ---');
+        console.log('Email Target:', email);
+        console.log('OTP Inputted:', `[${otp}]`);
+        console.log('OTP in DB:   ', user ? `[${user.otp}]` : 'NOT FOUND');
+        if (user) {
+            console.log('DB Expiry:   ', user.otpExpires);
+            console.log('Server Time: ', new Date());
+            console.log('Is Expired:  ', user.otpExpires < Date.now());
+        }
+        console.log('-----------------------------');
 
         if (!user) {
             return res.status(404).json({
@@ -111,6 +127,7 @@ exports.verifyOTP = async (req, res) => {
                 message: "Kode OTP telah kedaluwarsa. Silakan kirim ulang.",
             });
         }
+
 
         user.isVerified = true;
         user.otp = undefined;

@@ -43,7 +43,20 @@
           inputs[index - 1].focus();
         }
       });
+
+      // Handle Paste
+      input.addEventListener('paste', (e) => {
+        const data = e.clipboardData.getData('text').trim();
+        if (data.length === 6 && /^\d+$/.test(data)) {
+          data.split('').forEach((char, i) => {
+            if (inputs[i]) inputs[i].value = char;
+          });
+          updateHidden();
+          inputs[inputs.length - 1].focus();
+        }
+      });
     });
+
 
     function updateHidden() {
       let otp = '';
@@ -53,7 +66,12 @@
 
     document.getElementById('verify-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Ensure hidden input is updated before sending
+      updateHidden();
+      
       const email = localStorage.getItem('tempEmail');
+
       if (!email) {
         alert('Sesi verifikasi berakhir. Silakan daftar ulang.');
         window.location.href = '/register';
@@ -68,16 +86,26 @@
         const res = await fetch('/api/auth/verify-otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, otp: hiddenInput.value })
+          body: JSON.stringify({ email, otp: hiddenInput.value.trim() })
         });
+
 
         const result = await res.json();
         if (result.status === 'success') {
           localStorage.removeItem('tempEmail');
           localStorage.setItem('token', result.token);
           alert('Verifikasi berhasil!');
-          window.location.href = '/';
+          
+          const userRole = result.data.user.role;
+          if (userRole === 'admin') {
+            window.location.href = '/admin/dashboard';
+          } else if (userRole === 'staff') {
+            window.location.href = '/staff/dashboard';
+          } else {
+            window.location.href = '/customer/dashboard';
+          }
         } else {
+
           alert(result.message);
         }
       } catch (err) {
