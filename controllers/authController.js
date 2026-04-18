@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const sendEmail = require("../utils/email");
+const crypto = require("crypto");
 
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -25,11 +26,9 @@ exports.register = async (req, res) => {
     try {
         const { name, email, phone, address, password } = req.body;
 
-        // 1) Generate random 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        const otpExpires = Date.now() + 10 * 60 * 1000; 
 
-        // 2) Create new user (unverified)
         const newUser = await User.create({
             name,
             email,
@@ -40,8 +39,6 @@ exports.register = async (req, res) => {
             otpExpires,
         });
 
-
-        // 3) Send OTP to email
         const message = `Your Goede Shoes verification code is: ${otp}. It will expire in 10 minutes.`;
         
         try {
@@ -64,7 +61,6 @@ exports.register = async (req, res) => {
             });
         } catch (err) {
             console.error("Email error:", err);
-            // If email fails, we should ideally handle it by deleting user or letting them retry
             return res.status(500).json({
                 status: "error",
                 message: "There was an error sending the verification email. Try again later!",
@@ -82,7 +78,6 @@ exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
 
-        // 1) Find user by email and check if OTP matches and hasn't expired
         const user = await User.findOne({
             email,
             otp,
@@ -96,13 +91,11 @@ exports.verifyOTP = async (req, res) => {
             });
         }
 
-        // 2) OTP is correct, mark user as verified and clear OTP fields
         user.isVerified = true;
         user.otp = undefined;
         user.otpExpires = undefined;
         await user.save();
 
-        // 3) Generate JWT and send response
         createSendToken(user, 200, res);
     } catch (err) {
         res.status(400).json({
@@ -132,16 +125,13 @@ exports.resendOTP = async (req, res) => {
             });
         }
 
-        // 1) Generate new random 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+        const otpExpires = Date.now() + 10 * 60 * 1000;
 
-        // 2) Update user record
         user.otp = otp;
         user.otpExpires = otpExpires;
         await user.save();
 
-        // 3) Send new OTP to email
         const message = `Your new Goede Shoes verification code is: ${otp}. It will expire in 10 minutes.`;
         
         try {
@@ -174,7 +164,6 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // 1) Check if email and password exist
         if (!email || !password) {
             return res.status(400).json({
                 status: "fail",
@@ -182,7 +171,6 @@ exports.login = async (req, res) => {
             });
         }
 
-        // 2) Check if user exists && password is correct
         const user = await User.findOne({ email }).select("+password");
 
         if (!user || !(await user.correctPassword(password, user.password))) {
@@ -192,9 +180,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        // 3) Check if user is verified
         if (!user.isVerified) {
-            // Generate new OTP and send it
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             user.otp = otp;
             user.otpExpires = Date.now() + 10 * 60 * 1000;
@@ -222,7 +208,6 @@ exports.login = async (req, res) => {
             }
         }
 
-        // 4) Everything OK, send token
         createSendToken(user, 200, res);
     } catch (err) {
         res.status(400).json({
@@ -232,4 +217,79 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.forgotPassword = async (req, res) => {
+    // 1) Get user based on POSTed email
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+        return res.status(404).json({
+            status: "fail",
+            message: "There is no user with that email address.",
+        });
+    }
 
+    // 2) Generate the random reset token
+    const resetToken = user.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+
+    // 3) Send it to user's email
+    const resetURL = `${req.protocol}://${req.get("host")}/reset-password?token=${resetToken}`;
+    const message = `Forgot your password? Submit a new password to reset it here: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: "Your password reset token (valid for 10 min)",
+            message,
+        });
+
+        res.status(200).json({
+            status: "success",
+            message: "Token sent to email!",
+        });
+    } catch (err) {
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save({ validateBeforeSave: false });
+
+        return res.status(500).json({
+            status: "error",
+            message: "There was an error sending the email. Try again later!",
+        });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        // 1) Get user based on the token
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(req.body.token)
+            .digest("hex");
+
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() },
+        });
+
+        // 2) If token has not expired, and there is user, set the new password
+        if (!user) {
+            return res.status(400).json({
+                status: "fail",
+                message: "Token is invalid or has expired",
+            });
+        }
+
+        user.password = req.body.password;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+
+        // 3) Log the user in, send JWT
+        createSendToken(user, 200, res);
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message,
+        });
+    }
+};
