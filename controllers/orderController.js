@@ -51,7 +51,12 @@ exports.createOrder = async (req, res) => {
         const newOrder = await Order.create({
             user: req.user.id,
             items: processedItems,
-            logistics,
+            logistics: {
+                pickupMethod: logistics.pickupMethod,
+                deliveryMethod: logistics.deliveryMethod,
+                pickupAddress: logistics.pickupAddress,
+                deliveryAddress: logistics.deliveryAddress,
+            },
             payment,
             totalPrice,
         });

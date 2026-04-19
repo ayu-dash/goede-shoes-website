@@ -69,6 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update Logistics
     const pickupMethod = document.querySelector("[data-group='pickup'].active")?.dataset.value;
     const deliveryMethod = document.querySelector("[data-group='delivery'].active")?.dataset.value;
+    
+    // Fee is applied if ANY of the methods are NOT 'self'
     const logisticsFee = (pickupMethod === "pickup" || deliveryMethod === "delivery") ? LOGISTICS_FEE : 0;
 
     // Update Totals
@@ -115,6 +117,32 @@ document.addEventListener("DOMContentLoaded", () => {
       const group = btn.closest(".logistics-toggle");
       group.querySelectorAll(".toggle-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
+      
+      const groupName = btn.dataset.group; // pickup or delivery
+      const value = btn.dataset.value;     // self or pickup/delivery
+      
+      if (groupName === "pickup") {
+        const detail = document.getElementById("pickup-detail");
+        const info = document.getElementById("pickup-self-info");
+        if (value === "pickup") {
+          detail.classList.remove("d-none");
+          info.classList.add("d-none");
+        } else {
+          detail.classList.add("d-none");
+          info.classList.remove("d-none");
+        }
+      } else {
+        const detail = document.getElementById("delivery-detail");
+        const info = document.getElementById("delivery-self-info");
+        if (value === "delivery") {
+          detail.classList.remove("d-none");
+          info.classList.add("d-none");
+        } else {
+          detail.classList.add("d-none");
+          info.classList.remove("d-none");
+        }
+      }
+      
       updateOrderSummary();
     });
   });
@@ -128,6 +156,39 @@ document.addEventListener("DOMContentLoaded", () => {
       card.classList.add("active");
     });
   });
+
+  // =========================
+  // SAVED ADDRESS SELECTORS
+  // =========================
+  const pickupSelector = document.getElementById("pickup-address-selector");
+  const deliverySelector = document.getElementById("delivery-address-selector");
+  const syncCheckbox = document.getElementById("sync-address-checkbox");
+
+  if (pickupSelector) {
+    pickupSelector.addEventListener("change", (e) => {
+      // If sync is enabled, mirror to delivery
+      if (syncCheckbox && syncCheckbox.checked) {
+        deliverySelector.value = e.target.value;
+      }
+    });
+  }
+
+  if (deliverySelector) {
+    deliverySelector.addEventListener("change", (e) => {
+      // If manually changing delivery, uncheck sync if it was checked but value differs
+      if (syncCheckbox && syncCheckbox.checked && e.target.value !== pickupSelector.value) {
+        syncCheckbox.checked = false;
+      }
+    });
+  }
+
+  if (syncCheckbox) {
+    syncCheckbox.addEventListener("change", (e) => {
+      if (e.target.checked && pickupSelector) {
+        deliverySelector.value = pickupSelector.value;
+      }
+    });
+  }
 
   // =========================
   // ORDER FILTER TABS
@@ -246,7 +307,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const pickupMethod = document.querySelector("[data-group='pickup'].active").dataset.value;
       const deliveryMethod = document.querySelector("[data-group='delivery'].active").dataset.value;
-      const address = document.getElementById("pickup-address").value;
+      
+      const pickupSelector = document.getElementById("pickup-address-selector");
+      const deliverySelector = document.getElementById("delivery-address-selector");
+      
+      const pickupAddress = (pickupMethod === "pickup" && pickupSelector) ? pickupSelector.value : "";
+      const deliveryAddress = (deliveryMethod === "delivery" && deliverySelector) ? deliverySelector.value : "";
+
+      if (pickupMethod === "pickup" && !pickupAddress) {
+        alert("Mohon pilih alamat penjemputan dari profil Anda.");
+        return;
+      }
+
+      if (deliveryMethod === "delivery" && !deliveryAddress) {
+        alert("Mohon pilih alamat pengantaran dari profil Anda.");
+        return;
+      }
 
       const paymentMethod = document.querySelector("input[name='payment']:checked").value;
 
@@ -255,7 +331,8 @@ document.addEventListener("DOMContentLoaded", () => {
         logistics: {
           pickupMethod,
           deliveryMethod,
-          address,
+          pickupAddress,
+          deliveryAddress,
         },
         payment: {
           method: paymentMethod,

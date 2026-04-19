@@ -35,7 +35,10 @@ const orderSchema = new mongoose.Schema(
                 enum: ["self", "delivery"],
                 default: "delivery",
             },
-            address: {
+            pickupAddress: {
+                type: String,
+            },
+            deliveryAddress: {
                 type: String,
             },
         },
