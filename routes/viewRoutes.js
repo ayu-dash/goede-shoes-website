@@ -63,9 +63,23 @@ router.get("/customer/my-orders", protect, async (req, res) => {
         res.status(500).render("error", { message: "Gagal mengambil data pesanan." });
     }
 });
-router.get("/customer/order-detail", protect, (req, res) =>
-    res.render("customer/order-detail", { activePage: "my-orders" }),
-);
+router.get("/customer/order-detail", protect, async (req, res) => {
+    try {
+        const Order = require("../models/Order");
+        const order = await Order.findOne({
+            _id: req.query.id,
+            user: req.user._id,
+        });
+
+        if (!order) {
+            return res.status(404).render("error", { message: "Pesanan tidak ditemukan." });
+        }
+
+        res.render("customer/order-detail", { activePage: "my-orders", order });
+    } catch (err) {
+        res.status(500).render("error", { message: "Gagal memuat detail pesanan." });
+    }
+});
 router.get("/customer/profile", protect, async (req, res) => {
     try {
         const Order = require("../models/Order");

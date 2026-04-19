@@ -51,7 +51,7 @@
     <div class="dash-activity-list">
       <% if (recentOrders && recentOrders.length > 0) { %>
         <% recentOrders.forEach(order => { %>
-          <div class="dash-activity-item">
+          <a href="/customer/order-detail?id=<%= order._id %>" class="dash-activity-item">
             <img
               src="/images/hero-shoe.png"
               alt="Sepatu"
@@ -72,7 +72,7 @@
               <i class="fa-solid <%= order.status === 'completed' ? 'fa-circle-check' : 'fa-circle' %>"></i> 
               <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
             </div>
-          </div>
+          </a>
         <% }) %>
       <% } else { %>
         <p class="text-muted">Belum ada aktivitas terbaru.</p>
