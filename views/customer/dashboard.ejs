@@ -22,19 +22,19 @@
       <div class="dash-stat-card">
         <span class="dash-stat-label">TOTAL PESANAN</span>
         <div class="dash-stat-row">
-          <span class="dash-stat-num">24</span>
+          <span class="dash-stat-num"><%= String(userStats.totalOrders).padStart(2, '0') %></span>
           <span class="dash-stat-badge dash-stat-badge--up"
-            ><i class="fa-solid fa-arrow-trend-up"></i> +12%</span
+            ><i class="fa-solid fa-arrow-trend-up"></i> +0%</span
           >
         </div>
       </div>
       <div class="dash-stat-card">
         <span class="dash-stat-label">STATUS AKTIF</span>
         <div class="dash-stat-row">
-          <span class="dash-stat-num">03</span>
+          <span class="dash-stat-num"><%= String(userStats.activeOrders).padStart(2, '0') %></span>
           <span class="dash-stat-sub"
             >SEPATU SEDANG<br />
-            DICUCI</span
+            DIPROSES</span
           >
         </div>
       </div>
@@ -49,45 +49,34 @@
     </div>
 
     <div class="dash-activity-list">
-      <!-- Activity Item 1 -->
-      <div class="dash-activity-item">
-        <img
-          src="/images/nike-air-max-270.png"
-          alt="Nike Air Max 270"
-          class="dash-activity-img"
-        />
-        <div class="dash-activity-info">
-          <span class="dash-activity-name">Nike Air Max 270</span>
-          <span class="dash-activity-service">Deep Clean + Unyellowing</span>
-        </div>
-        <div class="dash-activity-meta">
-          <span class="dash-activity-meta-label">ESTIMASI SELESAI</span>
-          <span class="dash-activity-meta-value">Besok, 14:00</span>
-        </div>
-        <div class="dash-activity-status dash-activity-status--process">
-          <i class="fa-solid fa-circle"></i> Proses Cuci
-        </div>
-      </div>
-
-      <!-- Activity Item 2 -->
-      <div class="dash-activity-item">
-        <img
-          src="/images/adidas-ultraboost.png"
-          alt="Adidas Ultraboost"
-          class="dash-activity-img"
-        />
-        <div class="dash-activity-info">
-          <span class="dash-activity-name">Adidas Ultraboost</span>
-          <span class="dash-activity-service">Expressa Cleaning</span>
-        </div>
-        <div class="dash-activity-meta">
-          <span class="dash-activity-meta-label">SELESAI PADA</span>
-          <span class="dash-activity-meta-value">Hari ini, 09:15</span>
-        </div>
-        <div class="dash-activity-status dash-activity-status--done">
-          <i class="fa-solid fa-circle-check"></i> Sudah Selesai
-        </div>
-      </div>
+      <% if (recentOrders && recentOrders.length > 0) { %>
+        <% recentOrders.forEach(order => { %>
+          <div class="dash-activity-item">
+            <img
+              src="/images/hero-shoe.png"
+              alt="Sepatu"
+              class="dash-activity-img"
+            />
+            <div class="dash-activity-info">
+              <span class="dash-activity-name"><%= order.items[0].shoeName %></span>
+              <span class="dash-activity-service">
+                <%= order.items[0].serviceType %> 
+                <%= order.items[0].addons.length > 0 ? '+ ' + order.items[0].addons.join(', ') : '' %>
+              </span>
+            </div>
+            <div class="dash-activity-meta">
+              <span class="dash-activity-meta-label">TANGGAL PESAN</span>
+              <span class="dash-activity-meta-value"><%= new Date(order.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) %></span>
+            </div>
+            <div class="dash-activity-status dash-activity-status--<%= order.status === 'completed' ? 'done' : 'process' %>">
+              <i class="fa-solid <%= order.status === 'completed' ? 'fa-circle-check' : 'fa-circle' %>"></i> 
+              <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="text-muted">Belum ada aktivitas terbaru.</p>
+      <% } %>
     </div>
   </div>
 

@@ -15,9 +15,42 @@ router.get("/forgot-password", (req, res) =>
 router.get("/reset-password", (req, res) => res.render("auth/reset-password"));
 
 // Rute Dashboard (Protected)
-router.get("/customer/dashboard", protect, (req, res) =>
-    res.render("customer/dashboard", { activePage: "dashboard" }),
-);
+router.get("/customer/dashboard", protect, async (req, res) => {
+    try {
+        const Order = require("../models/Order");
+        const stats = await Order.aggregate([
+            { $match: { user: req.user._id } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    activeOrders: {
+                        $sum: {
+                            $cond: [
+                                { $in: ["$status", ["pending", "pickup", "in-progress", "delivery"]] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+        ]);
+
+        const recentOrders = await Order.find({ user: req.user._id })
+            .sort("-createdAt")
+            .limit(3);
+
+        const userStats = stats[0] || { totalOrders: 0, activeOrders: 0 };
+        res.render("customer/dashboard", {
+            activePage: "dashboard",
+            userStats,
+            recentOrders,
+        });
+    } catch (err) {
+        res.status(500).render("error", { message: "Gagal memuat dashboard." });
+    }
+});
 router.get("/customer/create-order", protect, (req, res) =>
     res.render("customer/create-order", { activePage: "dashboard" }),
 );
@@ -33,9 +66,39 @@ router.get("/customer/my-orders", protect, async (req, res) => {
 router.get("/customer/order-detail", protect, (req, res) =>
     res.render("customer/order-detail", { activePage: "my-orders" }),
 );
-router.get("/customer/profile", protect, (req, res) =>
-    res.render("customer/profile", { activePage: "profile" }),
-);
+router.get("/customer/profile", protect, async (req, res) => {
+    try {
+        const Order = require("../models/Order");
+        const stats = await Order.aggregate([
+            { $match: { user: req.user._id } },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    activeOrders: {
+                        $sum: {
+                            $cond: [
+                                { $in: ["$status", ["pending", "pickup", "in-progress", "delivery"]] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                    totalSpent: {
+                        $sum: {
+                            $cond: [{ $eq: ["$status", "cancelled"] }, 0, "$totalPrice"],
+                        },
+                    },
+                },
+            },
+        ]);
+
+        const userStats = stats[0] || { totalOrders: 0, activeOrders: 0, totalSpent: 0 };
+        res.render("customer/profile", { activePage: "profile", userStats });
+    } catch (err) {
+        res.status(500).render("error", { message: "Gagal memuat profil." });
+    }
+});
 
 router.get("/staff/dashboard", protect, restrictTo("staff", "admin"), (req, res) => res.render("staff/dashboard"));
 router.get("/admin/dashboard", protect, restrictTo("admin"), (req, res) => res.render("admin/dashboard"));
