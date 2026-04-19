@@ -14,7 +14,7 @@
 </div>
 
 <!-- PESANAN AKTIF -->
-<div class="orders-section">
+<div class="orders-section" id="active-orders-section">
   <div class="orders-section-header">
     <h3 class="dash-subtitle dash-subtitle--upper">PESANAN AKTIF</h3>
     <% const activeOrders = orders.filter(o => ["pending", "pickup", "in-progress", "delivery"].includes(o.status)) %>
@@ -27,7 +27,7 @@
     </div>
   <% } else { %>
     <% activeOrders.forEach(order => { %>
-      <div class="active-order-card">
+      <div class="active-order-card" data-order-status="proses">
         <div class="active-order-img">
           <img src="/images/hero-shoe.png" alt="Sepatu" />
         </div>
@@ -87,7 +87,7 @@
 </div>
 
 <!-- RIWAYAT PESANAN -->
-<div class="orders-section">
+<div class="orders-section" id="history-orders-section">
   <h3 class="dash-subtitle dash-subtitle--upper">RIWAYAT PESANAN</h3>
 
   <% const historyOrders = orders.filter(o => ["completed", "cancelled"].includes(o.status)) %>
@@ -97,7 +97,7 @@
       <p class="empty-text">Belum ada riwayat pesanan.</p>
     <% } else { %>
       <% historyOrders.forEach(order => { %>
-        <div class="history-card">
+        <div class="history-card" data-order-status="<%= order.status === 'completed' ? 'selesai' : 'batal' %>">
           <div class="history-card-top">
             <img src="/images/hero-shoe.png" alt="Sepatu" class="history-card-img" />
             <div class="history-card-info">

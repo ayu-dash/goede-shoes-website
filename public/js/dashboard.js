@@ -213,12 +213,36 @@ document.addEventListener("DOMContentLoaded", () => {
   // =========================
   // ORDER FILTER TABS
   // =========================
-  document.querySelectorAll(".order-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".order-tab").forEach((t) => t.classList.remove("active"));
-      tab.classList.add("active");
+  const orderTabs = document.querySelectorAll(".order-tab");
+  const activeOrdersSection = document.getElementById("active-orders-section");
+  const historyOrdersSection = document.getElementById("history-orders-section");
+
+  if (orderTabs.length > 0) {
+    orderTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        orderTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const filter = tab.dataset.filter;
+
+        document.querySelectorAll(".active-order-card, .history-card").forEach((card) => {
+          if (filter === "all" || card.dataset.orderStatus === filter) {
+            card.style.display = "";
+          } else {
+            card.style.display = "none";
+          }
+        });
+
+        if (activeOrdersSection) {
+          activeOrdersSection.style.display = (filter === "all" || filter === "proses") ? "" : "none";
+        }
+
+        if (historyOrdersSection) {
+          historyOrdersSection.style.display = (filter === "all" || filter === "selesai" || filter === "batal") ? "" : "none";
+        }
+      });
     });
-  });
+  }
 
   // =========================
   // ADD SHOE ITEM (Create Order)
