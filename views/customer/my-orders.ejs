@@ -17,157 +17,102 @@
 <div class="orders-section">
   <div class="orders-section-header">
     <h3 class="dash-subtitle dash-subtitle--upper">PESANAN AKTIF</h3>
-    <span class="orders-badge">1 BERLANGSUNG</span>
+    <% const activeOrders = orders.filter(o => ["pending", "pickup", "in-progress", "delivery"].includes(o.status)) %>
+    <span class="orders-badge"><%= activeOrders.length %> BERLANGSUNG</span>
   </div>
 
-  <div class="active-order-card">
-    <div class="active-order-img">
-      <img src="/images/nike-air-max-270.png" alt="Nike Air Max 270" />
+  <% if (activeOrders.length === 0) { %>
+    <div class="empty-state">
+      <p>Tidak ada pesanan aktif saat ini.</p>
     </div>
-    <div class="active-order-content">
-      <div class="active-order-top">
-        <div>
-          <span class="active-order-id">#ORD-8821</span>
-          <h4 class="active-order-name">Nike Air Max 270</h4>
-          <div class="active-order-services">
-            <span class="service-badge">DEEP CLEAN</span>
-            <span class="service-badge">UNYELLOWING</span>
+  <% } else { %>
+    <% activeOrders.forEach(order => { %>
+      <div class="active-order-card">
+        <div class="active-order-img">
+          <img src="/images/hero-shoe.png" alt="Sepatu" />
+        </div>
+        <div class="active-order-content">
+          <div class="active-order-top">
+            <div>
+              <span class="active-order-id">#<%= order.orderId %></span>
+              <h4 class="active-order-name">
+                <%= order.items[0].shoeName %> 
+                <%= order.items.length > 1 ? `+ ${order.items.length - 1} lainnya` : '' %>
+              </h4>
+              <div class="active-order-services">
+                <% order.items[0].addons.forEach(addon => { %>
+                  <span class="service-badge"><%= addon.toUpperCase() %></span>
+                <% }) %>
+                <span class="service-badge"><%= order.items[0].serviceType.toUpperCase() %></span>
+              </div>
+            </div>
+            <div class="active-order-status-wrap">
+              <span class="active-order-status-label">STATUS</span>
+              <span class="active-order-status">
+                <i class="fa-solid fa-circle"></i> <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+              </span>
+            </div>
+          </div>
+
+          <div class="active-order-progress">
+            <div class="progress-header">
+              <span class="progress-label">TOTAL HARGA</span>
+              <span class="progress-pct">Rp <%= order.totalPrice.toLocaleString('id-ID') %></span>
+            </div>
+            <div class="progress-bar">
+              <% 
+                let progress = 10;
+                if(order.status === 'pickup') progress = 30;
+                if(order.status === 'in-progress') progress = 60;
+                if(order.status === 'delivery') progress = 90;
+              %>
+              <div class="progress-fill" style="width: <%= progress %>%"></div>
+            </div>
+          </div>
+
+          <div class="active-order-bottom">
+            <div class="active-order-estimate">
+              <i class="fa-regular fa-calendar"></i>
+              <div>
+                <span class="estimate-label">TANGGAL PESAN</span>
+                <span class="estimate-value"><%= new Date(order.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+              </div>
+            </div>
+            <a href="/customer/order-detail?id=<%= order._id %>" class="btn btn-primary btn-sm">DETAIL</a>
           </div>
         </div>
-        <div class="active-order-status-wrap">
-          <span class="active-order-status-label">STATUS</span>
-          <span class="active-order-status"
-            ><i class="fa-solid fa-circle"></i> Sedang Dicuci</span
-          >
-        </div>
       </div>
-
-      <div class="active-order-progress">
-        <div class="progress-header">
-          <span class="progress-label">PROGRESS PENGERJAAN</span>
-          <span class="progress-pct">65%</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: 65%"></div>
-        </div>
-      </div>
-
-      <div class="active-order-bottom">
-        <div class="active-order-estimate">
-          <i class="fa-regular fa-calendar"></i>
-          <div>
-            <span class="estimate-label">ESTIMASI SELESAI</span>
-            <span class="estimate-value">24 Nov, 14:00</span>
-          </div>
-        </div>
-        <a href="/customer/order-detail" class="btn btn-primary btn-sm"
-          >DETAIL</a
-        >
-      </div>
-    </div>
-  </div>
+    <% }) %>
+  <% } %>
 </div>
 
 <!-- RIWAYAT PESANAN -->
 <div class="orders-section">
   <h3 class="dash-subtitle dash-subtitle--upper">RIWAYAT PESANAN</h3>
 
+  <% const historyOrders = orders.filter(o => ["completed", "cancelled"].includes(o.status)) %>
+  
   <div class="history-grid">
-    <!-- Card 1 -->
-    <div class="history-card">
-      <div class="history-card-top">
-        <img
-          src="/images/adidas-ultraboost.png"
-          alt="Adidas Ultraboost 21"
-          class="history-card-img"
-        />
-        <div class="history-card-info">
-          <span class="history-card-id">#ORD-4712</span>
-          <span class="history-status-badge">SELESAI</span>
-          <h4 class="history-card-name">Adidas Ultraboost 21</h4>
-          <span class="history-card-service">Regular Clean • 18 Nov 2025</span>
+    <% if (historyOrders.length === 0) { %>
+      <p class="empty-text">Belum ada riwayat pesanan.</p>
+    <% } else { %>
+      <% historyOrders.forEach(order => { %>
+        <div class="history-card">
+          <div class="history-card-top">
+            <img src="/images/hero-shoe.png" alt="Sepatu" class="history-card-img" />
+            <div class="history-card-info">
+              <span class="history-card-id">#<%= order.orderId %></span>
+              <span class="history-status-badge"><%= order.status.toUpperCase() %></span>
+              <h4 class="history-card-name"><%= order.items[0].shoeName %></h4>
+              <span class="history-card-service">
+                <%= order.items[0].serviceType %> • <%= new Date(order.createdAt).toLocaleDateString('id-ID') %>
+              </span>
+            </div>
+          </div>
+          <a href="/customer/order-detail?id=<%= order._id %>" class="btn btn-outline-dark btn-sm history-btn">Lihat Detail</a>
         </div>
-      </div>
-      <a
-        href="/customer/order-detail"
-        class="btn btn-outline-dark btn-sm history-btn"
-        >Lihat Detail</a
-      >
-    </div>
-
-    <!-- Card 2 -->
-    <div class="history-card">
-      <div class="history-card-top">
-        <img
-          src="/images/jordan-1-retro.png"
-          alt="Jordan 1 Retro High"
-          class="history-card-img"
-        />
-        <div class="history-card-info">
-          <span class="history-card-id">#ORD-8410</span>
-          <span class="history-status-badge">SELESAI</span>
-          <h4 class="history-card-name">Jordan 1 Retro High</h4>
-          <span class="history-card-service"
-            >Premium Repaint • 17 Nov 2025</span
-          >
-        </div>
-      </div>
-      <a
-        href="/customer/order-detail"
-        class="btn btn-outline-dark btn-sm history-btn"
-        >Lihat Detail</a
-      >
-    </div>
-
-    <!-- Card 3 -->
-    <div class="history-card">
-      <div class="history-card-top">
-        <img
-          src="/images/nb-574-grey.png"
-          alt="New Balance 574 Grey"
-          class="history-card-img"
-        />
-        <div class="history-card-info">
-          <span class="history-card-id">#ORD-8330</span>
-          <span class="history-status-badge">SELESAI</span>
-          <h4 class="history-card-name">New Balance 574 Grey</h4>
-          <span class="history-card-service">Suede Care • 05 Nov 2025</span>
-        </div>
-      </div>
-      <a
-        href="/customer/order-detail"
-        class="btn btn-outline-dark btn-sm history-btn"
-        >Lihat Detail</a
-      >
-    </div>
-
-    <!-- Card 4 -->
-    <div class="history-card">
-      <div class="history-card-top">
-        <img
-          src="/images/vans-old-skool.png"
-          alt="Vans Old Skool Black"
-          class="history-card-img"
-        />
-        <div class="history-card-info">
-          <span class="history-card-id">#ORD-9411</span>
-          <span class="history-status-badge">SELESAI</span>
-          <h4 class="history-card-name">Vans Old Skool Black</h4>
-          <span class="history-card-service">Deep Clean • 01 Nov 2025</span>
-        </div>
-      </div>
-      <a
-        href="/customer/order-detail"
-        class="btn btn-outline-dark btn-sm history-btn"
-        >Lihat Detail</a
-      >
-    </div>
-  </div>
-
-  <div class="history-more">
-    <button class="btn btn-outline-dark btn-load-more">
-      TAMPILKAN LEBIH BANYAK
-    </button>
+      <% }) %>
+    <% } %>
   </div>
 </div>
 

@@ -21,9 +21,15 @@ router.get("/customer/dashboard", protect, (req, res) =>
 router.get("/customer/create-order", protect, (req, res) =>
     res.render("customer/create-order", { activePage: "dashboard" }),
 );
-router.get("/customer/my-orders", protect, (req, res) =>
-    res.render("customer/my-orders", { activePage: "my-orders" }),
-);
+router.get("/customer/my-orders", protect, async (req, res) => {
+    try {
+        const Order = require("../models/Order");
+        const orders = await Order.find({ user: req.user.id }).sort("-createdAt");
+        res.render("customer/my-orders", { activePage: "my-orders", orders });
+    } catch (err) {
+        res.status(500).render("error", { message: "Gagal mengambil data pesanan." });
+    }
+});
 router.get("/customer/order-detail", protect, (req, res) =>
     res.render("customer/order-detail", { activePage: "my-orders" }),
 );

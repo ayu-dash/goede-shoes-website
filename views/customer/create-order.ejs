@@ -36,14 +36,13 @@
             <label class="form-label form-label--upper">Nama Sepatu</label>
             <input
               type="text"
-              class="form-input"
-              value="Air Jordan 1 Retro High"
+              class="form-input shoe-name"
               placeholder="Masukkan nama sepatu"
             />
           </div>
           <div class="form-group">
             <label class="form-label form-label--upper">Jenis Layanan</label>
-            <select class="form-input form-select">
+            <select class="form-input form-select service-type">
               <option>Deep Clean (Regular)</option>
               <option>Fast Clean</option>
               <option>Deep Clean Express</option>
@@ -56,66 +55,17 @@
             >Layanan Tambahan (Add-Ons)</label
           >
           <div class="addon-tags">
-            <label class="addon-tag active"
-              ><input type="checkbox" checked /> Unyellowing</label
+            <label class="addon-tag"
+              ><input type="checkbox" value="Unyellowing" /> Unyellowing</label
             >
             <label class="addon-tag"
-              ><input type="checkbox" /> Glue & Repress</label
+              ><input type="checkbox" value="Glue & Repress" /> Glue & Repress</label
             >
             <label class="addon-tag"
-              ><input type="checkbox" /> Leather Polish</label
+              ><input type="checkbox" value="Leather Polish" /> Leather Polish</label
             >
             <label class="addon-tag"
-              ><input type="checkbox" /> Deodorizer</label
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- Item 2 -->
-      <div class="shoe-item" id="shoe-item-2">
-        <div class="shoe-item-header">
-          <span class="shoe-item-label">Item 2</span>
-          <button type="button" class="shoe-item-remove" data-item="2">
-            Hapus
-          </button>
-        </div>
-        <div class="shoe-item-fields">
-          <div class="form-group">
-            <label class="form-label form-label--upper">Nama Sepatu</label>
-            <input
-              type="text"
-              class="form-input"
-              value="Vans Old Skool Black"
-              placeholder="Masukkan nama sepatu"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label form-label--upper">Jenis Layanan</label>
-            <select class="form-input form-select">
-              <option>Fast Clean</option>
-              <option>Deep Clean (Regular)</option>
-              <option>Deep Clean Express</option>
-              <option>Premium Repaint</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label form-label--upper"
-            >Layanan Tambahan (Add-Ons)</label
-          >
-          <div class="addon-tags">
-            <label class="addon-tag"
-              ><input type="checkbox" /> Unyellowing</label
-            >
-            <label class="addon-tag"
-              ><input type="checkbox" /> Glue & Repress</label
-            >
-            <label class="addon-tag"
-              ><input type="checkbox" /> Leather Polish</label
-            >
-            <label class="addon-tag active"
-              ><input type="checkbox" checked /> Deodorizer</label
+              ><input type="checkbox" value="Deodorizer" /> Deodorizer</label
             >
           </div>
         </div>
@@ -127,7 +77,7 @@
       <h3 class="order-section-title">Metode Logistik</h3>
       <div class="logistics-grid">
         <!-- Pickup -->
-        <div class="logistics-card">
+        <div class="logistics-card" id="pickup-card">
           <div class="logistics-card-header">
             <i class="fa-solid fa-box-open"></i> Pengambilan (Pickup)
           </div>
@@ -151,15 +101,11 @@
           </div>
           <div class="logistics-detail" id="pickup-detail">
             <span class="logistics-detail-label">ALAMAT JEMPUT</span>
-            <p class="logistics-detail-value">
-              Apartemen Menteng Park, Tower Emerald 12A<br /><small
-                >Jakarta Pusat, 10220</small
-              >
-            </p>
+            <textarea class="form-input" id="pickup-address" rows="2">Apartemen Menteng Park, Tower Emerald 12A, Jakarta Pusat, 10220</textarea>
           </div>
         </div>
         <!-- Delivery -->
-        <div class="logistics-card">
+        <div class="logistics-card" id="delivery-card">
           <div class="logistics-card-header">
             <i class="fa-solid fa-truck"></i> Pengantaran (Delivery)
           </div>
@@ -209,11 +155,6 @@
               Via Bisnis Indonesia. Keamanan & transfer bank digital
               terverifikasi.
             </p>
-            <div class="payment-logos">
-              <span class="bank-logo">BCA</span>
-              <span class="bank-logo bank-logo--active">mandiri</span>
-              <span class="bank-logo">bni</span>
-            </div>
           </div>
         </label>
         <label class="payment-card">
@@ -229,7 +170,6 @@
             <p class="payment-desc">
               Bayar saat kurir menjemput atau mengantar kembali sepatu Anda.
             </p>
-            <span class="payment-note">TERMASUK DAFTAR LAYANAN COD</span>
           </div>
         </label>
       </div>
@@ -241,31 +181,22 @@
     <div class="order-summary-card" id="order-summary">
       <h4 class="order-summary-title">Ringkasan Pesanan</h4>
 
-      <div class="order-summary-item">
-        <div>
-          <span class="summary-item-name">Air Jordan 1 Retro...</span>
-          <span class="summary-item-service">DEEP CLEAN + UNYELLOWING</span>
+      <div id="summary-items-container">
+        <!-- Dynamic items will be inserted here -->
+        <div class="order-summary-item placeholder-item">
+          <p class="text-muted">Tambahkan sepatu untuk melihat ringkasan</p>
         </div>
-        <span class="summary-item-price">Rp 125.000</span>
-      </div>
-
-      <div class="order-summary-item">
-        <div>
-          <span class="summary-item-name">Vans Old Skool Black</span>
-          <span class="summary-item-service">FAST CLEAN</span>
-        </div>
-        <span class="summary-item-price">Rp 45.000</span>
       </div>
 
       <div class="order-summary-divider"></div>
 
       <div class="order-summary-row">
         <span>Subtotal</span>
-        <span class="summary-price">Rp 170.000</span>
+        <span class="summary-price" id="summary-subtotal">Rp 0</span>
       </div>
       <div class="order-summary-row">
         <span>Biaya Jemput/Antar</span>
-        <span class="summary-price">Rp 15.000</span>
+        <span class="summary-price" id="summary-logistics">Rp 0</span>
       </div>
 
       <div class="order-summary-estimate">
@@ -277,7 +208,7 @@
 
       <div class="order-summary-row order-summary-total">
         <span>TOTAL PEMBAYARAN</span>
-        <span class="summary-total-price">Rp 185.000</span>
+        <span class="summary-total-price" id="summary-total">Rp 0</span>
       </div>
 
       <button
