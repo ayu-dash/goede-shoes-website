@@ -131,17 +131,42 @@
           </span>
         </div>
 
+        <% 
+          const SERVICE_PRICES = {
+            "Deep Clean (Regular)": 40000,
+            "Fast Clean": 25000,
+            "Deep Clean Express": 60000,
+            "Premium Repaint": 150000
+          };
+          const ADDON_PRICES = {
+            "Unyellowing": 50000,
+            "Glue & Repress": 60000,
+            "Leather Polish": 30000,
+            "Deodorizer": 15000
+          };
+        %>
+
         <% order.items.forEach(item=> { %>
-          <div class="order-summary-item">
-            <div>
-              <span class="summary-item-name">
-                <%= item.shoeName %>
-              </span>
-              <span class="summary-item-service">
-                <%= (item.serviceType || '' ).toUpperCase() %>
-              </span>
+          <div class="order-summary-item-wrapper" style="margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+            <div class="order-summary-item">
+              <div>
+                <span class="summary-item-name">
+                  <%= item.shoeName %>
+                </span>
+                <span class="summary-item-service">
+                  <%= (item.serviceType || '' ).toUpperCase() %>
+                </span>
+              </div>
+              <span class="summary-item-price">Rp <%= (SERVICE_PRICES[item.serviceType] || 40000).toLocaleString('id-ID') %></span>
             </div>
-            <span class="summary-item-price">Rp <%= ((item.price || 0)).toLocaleString('id-ID') %></span>
+            <% if (item.addons && item.addons.length > 0) { %>
+              <% item.addons.forEach(addon => { %>
+                <div class="order-summary-addon" style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-top: 4px; padding-left: 12px;">
+                  <span class="summary-addon-name">+ <%= addon %></span>
+                  <span class="summary-addon-price">Rp <%= (ADDON_PRICES[addon] || 0).toLocaleString('id-ID') %></span>
+                </div>
+              <% }) %>
+            <% } %>
           </div>
           <% }) %>
 

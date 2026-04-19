@@ -48,7 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       subtotal += itemPrice;
-      items.push({ shoeName, serviceType, addons, itemPrice });
+      
+      // Calculate breakdown for display
+      const basePrice = SERVICE_PRICES[serviceType] || 40000;
+      const addonsDetail = addons.map(a => ({ name: a, price: ADDON_PRICES[a] || 0 }));
+      
+      items.push({ shoeName, serviceType, basePrice, addonsDetail, itemPrice });
     });
 
     // Update Items List
@@ -56,12 +61,20 @@ document.addEventListener("DOMContentLoaded", () => {
       summaryContainer.innerHTML = `<div class="order-summary-item placeholder-item"><p class="text-muted">Tambahkan sepatu untuk melihat ringkasan</p></div>`;
     } else {
       summaryContainer.innerHTML = items.map(item => `
-        <div class="order-summary-item">
-          <div>
-            <span class="summary-item-name">${item.shoeName.length > 20 ? item.shoeName.substring(0, 17) + "..." : item.shoeName}</span>
-            <span class="summary-item-service">${item.serviceType.toUpperCase()} ${item.addons.length > 0 ? "+ " + item.addons.join(", ").toUpperCase() : ""}</span>
+        <div class="order-summary-item-wrapper">
+          <div class="order-summary-item">
+            <div>
+              <span class="summary-item-name">${item.shoeName.length > 20 ? item.shoeName.substring(0, 17) + "..." : item.shoeName}</span>
+              <span class="summary-item-service">${item.serviceType.toUpperCase()}</span>
+            </div>
+            <span class="summary-item-price">Rp ${item.basePrice.toLocaleString('id-ID')}</span>
           </div>
-          <span class="summary-item-price">Rp ${item.itemPrice.toLocaleString('id-ID')}</span>
+          ${item.addonsDetail.map(a => `
+            <div class="order-summary-addon">
+              <span class="summary-addon-name">+ ${a.name}</span>
+              <span class="summary-addon-price">Rp ${a.price.toLocaleString('id-ID')}</span>
+            </div>
+          `).join("")}
         </div>
       `).join("");
     }
@@ -80,10 +93,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Listen for changes
-  document.addEventListener("input", (e) => {
+  document.addEventListener("change", (e) => {
     if (e.target.classList.contains("shoe-name") || 
         e.target.classList.contains("service-type") || 
         e.target.type === "checkbox") {
+      updateOrderSummary();
+    }
+  });
+  document.addEventListener("input", (e) => {
+    if (e.target.classList.contains("shoe-name")) {
       updateOrderSummary();
     }
   });
@@ -96,17 +114,19 @@ document.addEventListener("DOMContentLoaded", () => {
       updateOrderSummary();
   };
   // =========================
-  // ADD-ON TAG TOGGLE
+  // ADD-ON TAG TOGGLE (Delegated)
   // =========================
-  document.querySelectorAll(".addon-tag").forEach((tag) => {
-    tag.addEventListener("click", (e) => {
-      e.preventDefault();
-      const checkbox = tag.querySelector("input[type='checkbox']");
-      if (checkbox) {
-        checkbox.checked = !checkbox.checked;
-      }
-      tag.classList.toggle("active");
-    });
+  document.addEventListener("click", (e) => {
+    const tag = e.target.closest(".addon-tag");
+    if (!tag) return;
+
+    const checkbox = tag.querySelector("input[type='checkbox']");
+    if (checkbox) {
+      checkbox.checked = !checkbox.checked;
+      // Trigger native-like change event to fire updateOrderSummary
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      tag.classList.toggle("active", checkbox.checked);
+    }
   });
 
   // =========================
@@ -235,10 +255,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="form-group">
           <label class="form-label form-label--upper">Layanan Tambahan (Add-Ons)</label>
           <div class="addon-tags">
-            <label class="addon-tag"><input type="checkbox" value="Unyellowing" /> Unyellowing</label>
-            <label class="addon-tag"><input type="checkbox" value="Glue & Repress" /> Glue & Repress</label>
-            <label class="addon-tag"><input type="checkbox" value="Leather Polish" /> Leather Polish</label>
-            <label class="addon-tag"><input type="checkbox" value="Deodorizer" /> Deodorizer</label>
+            <label class="addon-tag"><input type="checkbox" value="Unyellowing" /> Unyellowing (Rp 50.000)</label>
+            <label class="addon-tag"><input type="checkbox" value="Glue & Repress" /> Glue & Repress (Rp 60.000)</label>
+            <label class="addon-tag"><input type="checkbox" value="Leather Polish" /> Leather Polish (Rp 30.000)</label>
+            <label class="addon-tag"><input type="checkbox" value="Deodorizer" /> Deodorizer (Rp 15.000)</label>
           </div>
         </div>
       `;
@@ -247,37 +267,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const container = document.querySelector(".order-section");
       container.appendChild(shoeItem);
 
-      // Re-bind addon tag events
-      shoeItem.querySelectorAll(".addon-tag").forEach((tag) => {
-        tag.addEventListener("click", (e) => {
-          e.preventDefault();
-          const checkbox = tag.querySelector("input[type='checkbox']");
-          if (checkbox) checkbox.checked = !checkbox.checked;
-          tag.classList.toggle("active");
-        });
-      });
-
-      // Bind remove button
-      shoeItem.querySelector(".shoe-item-remove").addEventListener("click", () => {
-        shoeItem.remove();
-        updateOrderSummary();
-      });
-
       updateOrderSummary();
     });
   }
 
   // =========================
-  // REMOVE SHOE ITEM
+  // REMOVE SHOE ITEM (Delegated)
   // =========================
-  document.querySelectorAll(".shoe-item-remove").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const item = btn.closest(".shoe-item");
-      if (item) {
-        item.remove();
-        updateOrderSummary();
-      }
-    });
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".shoe-item-remove");
+    if (!btn) return;
+    
+    const item = btn.closest(".shoe-item");
+    if (item) {
+      item.remove();
+      updateOrderSummary();
+    }
   });
 
   // =========================

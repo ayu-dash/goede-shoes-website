@@ -949,6 +949,26 @@
   color: var(--text-primary);
 }
 
+.order-summary-item-wrapper {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.order-summary-item-wrapper:last-child {
+  border-bottom: none;
+}
+
+.order-summary-addon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  padding-left: 12px;
+}
+
 .summary-item-service {
   display: block;
   font-size: 10px;
