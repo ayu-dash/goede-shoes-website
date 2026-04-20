@@ -1,0 +1,233 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="page-header" style="margin-bottom: 32px;">
+  <h1 class="page-title page-title--xl">Managemen Layanan</h1>
+</div>
+
+<!-- CATEGORY CARDS -->
+<div class="service-cat-grid">
+  <!-- Top Row -->
+  <div class="cat-card large navy">
+    <h3>Menu Treatment</h3>
+    <div class="badge">12 LAYANAN</div>
+  </div>
+  <div class="cat-card medium gray">
+    <h3>Helmet Treatment</h3>
+    <div class="badge">12 LAYANAN</div>
+  </div>
+  
+  <!-- Bottom Row -->
+  <div class="service-cat-grid-bottom">
+    <div class="cat-card orange-light">
+      <h3>Reglue &<br>Repair</h3>
+      <div class="badge">6 LAYANAN</div>
+    </div>
+    <div class="cat-card gray">
+      <h3>Additional<br>Cost</h3>
+      <div class="badge">5 LAYANAN</div>
+    </div>
+    <div class="cat-card blue-light">
+      <h3>Bag &<br>Luggage</h3>
+      <div class="badge">9 LAYANAN</div>
+    </div>
+    <div class="cat-card white-border">
+      <h3>Repaint</h3>
+      <div class="badge">4 LAYANAN</div>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES TABLE -->
+<div class="admin-panel">
+  <div class="filter-bar">
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" class="search-input" placeholder="Cari layanan...">
+    </div>
+    <button class="btn btn-primary" onclick="openModal('addServiceModal')">+ TAMBAH LAYANAN</button>
+  </div>
+
+  <div class="admin-table-wrapper" style="overflow-x: auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>NAMA LAYANAN</th>
+          <th>KATEGORI</th>
+          <th>HARGA</th>
+          <th>EST. WAKTU</th>
+          <th style="text-align: right;">AKSI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 700; color: var(--navy-dark);">Deep Clean Regular</td>
+          <td><span class="badge badge-layanan-gray">MENU TREATMENT</span></td>
+          <td style="font-weight: 700; color: #0D47A1;">Rp 40.000</td>
+          <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> 1-2 Minggu</td>
+          <td>
+            <div class="action-buttons" style="justify-content: flex-end;">
+              <button class="edit" onclick="openModal('editServiceModal')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="delete"><i class="fa-regular fa-trash-can"></i></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; color: var(--navy-dark);">Leather Repaint</td>
+          <td><span class="badge badge-layanan-orange">REPAINT</span></td>
+          <td style="font-weight: 700; color: #0D47A1;">Rp 120.000</td>
+          <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> 1 Hari</td>
+          <td>
+            <div class="action-buttons" style="justify-content: flex-end;">
+              <button class="edit" onclick="openModal('editServiceModal')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="delete"><i class="fa-regular fa-trash-can"></i></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; color: var(--navy-dark);">Unyellowing Boost</td>
+          <td><span class="badge badge-layanan-blue">BAG & LUGGAGE</span></td>
+          <td style="font-weight: 700; color: #0D47A1;">Rp 65.000</td>
+          <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> 2-4 Hari</td>
+          <td>
+            <div class="action-buttons" style="justify-content: flex-end;">
+              <button class="edit" onclick="openModal('editServiceModal')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="delete"><i class="fa-regular fa-trash-can"></i></button>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; color: var(--navy-dark);">Helmet Sanitization</td>
+          <td><span class="badge badge-layanan-gray">HELMET</span></td>
+          <td style="font-weight: 700; color: #0D47A1;">Rp 55.000</td>
+          <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> 1-2 Hari</td>
+          <td>
+            <div class="action-buttons" style="justify-content: flex-end;">
+              <button class="edit" onclick="openModal('editServiceModal')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="delete"><i class="fa-regular fa-trash-can"></i></button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="page-btn active">1</button>
+    <button class="page-btn">2</button>
+    <button class="page-btn">3</button>
+    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Modal Add Service -->
+<div class="modal-overlay" id="addServiceModal" onclick="closeModal(event, 'addServiceModal')">
+  <div class="modal-content" style="max-width: 500px; padding: 32px;">
+    <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Tambah Layanan Baru</h3>
+    <form onsubmit="event.preventDefault(); closeModalRaw('addServiceModal');">
+      
+      <div class="modal-form-group" style="margin-bottom: 20px;">
+        <label class="modal-label">NAMA LAYANAN</label>
+        <input type="text" class="modal-input" placeholder="Contoh: Deep Clean Regular">
+      </div>
+      
+      <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
+        <div class="modal-form-group">
+          <label class="modal-label">KATEGORI</label>
+          <select class="modal-input" style="color: var(--text-secondary);">
+            <option value="" disabled selected>Pilih Kategori</option>
+            <option>Menu Treatment</option>
+            <option>Reglue & Repair</option>
+            <option>Helmet Treatment</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label class="modal-label">HARGA (RP)</label>
+          <input type="number" class="modal-input" placeholder="40000">
+        </div>
+      </div>
+      
+      <div class="modal-form-group" style="margin-bottom: 32px;">
+        <label class="modal-label">ESTIMASI WAKTU</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <input type="number" class="modal-input" placeholder="Min" style="padding: 10px 12px;">
+          <input type="number" class="modal-input" placeholder="Max" style="padding: 10px 12px;">
+          <select class="modal-input" style="padding: 10px 12px;">
+            <option>Hari</option>
+            <option>Minggu</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
+        <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;" onclick="closeModalRaw('addServiceModal')">Batal</button>
+        <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan Layanan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Edit Service -->
+<div class="modal-overlay" id="editServiceModal" onclick="closeModal(event, 'editServiceModal')">
+  <div class="modal-content" style="max-width: 500px; padding: 32px;">
+    <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Tambah Layanan Baru</h3> <!-- Note: Figma has 'Tambah Layanan Baru' for Edit too by mistake, I'll fix it to Edit Layanan as best practice -->
+    <form onsubmit="event.preventDefault(); closeModalRaw('editServiceModal');">
+      
+      <div class="modal-form-group" style="margin-bottom: 20px;">
+        <label class="modal-label">NAMA LAYANAN</label>
+        <input type="text" class="modal-input" value="Deep Clean Shoes">
+      </div>
+      
+      <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
+        <div class="modal-form-group">
+          <label class="modal-label">KATEGORI</label>
+          <select class="modal-input">
+            <option selected>Main Treatment</option>
+            <option>Reglue & Repair</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label class="modal-label">HARGA (RP)</label>
+          <input type="number" class="modal-input" value="120000">
+        </div>
+      </div>
+      
+      <div class="modal-form-group" style="margin-bottom: 32px;">
+        <label class="modal-label">ESTIMASI WAKTU</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <input type="number" class="modal-input" value="1" style="padding: 10px 12px;">
+          <input type="number" class="modal-input" value="2" style="padding: 10px 12px;">
+          <select class="modal-input" style="padding: 10px 12px;">
+            <option selected>Hari</option>
+            <option>Minggu</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
+        <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;" onclick="closeModalRaw('editServiceModal')">Batal</button>
+        <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan Layanan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+  }
+
+  function closeModal(e, id) {
+    if (e.target.id === id) {
+      document.getElementById(id).classList.remove('active');
+    }
+  }
+
+  function closeModalRaw(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+</script>
+
+<%- include('../partials/dashboard-foot') %>

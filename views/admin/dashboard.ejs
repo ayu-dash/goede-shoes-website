@@ -1,9 +1,190 @@
-<%- include('../partials/header') %>
-  <section class="dashboard">
-    <div class="container" style="padding: 100px 20px; text-align: center;">
-      <h1>Admin Panel</h1>
-      <p>Selamat datang, Administrator! Kelola seluruh sistem Goede Shoes.</p>
-      <a href="/" class="btn btn-primary">Kembali ke Beranda</a>
+<%- include('../partials/dashboard-head') %>
+
+<!-- STATS GRID -->
+<div class="admin-stats-grid">
+  <div class="admin-stat-card navy">
+    <div class="stat-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+    <div>
+      <div class="stat-label">TOTAL REVENUE</div>
+      <div class="stat-value">Rp 42.850.000</div>
     </div>
-  </section>
-  <%- include('../partials/footer') %>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+    <div>
+      <div class="stat-label">TOTAL ORDERS</div>
+      <div class="stat-value">1,248</div>
+    </div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon"><i class="fa-solid fa-paintbrush"></i></div>
+    <div>
+      <div class="stat-label">ACTIVE TREATMENTS</div>
+      <div class="stat-value">156</div>
+    </div>
+  </div>
+  <div class="admin-stat-card">
+    <div class="stat-icon"><i class="fa-solid fa-user-plus"></i></div>
+    <div>
+      <div class="stat-label">NEW CUSTOMERS</div>
+      <div class="stat-value">84</div>
+    </div>
+  </div>
+</div>
+
+<!-- BAR CHART MOCK -->
+<div class="admin-charts-row">
+  <div class="chart-header">
+    <div class="chart-title">
+      <h3>Analisis Pesanan</h3>
+      <p>VOLUME PESANAN PER BULAN</p>
+    </div>
+    <div class="chart-controls">
+      <div class="badge badge-layanan-gray"><span style="width:8px;height:8px;background:#0D47A1;border-radius:50%;display:inline-block;margin-right:6px;"></span>Tahun</div>
+      <select>
+        <option>2024</option>
+        <option>2023</option>
+      </select>
+    </div>
+  </div>
+  
+  <div class="bar-chart-mock">
+    <!-- Dummy bars indicating height percentage via inline logic -->
+    <div class="bar-col" style="height: 30%;"><span class="bar-tooltip">120</span><span class="bar-label">Jan</span></div>
+    <div class="bar-col" style="height: 35%;"><span class="bar-tooltip">145</span><span class="bar-label">Feb</span></div>
+    <div class="bar-col" style="height: 40%;"><span class="bar-tooltip">180</span><span class="bar-label">Mar</span></div>
+    <div class="bar-col" style="height: 38%;"><span class="bar-tooltip">170</span><span class="bar-label">Apr</span></div>
+    <div class="bar-col" style="height: 45%;"><span class="bar-tooltip">210</span><span class="bar-label">Mei</span></div>
+    <div class="bar-col" style="height: 48%;"><span class="bar-tooltip">230</span><span class="bar-label">Jun</span></div>
+    <div class="bar-col" style="height: 55%;"><span class="bar-tooltip">250</span><span class="bar-label">Jul</span></div>
+    <div class="bar-col" style="height: 60%;"><span class="bar-tooltip">275</span><span class="bar-label">Agu</span></div>
+    <div class="bar-col" style="height: 65%;"><span class="bar-tooltip">295</span><span class="bar-label">Sep</span></div>
+    <div class="bar-col active" style="height: 75%;"><span class="bar-tooltip">384</span><span class="bar-label">Okt</span></div>
+    <div class="bar-col" style="height: 20%; background: #f1f3f5;"><span class="bar-label">Nov</span></div>
+    <div class="bar-col" style="height: 0%;"><span class="bar-label">Des</span></div>
+  </div>
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="admin-grid-layout">
+  <!-- Transactions -->
+  <div class="admin-panel" style="overflow-x: auto;">
+    <div class="admin-panel-header">
+      <h3 class="admin-panel-title">Transaksi Terakhir</h3>
+      <a href="#" class="admin-link">Lihat Semua</a>
+    </div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER</th>
+          <th>SERVICE</th>
+          <th>STATUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color: var(--text-secondary); font-weight: 600;">#GD-9021</td>
+          <td>
+            <span class="table-client-name">Aditya Pratama</span>
+            <span class="table-client-sub">Jordan 1 Retro High</span>
+          </td>
+          <td><span class="badge badge-layanan-blue">Deep Cleaning</span></td>
+          <td><span class="badge badge-processing">Processing</span></td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-secondary); font-weight: 600;">#GD-9020</td>
+          <td>
+            <span class="table-client-name">Sarah Wijaya</span>
+            <span class="table-client-sub">Balenciaga Triple S</span>
+          </td>
+          <td><span class="badge badge-layanan-blue">Repaint Gold</span></td>
+          <td><span class="badge badge-completed">Completed</span></td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-secondary); font-weight: 600;">#GD-9019</td>
+          <td>
+            <span class="table-client-name">Rizky Ramadhan</span>
+            <span class="table-client-sub">Adidas Yeezy 350</span>
+          </td>
+          <td><span class="badge badge-layanan-blue">Unyellowing</span></td>
+          <td><span class="badge badge-pending">Pending</span></td>
+        </tr>
+        <tr>
+          <td style="color: var(--text-secondary); font-weight: 600;">#GD-9018</td>
+          <td>
+            <span class="table-client-name">Budi Santoso</span>
+            <span class="table-client-sub">Nike AF1 Low</span>
+          </td>
+          <td><span class="badge badge-layanan-blue">Deep Cleaning</span></td>
+          <td><span class="badge badge-processing">Processing</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Right Column -->
+  <div>
+    <!-- Popular Services Donut -->
+    <div class="admin-panel" style="margin-bottom: 24px;">
+      <h3 class="admin-panel-title">Analisis Layanan Terpopuler</h3>
+      <div class="donut-mock-container">
+        <div class="donut-circle">
+          <div class="donut-inner">
+            <span class="total">TOTAL</span>
+            <span class="val">1.2k+</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item"><span class="lbl"><i class="legend-dot" style="background:#0D47A1;"></i>Deep Clean</span> <span class="pct">45%</span></div>
+          <div class="legend-item"><span class="lbl"><i class="legend-dot" style="background:#94a3b8;"></i>Repaint</span> <span class="pct">25%</span></div>
+          <div class="legend-item"><span class="lbl"><i class="legend-dot" style="background:#475569;"></i>Unyellowing</span> <span class="pct">20%</span></div>
+          <div class="legend-item"><span class="lbl"><i class="legend-dot" style="background:#cbd5e1;"></i>Others</span> <span class="pct">10%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Activity -->
+    <div class="admin-panel">
+      <h3 class="admin-panel-title">Aktivitas Staff</h3>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-user">
+            <img src="https://ui-avatars.com/api/?name=Dimas&background=random" alt="Dimas">
+            <div class="activity-details">
+              <span class="name">Dimas Saputra</span>
+              <span class="action">SELESAI: REPAINT AF1</span>
+            </div>
+          </div>
+          <span class="activity-time">12m ago</span>
+        </div>
+        
+        <div class="activity-item">
+          <div class="activity-user">
+            <img src="https://ui-avatars.com/api/?name=Citra&background=random" alt="Citra">
+            <div class="activity-details">
+              <span class="name">Citra Kirana</span>
+              <span class="action blue">MULAI: DEEP CLEAN AJ1</span>
+            </div>
+          </div>
+          <span class="activity-time">24m ago</span>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-user">
+            <img src="https://ui-avatars.com/api/?name=Rendi&background=random" alt="Rendi">
+            <div class="activity-details">
+              <span class="name">Rendi Wijaya</span>
+              <span class="action orange">ISTIRAHAT MAKAN</span>
+            </div>
+          </div>
+          <span class="activity-time">1h ago</span>
+        </div>
+      </div>
+      <button class="btn-manage-staff">Manage All Staff</button>
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/dashboard-foot') %>

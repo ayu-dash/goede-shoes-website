@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
+  <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+  <link rel="stylesheet" href="/css/admin.css">
+  <% } %>
 </head>
 <body class="dashboard-body">
 
@@ -18,6 +21,34 @@
   <div class="sidebar-logo">
     <a href="/" class="logo">GO<span class="logo-highlight">ED</span>E</a>
   </div>
+  <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+      <i class="fa-solid fa-grip"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'transaksi' ? 'active' : '' %>">
+      <i class="fa-solid fa-cash-register"></i>
+      <span>Transaksi</span>
+    </a>
+    <a href="#" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'karyawan' ? 'active' : '' %>">
+      <i class="fa-regular fa-id-badge"></i>
+      <span>Karyawan</span>
+    </a>
+    <a href="/admin/customers" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'customer' ? 'active' : '' %>">
+      <i class="fa-solid fa-user-group"></i>
+      <span>Customer</span>
+    </a>
+    <a href="/admin/services" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'layanan' ? 'active' : '' %>">
+      <i class="fa-solid fa-layer-group"></i>
+      <span>Layanan</span>
+    </a>
+    <a href="#" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'operasional' ? 'active' : '' %>">
+      <i class="fa-solid fa-gear"></i>
+      <span>Operasional</span>
+    </a>
+  </nav>
+  <% } else { %>
   <nav class="sidebar-nav">
     <a href="/customer/dashboard" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>" id="nav-dashboard">
       <i class="fa-solid fa-grip"></i>
@@ -28,6 +59,7 @@
       <span>Pesanan Saya</span>
     </a>
   </nav>
+  <% } %>
   <div class="sidebar-bottom">
     <a href="/api/auth/logout" class="sidebar-link sidebar-link--logout">
       <i class="fa-solid fa-arrow-right-from-bracket"></i>

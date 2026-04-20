@@ -112,5 +112,9 @@ exports.renderCustomerProfile = async (req, res) => {
 };
 
 exports.renderStaffDashboard = (req, res) => res.render("staff/dashboard");
-
 exports.renderAdminDashboard = (req, res) => res.render("admin/dashboard");
+
+
+
+
+
