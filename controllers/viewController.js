@@ -1,4 +1,5 @@
 const Order = require("../models/Order");
+const User = require("../models/User");
 
 exports.renderIndex = (req, res) => res.render("index");
 
@@ -112,7 +113,83 @@ exports.renderCustomerProfile = async (req, res) => {
 };
 
 exports.renderStaffDashboard = (req, res) => res.render("staff/dashboard");
-exports.renderAdminDashboard = (req, res) => res.render("admin/dashboard");
+exports.renderAdminDashboard = async (req, res) => {
+    try {
+        const revenueResult = await Order.aggregate([
+            { $match: { status: { $ne: "cancelled" } } },
+            { $group: { _id: null, total: { $sum: "$totalPrice" } } }
+        ]);
+        const totalRevenue = revenueResult[0] ? revenueResult[0].total : 0;
+
+        const totalOrders = await Order.countDocuments();
+        const activeTreatments = await Order.countDocuments({ status: { $in: ["pending", "pickup", "in-progress", "delivery"] } });
+        const newCustomers = await User.countDocuments({ role: "customer" });
+
+        const recentOrders = await Order.find()
+            .sort("-createdAt")
+            .limit(5)
+            .populate("user", "name");
+
+        const serviceStatsResult = await Order.aggregate([
+            { $unwind: "$items" },
+            { $group: { _id: "$items.serviceType", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        const totalServices = serviceStatsResult.reduce((acc, curr) => acc + curr.count, 0);
+
+        const availableYearsResult = await Order.aggregate([
+            { $group: { _id: { $year: "$createdAt" } } },
+            { $sort: { _id: -1 } }
+        ]);
+        const availableYears = availableYearsResult.map(y => y._id);
+        if (availableYears.length === 0) availableYears.push(new Date().getFullYear());
+
+        const targetYear = parseInt(req.query.year) || new Date().getFullYear();
+        const monthlyOrdersResult = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(targetYear, 0, 1),
+                        $lt: new Date(targetYear + 1, 0, 1)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: "$createdAt" },
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+        
+        const monthlyOrders = Array(12).fill(0);
+        monthlyOrdersResult.forEach(item => {
+            monthlyOrders[item._id - 1] = item.count;
+        });
+        const maxMonthlyOrder = Math.max(...monthlyOrders, 1);
+
+        res.render("admin/dashboard", {
+            activePage: "dashboard",
+            stats: {
+                totalRevenue,
+                totalOrders,
+                activeTreatments,
+                newCustomers
+            },
+            recentOrders,
+            serviceStats: serviceStatsResult,
+            totalServices,
+            monthlyOrders,
+            maxMonthlyOrder,
+            targetYear,
+            availableYears
+        });
+    } catch (err) {
+        console.error("Dashboard Error:", err);
+        res.status(500).render("error", { message: "Gagal memuat dashboard admin." });
+    }
+};
 
 
 

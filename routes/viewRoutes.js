@@ -21,6 +21,7 @@ router.get("/customer/order-detail", protect, viewController.renderCustomerOrder
 router.get("/customer/profile", protect, viewController.renderCustomerProfile);
 
 router.get("/staff/dashboard", protect, restrictTo("staff", "admin"), viewController.renderStaffDashboard);
+
 router.get("/admin/dashboard", protect, restrictTo("admin"), viewController.renderAdminDashboard);
 
 
