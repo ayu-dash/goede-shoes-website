@@ -42,10 +42,9 @@
             <div class="form-group">
               <label for="phone" class="form-label">Nomor Telepon</label>
               <div class="form-input-wrap">
-                <input type="tel" id="phone" name="phone" class="form-input" placeholder="081234567890" 
-                  pattern="^(08|628|\+628)[0-9]{8,12}$" 
-                  title="Gunakan format nomor Indonesia (Contoh: 0812..., 62812..., atau +62812...)" 
-                  required />
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="081234567890"
+                  pattern="^(08|628|\+628)[0-9]{8,12}$"
+                  title="Gunakan format nomor Indonesia (Contoh: 0812..., 62812..., atau +62812...)" required />
               </div>
             </div>
 
@@ -56,6 +55,9 @@
               <div class="form-input-wrap">
                 <input type="password" id="password" name="password" class="form-input" placeholder="••••••••"
                   required />
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
               </div>
             </div>
 
@@ -65,6 +67,9 @@
               <div class="form-input-wrap">
                 <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
                   placeholder="••••••••" required />
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
               </div>
             </div>
 
