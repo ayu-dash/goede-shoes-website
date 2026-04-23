@@ -273,3 +273,9 @@ exports.renderAdminServices = async (req, res) => {
 
 exports.renderAdminCustomers = (req, res) =>
   res.render("admin/customers", { activePage: "customer" });
+
+exports.renderAdminEmployees = (req, res) =>
+  res.render("admin/employees", { activePage: "karyawan" });
+
+exports.renderAdminOperations = (req, res) =>
+  res.render("admin/operations", { activePage: "operasional" });
