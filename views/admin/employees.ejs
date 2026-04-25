@@ -13,7 +13,7 @@
     <div class="stat-icon"><i class="fa-solid fa-user-group"></i></div>
     <div>
       <div class="stat-label">TOTAL STAFF</div>
-      <div class="stat-value">24</div>
+      <div class="stat-value" id="statTotal"><%= stats.total %></div>
     </div>
   </div>
   <div class="admin-stat-card">
@@ -22,7 +22,7 @@
     </div>
     <div>
       <div class="stat-label">AKTIF</div>
-      <div class="stat-value">18</div>
+      <div class="stat-value" id="statActive"><%= stats.active %></div>
     </div>
   </div>
   <div class="admin-stat-card">
@@ -31,7 +31,7 @@
     </div>
     <div>
       <div class="stat-label">TIDAK AKTIF</div>
-      <div class="stat-value">6</div>
+      <div class="stat-value" id="statInactive"><%= stats.inactive %></div>
     </div>
   </div>
 </div>
@@ -43,6 +43,7 @@
       <i class="fa-solid fa-magnifying-glass"></i>
       <input
         type="text"
+        id="employeeSearch"
         class="search-input"
         placeholder="Filter berdasarkan nama..."
       />
@@ -62,20 +63,18 @@
           <th style="text-align: right">AKSI</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
+      <tbody id="employeeTableBody">
+        <% employees.forEach(employee => { %>
+        <tr data-id="<%= employee._id %>" data-name="<%= employee.name.toLowerCase() %>">
           <td>
             <div class="table-client-info">
               <img
-                src="https://ui-avatars.com/api/?name=Bambang+Susanto&background=random"
+                src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(employee.name) %>&background=random"
                 class="table-client-avatar"
                 alt="User"
               />
               <div>
-                <span class="table-client-name">Bambang Susanto</span>
-                <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #MST-001</span
-                >
+                <span class="table-client-name"><%= employee.name %></span>
               </div>
             </div>
           </td>
@@ -87,147 +86,36 @@
                   font-weight: 600;
                   color: var(--text-secondary);
                 "
-                >bambang.s@pristine.com</span
+                ><%= employee.email %></span
               >
             </div>
             <div>
               <span style="font-size: 11px; color: #cbd5e1"
-                >+62 812 3456 7890</span
+                ><%= employee.phone %></span
               >
             </div>
           </td>
           <td>
             <label class="toggle-switch">
-              <input type="checkbox" checked />
+              <input type="checkbox" class="status-toggle" <%= employee.isActive ? 'checked' : '' %> onchange="toggleEmployeeStatus('<%= employee._id %>', this)" />
               <span class="toggle-slider"></span>
-              <span class="toggle-label">AKTIF</span>
+              <span class="toggle-label"><%= employee.isActive ? 'AKTIF' : 'NON-AKTIF' %></span>
             </label>
           </td>
           <td>
             <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit">
+              <button class="edit" onclick="openEditModal('<%= JSON.stringify(employee) %>')">
                 <i class="fa-regular fa-pen-to-square"></i>
               </button>
-              <button class="delete">
+              <button class="delete" onclick="deleteEmployee('<%= employee._id %>')">
                 <i class="fa-regular fa-trash-can"></i>
               </button>
             </div>
           </td>
         </tr>
-
-        <tr>
-          <td>
-            <div class="table-client-info">
-              <img
-                src="https://ui-avatars.com/api/?name=Siska+Amelia&background=random"
-                class="table-client-avatar"
-                alt="User"
-              />
-              <div>
-                <span class="table-client-name">Siska Amelia</span>
-                <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #MST-002</span
-                >
-              </div>
-            </div>
-          </td>
-          <td>
-            <div>
-              <span
-                style="
-                  font-size: 12px;
-                  font-weight: 600;
-                  color: var(--text-secondary);
-                "
-                >siska.a@pristine.com</span
-              >
-            </div>
-            <div>
-              <span style="font-size: 11px; color: #cbd5e1"
-                >+62 811 9876 5432</span
-              >
-            </div>
-          </td>
-          <td>
-            <label class="toggle-switch">
-              <input type="checkbox" checked />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">AKTIF</span>
-            </label>
-          </td>
-          <td>
-            <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-              <button class="delete">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            <div class="table-client-info">
-              <img
-                src="https://ui-avatars.com/api/?name=Rudi+Hermawan&background=random"
-                class="table-client-avatar"
-                alt="User"
-              />
-              <div>
-                <span class="table-client-name">Rudi Hermawan</span>
-                <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #MST-003</span
-                >
-              </div>
-            </div>
-          </td>
-          <td>
-            <div>
-              <span
-                style="
-                  font-size: 12px;
-                  font-weight: 600;
-                  color: var(--text-secondary);
-                "
-                >rudi.h@pristine.com</span
-              >
-            </div>
-            <div>
-              <span style="font-size: 11px; color: #cbd5e1"
-                >+62 856 2233 4455</span
-              >
-            </div>
-          </td>
-          <td>
-            <label class="toggle-switch">
-              <input type="checkbox" />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">NON-AKTIF</span>
-            </label>
-          </td>
-          <td>
-            <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-              <button class="delete">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
+        <% }) %>
       </tbody>
     </table>
-  </div>
-
-  <div class="pagination">
-    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-    <button class="page-btn active">1</button>
-    <button class="page-btn">2</button>
-    <button class="page-btn">3</button>
-    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
   </div>
 </div>
 
@@ -251,23 +139,6 @@
     >
       Tambah Karyawan Baru
     </h3>
-
-    <!-- Photo Upload -->
-    <div class="emp-photo-upload" style="margin-bottom: 20px">
-      <div
-        class="emp-photo-circle"
-        style="width: 64px; height: 64px; font-size: 22px"
-      >
-        <i class="fa-regular fa-user"></i>
-        <span
-          class="emp-photo-badge"
-          style="width: 20px; height: 20px; font-size: 8px"
-          ><i class="fa-solid fa-camera"></i
-        ></span>
-      </div>
-      <span class="emp-photo-label">FOTO PROFIL</span>
-      <span class="emp-photo-sub">PNG / JPG / JPEG</span>
-    </div>
 
     <form id="addEmployeeForm">
       <div class="modal-form-group" style="margin-bottom: 14px">
@@ -359,22 +230,119 @@
   </div>
 </div>
 
-<script>
-  // Toggle label text
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggles = document.querySelectorAll(".toggle-switch input");
-    toggles.forEach((toggle) => {
-      toggle.addEventListener("change", function () {
-        const span = this.parentElement.querySelector(".toggle-label");
-        if (this.checked) {
-          span.textContent = "AKTIF";
-        } else {
-          span.textContent = "NON-AKTIF";
-        }
-      });
-    });
-  });
+<!-- Modal Edit Karyawan -->
+<div
+  class="modal-overlay"
+  id="editEmployeeModal"
+  onclick="closeModal(event, 'editEmployeeModal')"
+>
+  <div class="modal-content" style="max-width: 380px; padding: 28px 24px">
+    <h3
+      class="modal-title"
+      style="
+        color: #0d47a1;
+        margin-bottom: 20px;
+        font-size: 18px;
+        text-align: center;
+      "
+    >
+      Edit Data Karyawan
+    </h3>
 
+    <form id="editEmployeeForm">
+      <input type="hidden" name="id" id="editEmployeeId" />
+      <div class="modal-form-group" style="margin-bottom: 14px">
+        <label class="modal-label">NAMA LENGKAP</label>
+        <div class="modal-input-icon">
+          <i class="fa-regular fa-user"></i>
+          <input
+            type="text"
+            name="name"
+            id="editEmployeeName"
+            class="modal-input"
+            style="padding: 10px 14px 10px 36px"
+            placeholder="Contoh: Adrian Pratama"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="modal-form-group" style="margin-bottom: 14px">
+        <label class="modal-label">EMAIL</label>
+        <div class="modal-input-icon">
+          <i class="fa-regular fa-envelope"></i>
+          <input
+            type="email"
+            name="email"
+            id="editEmployeeEmail"
+            class="modal-input"
+            style="padding: 10px 14px 10px 36px"
+            placeholder="email@perusahaan.com"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="modal-form-group" style="margin-bottom: 14px">
+        <label class="modal-label">NOMOR TELEPON</label>
+        <div class="modal-input-icon">
+          <i class="fa-solid fa-phone"></i>
+          <input
+            type="tel"
+            name="phone"
+            id="editEmployeePhone"
+            class="modal-input"
+            style="padding: 10px 14px 10px 36px"
+            placeholder="0812..."
+            required
+          />
+        </div>
+      </div>
+
+      <div class="modal-form-group" style="margin-bottom: 24px">
+        <label class="modal-label">KATA SANDI BARU (OPSIONAL)</label>
+        <div class="modal-input-icon">
+          <i class="fa-solid fa-lock"></i>
+          <input
+            type="password"
+            name="password"
+            class="modal-input"
+            style="padding: 10px 14px 10px 36px"
+            placeholder="Isi jika ingin diubah"
+          />
+        </div>
+      </div>
+
+      <div
+        class="modal-actions"
+        style="flex-direction: column; gap: 8px; margin-top: 0"
+      >
+        <button
+          type="submit"
+          class="btn btn-primary"
+          style="
+            width: 100%;
+            background: #0d47a1;
+            border-radius: 8px;
+            padding: 12px;
+          "
+        >
+          Update Karyawan
+        </button>
+        <button
+          type="button"
+          class="btn btn-ghost-cancel"
+          style="width: 100%; font-weight: 700"
+          onclick="closeModalRaw('editEmployeeModal')"
+        >
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
   function openModal(id) {
     document.getElementById(id).classList.add("active");
   }
@@ -386,6 +354,135 @@
   function closeModalRaw(id) {
     document.getElementById(id).classList.remove("active");
   }
+
+  // Update Statistics UI
+  function updateStats() {
+    const total = document.querySelectorAll("#employeeTableBody tr").length;
+    const active = document.querySelectorAll("#employeeTableBody tr input.status-toggle:checked").length;
+    const inactive = total - active;
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statActive").textContent = active;
+    document.getElementById("statInactive").textContent = inactive;
+  }
+
+  // Search logic
+  const searchInput = document.getElementById("employeeSearch");
+  const tableRows = document.querySelectorAll("#employeeTableBody tr");
+
+  searchInput.addEventListener("input", (e) => {
+    const term = e.target.value.toLowerCase();
+    tableRows.forEach(row => {
+      const name = row.getAttribute("data-name");
+      if (name.includes(term)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  });
+
+  // Create Employee
+  const addForm = document.getElementById("addEmployeeForm");
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(addForm);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch("/api/admin/staff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.status === "success") {
+        location.reload();
+      } else {
+        alert(result.message || "Gagal menambah karyawan");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan");
+    }
+  });
+
+  // Toggle Status
+  async function toggleEmployeeStatus(id, checkbox) {
+    const label = checkbox.parentElement.querySelector(".toggle-label");
+    const isActive = checkbox.checked;
+    
+    try {
+      const res = await fetch(`/api/admin/staff/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive })
+      });
+      const result = await res.json();
+      if (result.status === "success") {
+        label.textContent = isActive ? "AKTIF" : "NON-AKTIF";
+        updateStats(); // REALTIME UPDATE
+      } else {
+        checkbox.checked = !isActive;
+        alert(result.message || "Gagal update status");
+      }
+    } catch (err) {
+      checkbox.checked = !isActive;
+      alert("Terjadi kesalahan");
+    }
+  }
+
+  // Delete Employee
+  async function deleteEmployee(id) {
+    if (!confirm("Yakin ingin menghapus karyawan ini?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/staff/${id}`, {
+        method: "DELETE"
+      });
+      if (res.status === 204) {
+        location.reload();
+      } else {
+        const result = await res.json();
+        alert(result.message || "Gagal menghapus karyawan");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan");
+    }
+  }
+
+  // Edit Employee
+  function openEditModal(empJson) {
+    const emp = JSON.parse(empJson);
+    document.getElementById("editEmployeeId").value = emp._id;
+    document.getElementById("editEmployeeName").value = emp.name;
+    document.getElementById("editEmployeeEmail").value = emp.email;
+    document.getElementById("editEmployeePhone").value = emp.phone;
+    openModal("editEmployeeModal");
+  }
+
+  const editForm = document.getElementById("editEmployeeForm");
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = document.getElementById("editEmployeeId").value;
+    const formData = new FormData(editForm);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch(`/api/admin/staff/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.status === "success") {
+        location.reload();
+      } else {
+        alert(result.message || "Gagal update karyawan");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan");
+    }
+  });
 </script>
 
 <%- include('../partials/dashboard-foot') %>

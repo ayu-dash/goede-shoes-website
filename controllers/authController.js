@@ -199,7 +199,14 @@ exports.login = async (req, res) => {
 
         const user = await User.findOne({ email }).select("+password");
 
-        if (!user || !(await user.correctPassword(password, user.password))) {
+        if (user && (await user.correctPassword(password, user.password))) {
+            if (!user.isActive) {
+                return res.status(401).json({
+                    status: "fail",
+                    message: "Akun Anda telah dinonaktifkan. Silakan hubungi admin.",
+                });
+            }
+        } else {
             return res.status(401).json({
                 status: "fail",
                 message: "Email or password incorrect",

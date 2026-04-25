@@ -274,8 +274,28 @@ exports.renderAdminServices = async (req, res) => {
 exports.renderAdminCustomers = (req, res) =>
   res.render("admin/customers", { activePage: "customer" });
 
-exports.renderAdminEmployees = (req, res) =>
-  res.render("admin/employees", { activePage: "karyawan" });
+exports.renderAdminEmployees = async (req, res) => {
+  try {
+    const employees = await User.find({ role: "staff" }).sort("-createdAt");
+
+    const stats = {
+      total: employees.length,
+      active: employees.filter((e) => e.isActive).length,
+      inactive: employees.filter((e) => !e.isActive).length,
+    };
+
+    res.render("admin/employees", {
+      activePage: "karyawan",
+      employees,
+      stats,
+    });
+  } catch (err) {
+    console.error("Employees Error:", err);
+    res
+      .status(500)
+      .render("error", { message: "Gagal memuat halaman karyawan." });
+  }
+};
 
 exports.renderAdminOperations = (req, res) =>
   res.render("admin/operations", { activePage: "operasional" });

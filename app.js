@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const userRoutes = require("./routes/userRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/admin", adminRoutes);
 
 connectDB();
 
