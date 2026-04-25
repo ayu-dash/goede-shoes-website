@@ -26,4 +26,10 @@ router
 
 router.get("/customers/:id/orders", adminController.getCustomerOrders);
 
+// Operational Settings
+router
+  .route("/settings")
+  .get(adminController.getSettings)
+  .patch(adminController.updateSettings);
+
 module.exports = router;

@@ -1,5 +1,43 @@
 const User = require("../models/User");
 const Order = require("../models/Order");
+const Settings = require("../models/Settings");
+
+exports.getSettings = async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({});
+    }
+    res.status(200).json({
+      status: "success",
+      data: { settings },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.updateSettings = async (req, res) => {
+  try {
+    const settings = await Settings.findOneAndUpdate({}, req.body, {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    });
+    res.status(200).json({
+      status: "success",
+      data: { settings },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
 
 exports.getAllStaff = async (req, res) => {
   try {

@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
 const Service = require("../models/Service");
+const Settings = require("../models/Settings");
 
 exports.renderIndex = (req, res) => res.render("index");
 
@@ -313,5 +314,36 @@ exports.renderAdminEmployees = async (req, res) => {
   }
 };
 
-exports.renderAdminOperations = (req, res) =>
-  res.render("admin/operations", { activePage: "operasional" });
+exports.renderAdminOperations = async (req, res) => {
+  try {
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = await Settings.create({
+        bankAccounts: [
+          {
+            bankName: "BCA",
+            accountNumber: "8820 4419 2201",
+            accountHolder: "PT. GOEDE SHOES",
+          },
+        ],
+        shippingRatePerKm: 10000,
+        storeInfo: {
+          name: "Goede HQ - Senopati",
+          address:
+            "Jl. Senopati No.41, RT.6/RW.3, Selong, Kec. Kby. Baru, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12110",
+          openTime: "09:00",
+          closeTime: "21:00",
+          phone: "+62 811-2345-6789",
+          email: "hq.senopati@goede.com",
+        },
+      });
+    }
+
+    res.render("admin/operations", {
+      activePage: "operasional",
+      settings,
+    });
+  } catch (err) {
+    res.status(500).render("error", { message: err.message });
+  }
+};
