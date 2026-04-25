@@ -1,0 +1,171 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="page-header" style="margin-bottom: 32px">
+  <h1 class="page-title page-title--xl">Profil Saya</h1>
+  <p class="page-subtitle">Kelola informasi pribadi dan keamanan akun Anda</p>
+</div>
+
+<div class="profile-layout" style="display: grid; grid-template-columns: 350px 1fr; gap: 32px; align-items: start;">
+  
+  <!-- LEFT: Profile Summary Card -->
+  <div class="admin-panel" style="padding: 32px; text-align: center;">
+    <div class="profile-avatar-large" style="width: 120px; height: 120px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 48px; color: #64748b; border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+      <%= user.name.charAt(0).toUpperCase() %>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 4px;"><%= user.name %></h2>
+    <p style="font-size: 14px; color: #64748b; margin-bottom: 24px;"><%= user.email %></p>
+    
+    <div style="display: inline-block; padding: 6px 12px; background: #f0fdf4; color: #16a34a; border-radius: 99px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+      Administrator
+    </div>
+    
+    <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 24px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <span style="font-size: 13px; color: #64748b;">Member Sejak</span>
+        <span style="font-size: 13px; font-weight: 600; color: #0f172a;"><%= new Date(user.createdAt).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) %></span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-size: 13px; color: #64748b;">Status Akun</span>
+        <span style="font-size: 13px; font-weight: 600; color: #16a34a;">Aktif</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Edit Forms -->
+  <div style="display: grid; gap: 32px;">
+    
+    <!-- PERSONAL INFO -->
+    <div class="admin-panel" style="padding: 32px;">
+      <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+        <i class="fa-regular fa-user" style="color: #0284c7;"></i>
+        Informasi Pribadi
+      </h3>
+      
+      <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+          <div class="ops-form-group">
+            <label class="ops-field-label">NAMA LENGKAP</label>
+            <input type="text" name="name" class="ops-field-input" value="<%= user.name %>" required />
+          </div>
+          <div class="ops-form-group">
+            <label class="ops-field-label">ALAMAT EMAIL</label>
+            <input type="email" name="email" class="ops-field-input" value="<%= user.email %>" required />
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+          <div class="ops-form-group">
+            <label class="ops-field-label">NOMOR TELEPON</label>
+            <input type="text" name="phone" class="ops-field-input" value="<%= user.phone || '' %>" placeholder="Contoh: 08123456789" />
+          </div>
+          <div class="ops-form-group">
+            <!-- Reserved for role / department maybe -->
+          </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary" id="btnUpdateProfile">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SECURITY / PASSWORD -->
+    <div class="admin-panel" style="padding: 32px;">
+      <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+        <i class="fa-solid fa-shield-halved" style="color: #e11d48;"></i>
+        Keamanan Akun
+      </h3>
+      
+      <form id="updatePasswordForm" onsubmit="handleUpdatePassword(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+          <div class="ops-form-group">
+            <label class="ops-field-label">PASSWORD SAAT INI</label>
+            <input type="password" name="passwordCurrent" class="ops-field-input" required />
+          </div>
+          <div class="ops-form-group">
+            <label class="ops-field-label">PASSWORD BARU</label>
+            <input type="password" name="password" class="ops-field-input" required minlength="8" />
+          </div>
+          <div class="ops-form-group">
+            <label class="ops-field-label">KONFIRMASI PASSWORD</label>
+            <input type="password" name="passwordConfirm" class="ops-field-input" required minlength="8" />
+          </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="submit" class="btn btn-primary" style="background: #e11d48;" id="btnUpdatePassword">Perbarui Password</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function handleUpdateProfile(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnUpdateProfile');
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  
+  try {
+    const res = await fetch('/api/users/updateMe', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    if (res.ok) {
+      alert('Profil berhasil diperbarui!');
+      location.reload();
+    } else {
+      alert(result.message || 'Gagal memperbarui profil');
+    }
+  } catch (err) {
+    alert('Terjadi kesalahan koneksi');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Simpan Perubahan';
+  }
+}
+
+async function handleUpdatePassword(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnUpdatePassword');
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  if (data.password !== data.passwordConfirm) {
+    return alert('Konfirmasi password tidak cocok');
+  }
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+  
+  try {
+    const res = await fetch('/api/auth/updateMyPassword', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await res.json();
+    if (res.ok) {
+      alert('Password berhasil diubah!');
+      e.target.reset();
+    } else {
+      alert(result.message || 'Gagal mengubah password');
+    }
+  } catch (err) {
+    alert('Terjadi kesalahan koneksi');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Perbarui Password';
+  }
+}
+</script>
+
+<%- include('../partials/dashboard-foot') %>

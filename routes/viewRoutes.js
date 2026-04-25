@@ -79,4 +79,11 @@ router.get(
   viewController.renderAdminOperations,
 );
 
+router.get(
+  "/admin/profile",
+  protect,
+  restrictTo("admin"),
+  viewController.renderAdminProfile,
+);
+
 module.exports = router;

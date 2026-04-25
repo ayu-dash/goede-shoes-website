@@ -377,3 +377,13 @@ exports.renderAdminOperations = async (req, res) => {
     res.status(500).render("error", { message: err.message });
   }
 };
+
+exports.renderAdminProfile = async (req, res) => {
+  try {
+    res.render("admin/profile", {
+      activePage: "profile",
+    });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat profil admin." });
+  }
+};

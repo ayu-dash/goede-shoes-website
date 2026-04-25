@@ -333,3 +333,30 @@ exports.logout = (req, res) => {
 
     res.status(200).json({ status: "success" });
 };
+
+exports.updateMyPassword = async (req, res) => {
+    try {
+        // 1) Get user from collection
+        const user = await User.findById(req.user.id).select("+password");
+
+        // 2) Check if POSTed current password is correct
+        if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+            return res.status(401).json({
+                status: "fail",
+                message: "Password saat ini salah.",
+            });
+        }
+
+        // 3) If so, update password
+        user.password = req.body.password;
+        await user.save();
+
+        // 4) Log user in, send JWT
+        createSendToken(user, 200, req, res);
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message,
+        });
+    }
+};
