@@ -266,13 +266,29 @@ exports.renderAdminServices = async (req, res) => {
   } catch (err) {
     console.error("Services Error:", err);
     res
-      .status(500)
       .render("error", { message: "Gagal memuat halaman layanan." });
   }
 };
 
-exports.renderAdminCustomers = (req, res) =>
-  res.render("admin/customers", { activePage: "customer" });
+exports.renderAdminCustomers = async (req, res) => {
+  try {
+    const customers = await User.find({ role: "customer" }).sort("-createdAt");
+
+    const stats = {
+      total: customers.length,
+      active: customers.filter((c) => c.isActive).length,
+      inactive: customers.filter((c) => !c.isActive).length,
+    };
+
+    res.render("admin/customers", {
+      activePage: "customer",
+      customers,
+      stats,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
 
 exports.renderAdminEmployees = async (req, res) => {
   try {

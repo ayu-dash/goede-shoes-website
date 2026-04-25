@@ -663,15 +663,15 @@
    =========================== */
 
 .modal-content--lg {
-  max-width: 700px;
-  padding: 32px;
+  max-width: 900px;
+  padding: 24px 32px;
 }
 
 .cust-detail-header {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .cust-detail-avatar {
@@ -710,7 +710,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .cust-detail-stat {

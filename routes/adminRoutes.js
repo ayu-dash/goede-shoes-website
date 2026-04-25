@@ -17,4 +17,13 @@ router
   .patch(adminController.updateStaff)
   .delete(adminController.deleteStaff);
 
+// Customer Management
+router.route("/customers").get(adminController.getAllCustomers);
+router
+  .route("/customers/:id")
+  .patch(adminController.updateStaff) // Reusing updateStaff logic for customers
+  .delete(adminController.deleteStaff); // Reusing deleteStaff logic for customers
+
+router.get("/customers/:id/orders", adminController.getCustomerOrders);
+
 module.exports = router;

@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Order = require("../models/Order");
 
 exports.getAllStaff = async (req, res) => {
   try {
@@ -7,6 +8,39 @@ exports.getAllStaff = async (req, res) => {
       status: "success",
       results: staff.length,
       data: { staff },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.getAllCustomers = async (req, res) => {
+  try {
+    const customers = await User.find({ role: "customer" });
+    res.status(200).json({
+      status: "success",
+      results: customers.length,
+      data: { customers },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.getCustomerOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.params.id }).sort("-createdAt");
+
+    res.status(200).json({
+      status: "success",
+      results: orders.length,
+      data: { orders },
     });
   } catch (err) {
     res.status(400).json({

@@ -4,7 +4,7 @@
   <h1 class="page-title page-title--xl">Manajemen Customer</h1>
 </div>
 
-<!-- STATS CARDS MOCK -->
+<!-- STATS CARDS -->
 <div
   class="admin-stats-grid"
   style="grid-template-columns: repeat(3, 1fr); margin-bottom: 32px"
@@ -33,7 +33,7 @@
     </div>
     <div>
       <div class="stat-label">Total Customer</div>
-      <div class="stat-value">1,284</div>
+      <div class="stat-value" id="statTotal"><%= stats.total %></div>
     </div>
   </div>
 
@@ -62,8 +62,8 @@
       </div>
     </div>
     <div>
-      <div class="stat-label">Customer Baru</div>
-      <div class="stat-value">452</div>
+      <div class="stat-label">Aktif</div>
+      <div class="stat-value" id="statActive"><%= stats.active %></div>
     </div>
   </div>
 
@@ -89,8 +89,8 @@
       </div>
     </div>
     <div>
-      <div class="stat-label">Rata-rata Nilai Pesanan</div>
-      <div class="stat-value">Rp 425.000</div>
+      <div class="stat-label">Tidak Aktif</div>
+      <div class="stat-value" id="statInactive"><%= stats.inactive %></div>
     </div>
   </div>
 </div>
@@ -102,11 +102,11 @@
       <i class="fa-solid fa-magnifying-glass"></i>
       <input
         type="text"
+        id="customerSearch"
         class="search-input"
         placeholder="Filter berdasarkan nama..."
       />
     </div>
-    <button class="btn-filter"><i class="fa-solid fa-filter"></i></button>
   </div>
 
   <div class="admin-table-wrapper" style="overflow-x: auto">
@@ -122,19 +122,20 @@
           <th style="text-align: right">AKSI</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
+      <tbody id="customerTableBody">
+        <% customers.forEach(customer => { %>
+        <tr data-id="<%= customer._id %>" data-name="<%= customer.name.toLowerCase() %>">
           <td>
             <div class="table-client-info">
               <img
-                src="https://ui-avatars.com/api/?name=Arini+Sulistiowati&background=random"
+                src="https://ui-avatars.com/api/?name=<%= encodeURIComponent(customer.name) %>&background=random"
                 class="table-client-avatar"
                 alt="User"
               />
               <div>
-                <span class="table-client-name">Arini Sulistiowati</span>
+                <span class="table-client-name"><%= customer.name %></span>
                 <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #CST-9021</span
+                  >ID: #CST-<%= customer._id.toString().slice(-4).toUpperCase() %></span
                 >
               </div>
             </div>
@@ -147,191 +148,177 @@
                   font-weight: 600;
                   color: var(--text-secondary);
                 "
-                >arini.s@gmail.com</span
+                ><%= customer.email %></span
               >
             </div>
             <div>
               <span style="font-size: 11px; color: #cbd5e1"
-                >+62 812-3456-7890</span
+                ><%= customer.phone %></span
               >
             </div>
           </td>
           <td>
             <span class="badge badge-layanan-blue" style="border-radius: 12px"
-              >14 Pesanan</span
+              >0 Pesanan</span
             >
           </td>
-          <td style="font-weight: 700; color: #0d47a1">Rp 4.250.000</td>
+          <td style="font-weight: 700; color: #0d47a1">Rp 0</td>
           <td>
             <label class="toggle-switch">
-              <input type="checkbox" checked />
+              <input type="checkbox" class="status-toggle" <%= customer.isActive ? 'checked' : '' %> onchange="toggleCustomerStatus('<%= customer._id %>', this)" />
               <span class="toggle-slider"></span>
-              <span class="toggle-label">Aktif</span>
+              <span class="toggle-label"><%= customer.isActive ? 'Aktif' : 'Non-Aktif' %></span>
             </label>
           </td>
-          <td style="color: var(--text-secondary)">12 Jan 2023</td>
+          <td style="color: var(--text-secondary)">
+             <%= new Date(customer.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+          </td>
           <td>
             <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit" onclick="openCustomerDetail()">
+              <button class="edit" onclick="openCustomerDetail('<%= JSON.stringify(customer) %>')">
                 <i class="fa-regular fa-eye"></i>
               </button>
-              <button class="delete">
+              <button class="delete" onclick="deleteCustomer('<%= customer._id %>')">
                 <i class="fa-regular fa-trash-can"></i>
               </button>
             </div>
           </td>
         </tr>
-
-        <tr>
-          <td>
-            <div class="table-client-info">
-              <img
-                src="https://ui-avatars.com/api/?name=Budi+Pratama&background=random"
-                class="table-client-avatar"
-                alt="User"
-              />
-              <div>
-                <span class="table-client-name">Budi Pratama</span>
-                <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #CST-8842</span
-                >
-              </div>
-            </div>
-          </td>
-          <td>
-            <div>
-              <span
-                style="
-                  font-size: 12px;
-                  font-weight: 600;
-                  color: var(--text-secondary);
-                "
-                >budi.pratama@outlook.com</span
-              >
-            </div>
-            <div>
-              <span style="font-size: 11px; color: #cbd5e1"
-                >+62 811-9922-3344</span
-              >
-            </div>
-          </td>
-          <td>
-            <span class="badge badge-layanan-blue" style="border-radius: 12px"
-              >3 Pesanan</span
-            >
-          </td>
-          <td style="font-weight: 700; color: #0d47a1">Rp 840.000</td>
-          <td>
-            <label class="toggle-switch">
-              <input type="checkbox" />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">Non-Aktif</span>
-            </label>
-          </td>
-          <td style="color: var(--text-secondary)">05 Feb 2024</td>
-          <td>
-            <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit" onclick="openCustomerDetail()">
-                <i class="fa-regular fa-eye"></i>
-              </button>
-              <button class="delete">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-
-        <tr>
-          <td>
-            <div class="table-client-info">
-              <img
-                src="https://ui-avatars.com/api/?name=Citra+Kirana&background=random"
-                class="table-client-avatar"
-                alt="User"
-              />
-              <div>
-                <span class="table-client-name">Citra Kirana</span>
-                <span class="table-client-sub" style="opacity: 0.7"
-                  >ID: #CST-9104</span
-                >
-              </div>
-            </div>
-          </td>
-          <td>
-            <div>
-              <span
-                style="
-                  font-size: 12px;
-                  font-weight: 600;
-                  color: var(--text-secondary);
-                "
-                >citra.kirana@yahoo.id</span
-              >
-            </div>
-            <div>
-              <span style="font-size: 11px; color: #cbd5e1"
-                >+62 856-7788-1122</span
-              >
-            </div>
-          </td>
-          <td>
-            <span class="badge badge-layanan-blue" style="border-radius: 12px"
-              >8 Pesanan</span
-            >
-          </td>
-          <td style="font-weight: 700; color: #0d47a1">Rp 2.120.000</td>
-          <td>
-            <label class="toggle-switch">
-              <input type="checkbox" checked />
-              <span class="toggle-slider"></span>
-              <span class="toggle-label">Aktif</span>
-            </label>
-          </td>
-          <td style="color: var(--text-secondary)">28 Nov 2023</td>
-          <td>
-            <div class="action-buttons" style="justify-content: flex-end">
-              <button class="edit" onclick="openCustomerDetail()">
-                <i class="fa-regular fa-eye"></i>
-              </button>
-              <button class="delete">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
+        <% }) %>
       </tbody>
     </table>
-  </div>
-
-  <div class="pagination">
-    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-    <button class="page-btn active">1</button>
-    <button class="page-btn">2</button>
-    <button class="page-btn">3</button>
-    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
   </div>
 </div>
 
 <script>
-  // Toggle label text
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggles = document.querySelectorAll(".toggle-switch input");
-    toggles.forEach((toggle) => {
-      toggle.addEventListener("change", function () {
-        const span = this.parentElement.querySelector(".toggle-label");
-        if (this.checked) {
-          span.textContent = "Aktif";
-        } else {
-          span.textContent = "Non-Aktif";
-        }
-      });
+  // Update Statistics UI
+  function updateStats() {
+    const total = document.querySelectorAll("#customerTableBody tr").length;
+    const active = document.querySelectorAll("#customerTableBody tr input.status-toggle:checked").length;
+    const inactive = total - active;
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statActive").textContent = active;
+    document.getElementById("statInactive").textContent = inactive;
+  }
+
+  // Search logic
+  const searchInput = document.getElementById("customerSearch");
+  const tableRows = document.querySelectorAll("#customerTableBody tr");
+
+  searchInput.addEventListener("input", (e) => {
+    const term = e.target.value.toLowerCase();
+    tableRows.forEach(row => {
+      const name = row.getAttribute("data-name");
+      if (name.includes(term)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
     });
   });
 
+  // Toggle Status
+  async function toggleCustomerStatus(id, checkbox) {
+    const label = checkbox.parentElement.querySelector(".toggle-label");
+    const isActive = checkbox.checked;
+    
+    try {
+      const res = await fetch(`/api/admin/customers/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive })
+      });
+      const result = await res.json();
+      if (result.status === "success") {
+        label.textContent = isActive ? "Aktif" : "Non-Aktif";
+        updateStats(); // REALTIME UPDATE
+      } else {
+        checkbox.checked = !isActive;
+        alert(result.message || "Gagal update status");
+      }
+    } catch (err) {
+      checkbox.checked = !isActive;
+      alert("Terjadi kesalahan");
+    }
+  }
+
+  // Delete Customer
+  async function deleteCustomer(id) {
+    if (!confirm("Yakin ingin menghapus customer ini?")) return;
+
+    try {
+      const res = await fetch(`/api/admin/customers/${id}`, {
+        method: "DELETE"
+      });
+      if (res.status === 204) {
+        location.reload();
+      } else {
+        const result = await res.json();
+        alert(result.message || "Gagal menghapus customer");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan");
+    }
+  }
+
   // Customer Detail Modal
-  function openCustomerDetail() {
+  async function openCustomerDetail(custJson) {
+    const cust = JSON.parse(custJson);
+    
+    // Fill basic info
+    document.getElementById("detailAvatar").src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cust.name)}&background=0d47a1&color=fff&size=80`;
+    document.getElementById("detailName").textContent = cust.name;
+    document.getElementById("detailId").textContent = `#CST-${cust._id.toString().slice(-4).toUpperCase()}`;
+    document.getElementById("detailEmail").innerHTML = `<i class="fa-regular fa-envelope"></i> ${cust.email}`;
+    document.getElementById("detailPhone").innerHTML = `<i class="fa-solid fa-phone"></i> ${cust.phone}`;
+    document.getElementById("detailJoinDate").innerHTML = `<i class="fa-regular fa-calendar"></i> Joined ${new Date(cust.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+
+    // Fetch and fill orders
+    const orderTableBody = document.getElementById("orderHistoryBody");
+    orderTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center">Memuat riwayat pesanan...</td></tr>';
+    
+    try {
+      const res = await fetch(`/api/admin/customers/${cust._id}/orders`);
+      const result = await res.json();
+      
+      if (result.status === "success") {
+        const orders = result.data.orders;
+        let totalSpent = 0;
+        
+        document.getElementById("detailTotalOrders").textContent = orders.length;
+        
+        if (orders.length === 0) {
+          orderTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center">Belum ada riwayat pesanan.</td></tr>';
+          document.getElementById("detailTotalSpent").textContent = "Rp 0";
+        } else {
+          orderTableBody.innerHTML = "";
+          orders.forEach(order => {
+            totalSpent += order.totalPrice;
+            const services = order.items.map(item => `<span class="badge badge-layanan-gray">${item.serviceType.toUpperCase()}</span>`).join(" ");
+            const statusClass = `badge-${order.status}`;
+            
+            const row = `
+              <tr>
+                <td class="cust-detail-order-id">${order.orderId || '#ORD-UNKNOWN'}</td>
+                <td>${new Date(order.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                <td>${services}</td>
+                <td><span class="badge badge-layanan-blue" style="text-transform: capitalize">${order.status}</span></td>
+                <td>Rp ${order.totalPrice.toLocaleString('id-ID')}</td>
+              </tr>
+            `;
+            orderTableBody.insertAdjacentHTML("beforeend", row);
+          });
+          document.getElementById("detailTotalSpent").textContent = `Rp ${totalSpent.toLocaleString('id-ID')}`;
+        }
+      }
+    } catch (err) {
+      orderTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red">Gagal memuat pesanan.</td></tr>';
+    }
+
     document.getElementById("customerDetailModal").classList.add("active");
   }
+  
   function closeModal(e, id) {
     if (e.target.id === id) {
       document.getElementById(id).classList.remove("active");
@@ -352,88 +339,53 @@
     <!-- Header -->
     <div class="cust-detail-header">
       <img
-        src="https://ui-avatars.com/api/?name=Arini+Sulistiowati&background=0d47a1&color=fff&size=80"
+        id="detailAvatar"
+        src=""
         class="cust-detail-avatar"
         alt="Avatar"
       />
       <div class="cust-detail-info">
         <div class="cust-detail-name-row">
-          <h3>Arini Sulistiowati</h3>
-          <span class="badge badge-layanan-gray">#CST-9021</span>
+          <h3 id="detailName">Customer Name</h3>
+          <span class="badge badge-layanan-gray" id="detailId">ID: #CST-0000</span>
         </div>
         <div class="cust-detail-meta">
-          <span><i class="fa-regular fa-envelope"></i> arini.s@gmail.com</span>
-          <span><i class="fa-solid fa-phone"></i> +62 812-3456-7890</span>
-          <span><i class="fa-regular fa-calendar"></i> Joined 12 Oct 2022</span>
+          <span id="detailEmail"></span>
+          <span id="detailPhone"></span>
+          <span id="detailJoinDate"></span>
         </div>
       </div>
     </div>
 
     <!-- Stats -->
-    <div class="cust-detail-stats">
+    <div class="cust-detail-stats" style="margin-top: 24px">
       <div class="cust-detail-stat">
         <span class="cust-detail-stat-label">TOTAL PESANAN</span>
-        <span class="cust-detail-stat-value">14</span>
+        <span class="cust-detail-stat-value" id="detailTotalOrders">0</span>
       </div>
       <div class="cust-detail-stat">
         <span class="cust-detail-stat-label">TOTAL PENGELUARAN</span>
-        <span class="cust-detail-stat-value">Rp 4.250.000</span>
-      </div>
-      <div class="cust-detail-stat">
-        <span class="cust-detail-stat-label">RATA-RATA PENGELUARAN</span>
-        <span class="cust-detail-stat-value">Rp 303.571</span>
+        <span class="cust-detail-stat-value" id="detailTotalSpent">Rp 0</span>
       </div>
     </div>
 
     <!-- Order History -->
-    <h4 class="cust-detail-section-title">Riwayat Pesanan</h4>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ORDER ID</th>
-          <th>TANGGAL PESANAN</th>
-          <th>JENIS LAYANAN</th>
-          <th>STATUS</th>
-          <th>NOMINAL</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="cust-detail-order-id">#ORD-5521</td>
-          <td>24 May 2023</td>
-          <td><span class="badge badge-layanan-orange">REPAINT</span></td>
-          <td><span class="badge badge-processing">Diantar</span></td>
-          <td>Rp 450.000</td>
-        </tr>
-        <tr>
-          <td class="cust-detail-order-id">#ORD-5488</td>
-          <td>18 May 2023</td>
-          <td><span class="badge badge-layanan-gray">DEEP CLEAN</span></td>
-          <td><span class="badge badge-completed">Selesai</span></td>
-          <td>Rp 120.000</td>
-        </tr>
-        <tr>
-          <td class="cust-detail-order-id">#ORD-5310</td>
-          <td>02 May 2023</td>
-          <td>
-            <span class="badge badge-layanan-blue">UNYELLOWING</span>
-            <span class="badge badge-layanan-gray">HEEL REPAIR</span>
-          </td>
-          <td><span class="badge badge-completed">Selesai</span></td>
-          <td>Rp 850.000</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="pagination">
-      <button class="page-btn active">1</button>
-      <button class="page-btn">2</button>
-      <button class="page-btn">3</button>
-      <button class="page-btn">...</button>
-      <button class="page-btn">5</button>
-      <button class="page-btn">
-        <i class="fa-solid fa-chevron-right"></i>
-      </button>
+    <h4 class="cust-detail-section-title" style="margin-top: 20px; margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--navy-dark); text-transform: uppercase; letter-spacing: 0.5px;">Riwayat Pesanan</h4>
+    <div class="admin-table-wrapper" style="overflow-y: auto; max-height: 240px; margin-bottom: 20px; border: 1px solid #f1f5f9; border-radius: 8px;">
+      <table class="admin-table">
+        <thead style="position: sticky; top: 0; z-index: 10; background: #fff;">
+          <tr>
+            <th>ORDER ID</th>
+            <th>TANGGAL</th>
+            <th>LAYANAN</th>
+            <th>STATUS</th>
+            <th>NOMINAL</th>
+          </tr>
+        </thead>
+        <tbody id="orderHistoryBody">
+          <!-- Will be filled by JS -->
+        </tbody>
+      </table>
     </div>
 
     <div class="cust-detail-footer">
