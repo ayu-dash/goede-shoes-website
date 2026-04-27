@@ -46,6 +46,37 @@ router.get(
   restrictTo("staff", "admin"),
   viewController.renderStaffDashboard,
 );
+router.get(
+  "/staff/profile",
+  protect,
+  restrictTo("staff", "admin"),
+  viewController.renderStaffProfile,
+);
+
+router.get(
+  "/staff/operations",
+  protect,
+  restrictTo("staff", "admin"),
+  viewController.renderStaffOperations,
+);
+router.get(
+  "/staff/history",
+  protect,
+  restrictTo("staff", "admin"),
+  viewController.renderStaffHistory,
+);
+router.get(
+  "/staff/washing",
+  protect,
+  restrictTo("staff", "admin"),
+  viewController.renderStaffWashing,
+);
+router.get(
+  "/staff/order/:id",
+  protect,
+  restrictTo("staff", "admin"),
+  viewController.renderStaffOrderDetail,
+);
 
 router.get(
   "/admin/dashboard",

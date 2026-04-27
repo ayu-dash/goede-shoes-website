@@ -10,4 +10,17 @@ router.use(authMiddleware.protect);
 router.post("/", orderController.createOrder);
 router.get("/my-orders", orderController.getMyOrders);
 
+// Staff & Admin Routes
+router.patch(
+    "/:id/update-status",
+    authMiddleware.restrictTo("staff", "admin"),
+    orderController.upload.array("photos", 5),
+    orderController.updateOrderStatus
+);
+router.patch(
+    "/:id/confirm-payment",
+    authMiddleware.restrictTo("staff", "admin"),
+    orderController.confirmPayment
+);
+
 module.exports = router;

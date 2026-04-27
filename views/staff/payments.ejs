@@ -1,0 +1,135 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-panel">
+  <div class="admin-panel-header">
+    <h3 class="admin-panel-title">Validasi Pembayaran</h3>
+    <p class="admin-panel-subtitle">DAFTAR PESANAN MENUNGGU PEMBAYARAN</p>
+  </div>
+  
+  <div class="admin-table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER</th>
+          <th>METHOD</th>
+          <th>TOTAL BILL</th>
+          <th>ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td style="font-weight: 700; color: var(--navy);"><%= order.orderId %></td>
+              <td>
+                <span class="table-client-name"><%= order.user ? order.user.name : 'Unknown' %></span>
+                <span class="table-client-sub">
+                  <%= order.items[0]?.shoeName || 'Shoe' %>
+                  <%= order.items.length > 1 ? `(+${order.items.length - 1} lainnya)` : '' %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-layanan-gray">
+                  <i class="fa-solid <%= order.payment.method === 'cod' ? 'fa-hand-holding-dollar' : 'fa-building-columns' %>"></i>
+                  <%= order.payment.method.toUpperCase() %>
+                </span>
+              </td>
+              <td style="font-weight: 600;">Rp <%= order.totalPrice.toLocaleString('id-ID') %></td>
+              <td>
+                <button class="btn btn-primary btn-sm btn-confirm-payment" data-id="<%= order._id %>" data-orderid="<%= order.orderId %>">
+                  Konfirmasi Lunas
+                </button>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+              <i class="fa-solid fa-circle-check" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: var(--green);"></i>
+              Semua pembayaran telah divalidasi.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Detail Pembayaran (Simulation of Step: "Menampilkan detail tagihan pesanan") -->
+<div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Konfirmasi Pembayaran</h3>
+      <span class="close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p>Apakah Anda yakin telah menerima pembayaran untuk pesanan <strong id="modalOrderId"></strong>?</p>
+      <div class="payment-detail-box" style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span>Total Tagihan:</span>
+          <span id="modalTotal" style="font-weight: 700; color: var(--navy);"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Metode:</span>
+          <span id="modalMethod" style="text-transform: uppercase; font-weight: 600;"></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline close-modal">Batal</button>
+      <button id="btnFinalConfirm" class="btn btn-primary">Konfirmasi Lunas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('paymentModal');
+  const btns = document.querySelectorAll('.btn-confirm-payment');
+  const closeBtn = document.querySelector('.close');
+  const closeBtnAlt = document.querySelector('.close-modal');
+  let selectedId = null;
+
+  btns.forEach(btn => {
+    btn.onclick = function() {
+      selectedId = this.dataset.id;
+      document.getElementById('modalOrderId').innerText = this.dataset.orderid;
+      document.getElementById('modalTotal').innerText = this.closest('tr').cells[3].innerText;
+      document.getElementById('modalMethod').innerText = this.closest('tr').cells[2].innerText.trim();
+      modal.style.display = "block";
+    }
+  });
+
+  closeBtn.onclick = () => modal.style.display = "none";
+  closeBtnAlt.onclick = () => modal.style.display = "none";
+  window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; }
+
+  document.getElementById('btnFinalConfirm').onclick = async function() {
+    try {
+      this.disabled = true;
+      this.innerText = 'Memproses...';
+      
+      const response = await fetch(`/api/orders/${selectedId}/confirm-payment`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        alert('Gagal mengonfirmasi pembayaran.');
+        this.disabled = false;
+        this.innerText = 'Konfirmasi Lunas';
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi kesalahan.');
+      this.disabled = false;
+      this.innerText = 'Konfirmasi Lunas';
+    }
+  }
+});
+</script>
+
+<%- include('../partials/dashboard-foot') %>

@@ -1,0 +1,40 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-panel">
+  <div class="admin-panel-header">
+    <h3 class="admin-panel-title">Profil Staff</h3>
+  </div>
+  
+  <div class="profile-container" style="display: flex; gap: 30px; padding: 20px;">
+    <div class="profile-sidebar" style="text-align: center;">
+      <div class="profile-avatar" style="width: 120px; height: 120px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <i class="fa-solid fa-user" style="font-size: 3rem; color: var(--navy);"></i>
+      </div>
+      <h3 style="margin-bottom: 5px;"><%= user.name %></h3>
+      <span class="badge badge-processing" style="text-transform: uppercase;"><%= user.role %></span>
+    </div>
+    
+    <div class="profile-info" style="flex: 1;">
+      <div class="admin-panel" style="background: var(--bg-secondary); border: none;">
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">EMAIL ADDRESS</label>
+          <div style="font-weight: 600;"><%= user.email %></div>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">PHONE NUMBER</label>
+          <div style="font-weight: 600;"><%= user.phone || '-' %></div>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">MEMBER SINCE</label>
+          <div style="font-weight: 600;"><%= new Date(user.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %></div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px;">
+        <button class="btn btn-primary" onclick="alert('Fitur edit profil segera hadir!')">Edit Profil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/dashboard-foot') %>

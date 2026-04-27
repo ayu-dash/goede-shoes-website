@@ -154,16 +154,22 @@
                 <option value="">-- Pilih Alamat Profil --</option>
                 <% if (user.addresses && user.addresses.length> 0) { %>
                   <% user.addresses.forEach(addr=> { %>
-                    <option value="<%= addr.fullAddress %><%= addr.notes ? ' (' + addr.notes + ')' : '' %>">
+                    <option value="<%= addr.fullAddress %><%= addr.notes ? ' (' + addr.notes + ')' : '' %>" data-phone="<%= addr.phone || user.phone %>">
                       <%= addr.label.toUpperCase() %> - <%= addr.recipientName %>
                     </option>
                     <% }) %>
-                      <% } %>
+                <% } %>
+                <option value="manual">-- Input Alamat Manual --</option>
               </select>
+              <div id="pickup-address-manual-container" class="d-none">
+                <textarea class="form-input" id="pickup-address-manual" placeholder="Masukkan alamat lengkap penjemputan..." rows="2"></textarea>
+              </div>
             </div>
             <div class="logistics-detail d-none" id="pickup-self-info">
               <p class="logistics-info-note">
-                <i class="fa-solid fa-store"></i> Silakan antar sepatu Anda ke gerai kami <br>
+                <i class="fa-solid fa-store"></i> Silakan antar sepatu Anda ke gerai kami:<br>
+                <strong><%= settings.storeInfo.name %></strong><br>
+                <span style="font-size: 11px; opacity: 0.8;"><%= settings.storeInfo.address %></span>
               </p>
             </div>
           </div>
@@ -193,16 +199,22 @@
                 <option value="">-- Pilih Alamat Profil --</option>
                 <% if (user.addresses && user.addresses.length> 0) { %>
                   <% user.addresses.forEach(addr=> { %>
-                    <option value="<%= addr.fullAddress %><%= addr.notes ? ' (' + addr.notes + ')' : '' %>">
+                    <option value="<%= addr.fullAddress %><%= addr.notes ? ' (' + addr.notes + ')' : '' %>" data-phone="<%= addr.phone || user.phone %>">
                       <%= addr.label.toUpperCase() %> - <%= addr.recipientName %>
                     </option>
                     <% }) %>
-                      <% } %>
+                <% } %>
+                <option value="manual">-- Input Alamat Manual --</option>
               </select>
+              <div id="delivery-address-manual-container" class="d-none">
+                <textarea class="form-input" id="delivery-address-manual" placeholder="Masukkan alamat lengkap pengantaran..." rows="2"></textarea>
+              </div>
             </div>
             <div class="logistics-detail d-none" id="delivery-self-info">
               <p class="logistics-info-note">
-                <i class="fa-solid fa-store"></i> Silakan ambil sepatu Anda di gerai kami jika sudah selesai.
+                <i class="fa-solid fa-store"></i> Silakan ambil sepatu Anda di gerai kami:<br>
+                <strong><%= settings.storeInfo.name %></strong><br>
+                <span style="font-size: 11px; opacity: 0.8;"><%= settings.storeInfo.address %></span>
               </p>
             </div>
           </div>

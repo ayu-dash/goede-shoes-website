@@ -94,7 +94,7 @@ exports.renderCustomerOrderDetail = async (req, res) => {
     const order = await Order.findOne({
       _id: req.query.id,
       user: req.user._id,
-    });
+    }).populate("user");
 
     if (!order) {
       return res
@@ -152,7 +152,121 @@ exports.renderCustomerProfile = async (req, res) => {
   }
 };
 
-exports.renderStaffDashboard = (req, res) => res.render("staff/dashboard");
+exports.renderStaffDashboard = async (req, res) => {
+  try {
+    const stats = {
+      pendingPayment: await Order.countDocuments({ "payment.status": "pending" }),
+      pendingPickup: await Order.countDocuments({ status: "pickup" }),
+      inProgress: await Order.countDocuments({ status: { $in: ["received", "validating-in", "in-progress", "quality-check"] } }),
+      pendingDelivery: await Order.countDocuments({ status: "delivery" }),
+    };
+
+    const recentActivities = await Order.find()
+      .sort("-updatedAt")
+      .limit(5)
+      .populate("user", "name");
+
+    res.render("staff/dashboard", {
+      activePage: "dashboard",
+      stats,
+      recentActivities,
+    });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat dashboard staff." });
+  }
+};
+
+exports.renderStaffLogistics = async (req, res) => {
+  try {
+    const filter = req.query.filter || "all";
+    let query = { 
+      $or: [
+        { status: "pending", "logistics.pickupMethod": "pickup" },
+        { status: { $in: ["pickup", "quality-check", "delivery"] } }
+      ]
+    };
+    
+    if (filter === "pickup") {
+      query = { 
+        $or: [
+          { status: "pending", "logistics.pickupMethod": "pickup" },
+          { status: "pickup" }
+        ]
+      };
+    }
+    if (filter === "delivery") {
+      query = { status: { $in: ["quality-check", "delivery"] } };
+    }
+
+    const orders = await Order.find(query)
+      .sort("-updatedAt")
+      .populate("user", "name");
+
+    res.render("staff/logistics", { activePage: "logistics", orders, filter });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat data logistik." });
+  }
+};
+
+exports.renderStaffWashing = async (req, res) => {
+  try {
+    const orders = await Order.find({ 
+      $or: [
+        { status: "pending", "logistics.pickupMethod": "self" },
+        { status: { $in: ["received", "validating-in", "in-progress"] } }
+      ]
+    })
+      .sort("-updatedAt")
+      .populate("user", "name");
+    res.render("staff/washing", { activePage: "washing", orders });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat antrian cuci." });
+  }
+};
+exports.renderStaffOperations = async (req, res) => {
+  try {
+    const orders = await Order.find({ 
+      status: { $nin: ["completed", "cancelled"] } 
+    })
+      .sort("-updatedAt")
+      .populate("user", "name");
+    res.render("staff/operations", { activePage: "operations", orders });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat operasional staff." });
+  }
+};
+exports.renderStaffHistory = async (req, res) => {
+  try {
+    const orders = await Order.find({ 
+      status: { $in: ["completed", "cancelled"] } 
+    })
+      .sort("-updatedAt")
+      .populate("user", "name");
+    res.render("staff/history", { activePage: "history", orders });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat riwayat staff." });
+  }
+};
+
+exports.renderStaffOrderDetail = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("user");
+    if (!order) {
+      return res.status(404).render("error", { message: "Pesanan tidak ditemukan." });
+    }
+    res.render("staff/order-detail", { activePage: "washing", order });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat detail pesanan." });
+  }
+};
+
+exports.renderStaffProfile = async (req, res) => {
+  try {
+    res.render("staff/profile", { activePage: "profile" });
+  } catch (err) {
+    res.status(500).render("error", { message: "Gagal memuat profil staff." });
+  }
+};
 exports.renderAdminDashboard = async (req, res) => {
   try {
     const revenueResult = await Order.aggregate([

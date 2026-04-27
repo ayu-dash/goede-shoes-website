@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashboard.css">
-  <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+  <% if (typeof user !== 'undefined' && (user.role === 'admin' || user.role === 'staff')) { %>
   <link rel="stylesheet" href="/css/admin.css">
   <% } %>
 </head>
@@ -48,6 +48,21 @@
       <span>Operasional</span>
     </a>
   </nav>
+  <% } else if (typeof user !== 'undefined' && user.role === 'staff') { %>
+  <nav class="sidebar-nav">
+    <a href="/staff/dashboard" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>">
+      <i class="fa-solid fa-grip"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="/staff/operations" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'operations' ? 'active' : '' %>">
+      <i class="fa-solid fa-list-check"></i>
+      <span>Operasional</span>
+    </a>
+    <a href="/staff/history" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'history' ? 'active' : '' %>">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>Riwayat</span>
+    </a>
+  </nav>
   <% } else { %>
   <nav class="sidebar-nav">
     <a href="/customer/dashboard" class="sidebar-link <%= typeof activePage !== 'undefined' && activePage === 'dashboard' ? 'active' : '' %>" id="nav-dashboard">
@@ -74,7 +89,7 @@
       <button class="topbar-bell" aria-label="Notifications">
         <i class="fa-regular fa-bell"></i>
       </button>
-      <a href="<%= user.role === 'admin' ? '/admin/profile' : '/customer/profile' %>" class="topbar-user">
+      <a href="<%= user.role === 'admin' ? '/admin/profile' : (user.role === 'staff' ? '/staff/profile' : '/customer/profile') %>" class="topbar-user">
         <div class="topbar-user-info">
           <span class="topbar-user-name"><%= user.name %></span>
           <span class="topbar-user-role"><%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></span>

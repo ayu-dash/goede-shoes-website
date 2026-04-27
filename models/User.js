@@ -44,6 +44,9 @@ const userSchema = new mongoose.Schema({
                 type: String,
                 required: [true, "Please provide the full address"],
             },
+            phone: {
+                type: String,
+            },
             notes: {
                 type: String,
             },

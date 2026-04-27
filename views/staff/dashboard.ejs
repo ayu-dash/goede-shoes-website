@@ -1,9 +1,85 @@
-<%- include('../partials/header') %>
-  <section class="dashboard">
-    <div class="container" style="padding: 100px 20px; text-align: center;">
-      <h1>Staff Dashboard</h1>
-      <p>Selamat datang di panel Staff! Kelola pesanan pelanggan di sini.</p>
-      <a href="/" class="btn btn-primary">Kembali ke Beranda</a>
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-stats-grid">
+  <div class="admin-stat-card orange">
+    <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+    <div>
+      <div class="stat-label">PENDING PAYMENT</div>
+      <div class="stat-value"><%= stats.pendingPayment %></div>
     </div>
-  </section>
-  <%- include('../partials/footer') %>
+  </div>
+  <div class="admin-stat-card blue">
+    <div class="stat-icon"><i class="fa-solid fa-truck-pickup"></i></div>
+    <div>
+      <div class="stat-label">PENDING PICKUP</div>
+      <div class="stat-value"><%= stats.pendingPickup %></div>
+    </div>
+  </div>
+  <div class="admin-stat-card navy">
+    <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+    <div>
+      <div class="stat-label">IN PROGRESS</div>
+      <div class="stat-value"><%= stats.inProgress %></div>
+    </div>
+  </div>
+  <div class="admin-stat-card green">
+    <div class="stat-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
+    <div>
+      <div class="stat-label">PENDING DELIVERY</div>
+      <div class="stat-value"><%= stats.pendingDelivery %></div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-grid-layout" style="grid-template-columns: 1fr;">
+  <div class="admin-panel" style="overflow-x: auto;">
+    <div class="admin-panel-header">
+      <h3 class="admin-panel-title">Aktivitas Terakhir</h3>
+    </div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER</th>
+          <th>STATUS</th>
+          <th>TERAKHIR UPDATE</th>
+          <th>AKSI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (recentActivities && recentActivities.length > 0) { %>
+          <% recentActivities.forEach(order => { %>
+            <tr>
+              <td style="color: var(--text-secondary); font-weight: 600;"><%= order.orderId %></td>
+              <td>
+                <span class="table-client-name"><%= order.user ? order.user.name : "Unknown" %></span>
+                <span class="table-client-sub">
+                  <%= order.items[0]?.shoeName || "-" %>
+                  <%= order.items.length > 1 ? `(+${order.items.length - 1} lainnya)` : "" %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-<%= order.status === 'completed' ? 'completed' : (order.status === 'pending' ? 'pending' : 'processing') %>">
+                  <%= order.status.toUpperCase() %>
+                </span>
+              </td>
+              <td>
+                <% const diff = Math.floor((new Date() - new Date(order.updatedAt)) / 60000); %>
+                <%= diff < 60 ? diff + 'm ago' : (diff < 1440 ? Math.floor(diff/60) + 'h ago' : Math.floor(diff/1440) + 'd ago') %>
+              </td>
+              <td>
+                <a href="/staff/order/<%= order._id %>" class="btn btn-outline btn-sm" style="padding: 4px 10px; font-size: 11px;">Detail</a>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Belum ada aktivitas</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/dashboard-foot') %>

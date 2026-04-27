@@ -1,0 +1,178 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-panel">
+  <div class="admin-panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h3 class="admin-panel-title">Operasional Bengkel</h3>
+      <p class="admin-panel-subtitle">MANAJEMEN ALUR KERJA TERPADU</p>
+    </div>
+    <div class="stats-mini" style="display: flex; gap: 15px;">
+        <div class="stat-mini-item">
+            <span style="font-size: 11px; opacity: 0.7; display: block; text-transform: uppercase;">Total Aktif</span>
+            <span style="font-size: 18px; font-weight: 700; color: var(--navy);"><%= orders.length %></span>
+        </div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 15px; margin-bottom: 20px; padding-top: 15px;">
+    <div style="flex: 1; position: relative;">
+      <i class="fa-solid fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary);"></i>
+      <input type="text" id="searchInput" class="form-control" placeholder="Cari Order ID atau Nama Pelanggan..." style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px 10px 40px; background: #f8fafc;">
+    </div>
+    <div style="width: 250px;">
+      <select id="statusFilter" class="form-control" style="width: 100%; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px; background: #f8fafc; font-weight: 600; color: var(--navy);">
+        <option value="all">Semua Status</option>
+        <option value="pending">Submit (Menunggu)</option>
+        <option value="payment">Pembayaran</option>
+        <option value="pickup">Penjemputan</option>
+        <option value="received">Diterima (Siap Dicuci)</option>
+        <option value="validating-in">Cek Kondisi</option>
+        <option value="in-progress">Sedang Dicuci</option>
+        <option value="quality-check">Cek Hasil (QC)</option>
+        <option value="delivery">Pengantaran</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER</th>
+          <th>LAYANAN</th>
+          <th>METODE</th>
+          <th>STATUS OPERASIONAL</th>
+          <th>TENGGAT</th>
+          <th>AKSI TERSEDIA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr class="order-row" data-status="<%= order.status %>">
+              <td style="font-weight: 700; color: var(--navy);"><%= order.orderId %></td>
+              <td>
+                <span class="table-client-name"><%= order.user ? order.user.name : 'Unknown' %></span>
+                <span class="table-client-sub" style="display: block; font-size: 11px;">
+                    <%= order.items[0]?.shoeName %> <%= order.items.length > 1 ? `(+${order.items.length-1})` : '' %>
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-layanan-blue" style="font-size: 10px;">
+                    <%= order.items[0]?.serviceType %>
+                </span>
+              </td>
+              <td>
+                <div style="font-size: 11px; color: var(--text-secondary);">
+                    <i class="fa-solid fa-truck-pickup"></i> <%= order.logistics.pickupMethod.toUpperCase() %><br>
+                    <i class="fa-solid fa-truck-fast"></i> <%= order.logistics.deliveryMethod.toUpperCase() %>
+                </div>
+              </td>
+              <td>
+                <% if (order.status === 'pending') { %>
+                  <% if (order.logistics.pickupMethod === 'pickup') { %>
+                    <span class="badge" style="background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5;">Siap Dijemput</span>
+                  <% } else { %>
+                    <span class="badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">Menunggu Drop-off</span>
+                  <% } %>
+                <% } else if (order.status === 'payment') { %>
+                    <span class="badge" style="background: #fdf4ff; color: #86198f; border: 1px solid #fae8ff;">Menunggu Pembayaran</span>
+                <% } else if (order.status === 'pickup') { %>
+                    <span class="badge" style="background: #eff6ff; color: #1e40af; border: 1px solid #dbeafe;">Sedang Dijemput</span>
+                <% } else if (order.status === 'received') { %>
+                    <span class="badge badge-pending">Siap Dicuci</span>
+                <% } else if (order.status === 'validating-in') { %>
+                    <span class="badge badge-processing">Cek Kondisi</span>
+                <% } else if (order.status === 'in-progress') { %>
+                    <span class="badge badge-processing">Sedang Dicuci</span>
+                <% } else if (order.status === 'quality-check') { %>
+                    <span class="badge" style="background: #fefce8; color: #854d0e; border: 1px solid #fef08a;">Cek Hasil / QC</span>
+                <% } else if (order.status === 'delivery') { %>
+                    <span class="badge" style="background: #f0fdf4; color: #166534; border: 1px solid #dcfce7;">Sedang Diantar</span>
+                <% } else { %>
+                    <span class="badge badge-layanan-gray"><%= order.status.toUpperCase() %></span>
+                <% } %>
+              </td>
+              <td>
+                <% 
+                  const deadline = new Date(order.createdAt);
+                  deadline.setDate(deadline.getDate() + 3);
+                  const isOverdue = new Date() > deadline;
+                %>
+                <span style="font-size: 11px; font-weight: 600; color: <%= isOverdue ? '#e11d48' : 'inherit' %>">
+                    <%= deadline.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) %>
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                    <a href="/staff/order/<%= order._id %>" class="btn btn-primary btn-sm" style="padding: 6px 14px; font-size: 11px;">
+                        Lihat Detail
+                    </a>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr id="emptyRow">
+            <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+              Tidak ada aktivitas operasional saat ini.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableRows = document.querySelectorAll('.order-row');
+    const tbody = document.querySelector('.admin-table tbody');
+
+    function filterTable() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const statusTerm = statusFilter.value;
+      let visibleCount = 0;
+
+      tableRows.forEach(row => {
+        const orderId = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+        const customerName = row.querySelector('.table-client-name').textContent.toLowerCase();
+        const rowStatus = row.getAttribute('data-status');
+
+        const matchesSearch = orderId.includes(searchTerm) || customerName.includes(searchTerm);
+        const matchesStatus = statusTerm === 'all' || rowStatus === statusTerm;
+
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Handle "Not found" message
+      let noResultRow = document.getElementById('noResultRow');
+      if (visibleCount === 0 && tableRows.length > 0) {
+        if (!noResultRow) {
+          noResultRow = document.createElement('tr');
+          noResultRow.id = 'noResultRow';
+          noResultRow.innerHTML = '<td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-secondary);">Tidak ada data yang sesuai dengan pencarian.</td>';
+          tbody.appendChild(noResultRow);
+        }
+        noResultRow.style.display = '';
+      } else if (noResultRow) {
+        noResultRow.style.display = 'none';
+      }
+    }
+
+    if (searchInput && statusFilter) {
+      searchInput.addEventListener('input', filterTable);
+      statusFilter.addEventListener('change', filterTable);
+    }
+  });
+</script>
+
+<%- include('../partials/dashboard-foot') %>

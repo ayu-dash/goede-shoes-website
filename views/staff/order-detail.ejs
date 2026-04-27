@@ -1,0 +1,514 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-panel">
+  <div class="admin-panel-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+      <h3 class="admin-panel-title">Detail Pesanan <%= order.orderId %></h3>
+      <p class="admin-panel-subtitle">Informasi lengkap pesanan pelanggan</p>
+    </div>
+    <a href="/staff/washing" class="btn btn-outline btn-sm">
+      <i class="fa-solid fa-arrow-left"></i> Kembali ke Antrian
+    </a>
+  </div>
+
+  <!-- Timeline Progress Tracker -->
+  <div class="admin-panel" style="margin-bottom: 20px; padding: 25px;">
+    <div style="display: flex; justify-content: space-between; position: relative; margin-bottom: 30px;">
+      <% 
+        const steps = [];
+        steps.push({ key: 'pending', label: 'Submit', icon: 'fa-file-invoice' });
+
+        if (order.logistics.pickupMethod === 'pickup') {
+          steps.push({ key: 'pickup', label: 'Dijemput', icon: 'fa-truck-pickup' });
+        }
+        
+        steps.push({ key: 'received', label: 'Diterima', icon: 'fa-box-open' });
+        steps.push({ key: 'validating-in', label: 'Cek Kondisi', icon: 'fa-clipboard-check' });
+        steps.push({ key: 'in-progress', label: 'Cuci', icon: 'fa-soap' });
+        steps.push({ key: 'quality-check', label: 'Cek Hasil', icon: 'fa-magnifying-glass' });
+        
+        if (!order.logistics || !order.logistics.deliveryMethod || order.logistics.deliveryMethod.toLowerCase() !== 'self') {
+          steps.push({ key: 'delivery', label: 'Diantar', icon: 'fa-truck-fast' });
+        }
+        
+        steps.push({ key: 'completed', label: 'Selesai', icon: 'fa-check-double' });
+        
+        let effectiveStatus = order.status;
+        if (effectiveStatus === 'payment') effectiveStatus = 'pending';
+        const currentIdx = steps.findIndex(s => s.key === effectiveStatus);
+      %>
+      
+      <!-- Progress Line Background -->
+      <div style="position: absolute; top: 19px; left: 5%; right: 5%; height: 4px; background: #e2e8f0; z-index: 1;"></div>
+      <!-- Active Progress Line -->
+      <div style="position: absolute; top: 19px; left: 5%; width: <%= (currentIdx / (steps.length - 1)) * 90 %>%; height: 4px; background: var(--navy); z-index: 1; transition: width 0.5s ease;"></div>
+
+      <% steps.forEach((step, index) => { %>
+        <div style="text-align: center; z-index: 2; width: <%= 100 / steps.length %>%;">
+          <div style="
+            width: 38px; 
+            height: 38px; 
+            border-radius: 50%; 
+            background: <%= index <= currentIdx ? 'var(--navy)' : '#fff' %>; 
+            border: 2px solid <%= index <= currentIdx ? 'var(--navy)' : '#e2e8f0' %>;
+            color: <%= index <= currentIdx ? '#fff' : '#94a3b8' %>;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0 auto 10px auto;
+            transition: all 0.3s ease;
+            box-shadow: <%= index === currentIdx ? '0 0 0 4px rgba(30, 41, 59, 0.1)' : 'none' %>;
+          ">
+            <i class="fa-solid <%= step.icon %>" style="font-size: 16px;"></i>
+          </div>
+          <p style="
+            font-size: 11px; 
+            font-weight: <%= index === currentIdx ? '800' : '600' %>; 
+            color: <%= index <= currentIdx ? 'var(--navy)' : '#94a3b8' %>;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          ">
+            <%= step.label %>
+          </p>
+        </div>
+      <% }) %>
+    </div>
+
+    <!-- Dedicated Action Section -->
+    <div id="actionContainer" style="
+      margin-top: 40px; 
+      padding: 30px; 
+      background: #f8fafc; 
+      border-radius: 16px; 
+      border: 2px solid #e2e8f0; 
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    ">
+      <% if (currentIdx < steps.length - 1) { %>
+        <% const nextStep = steps[currentIdx + 1]; %>
+        <p style="font-size: 14px; font-weight: 700; color: var(--text-secondary); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
+          Aksi Berikutnya: <span style="color: var(--navy); border-bottom: 2px solid var(--navy); font-weight: 800;"><%= nextStep.label.toUpperCase() %></span>
+        </p>
+        
+        <div style="display: flex; justify-content: center; gap: 20px;">
+          <% if (nextStep.key === 'validating-in') { %>
+            <button class="btn btn-primary next-action-btn" data-action="modal" data-status="validating-in" data-title="Dokumentasi Drop-off" data-desc="Unggah foto sepatu saat diterima untuk mencatat kondisi awal." style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-camera" style="margin-right: 10px;"></i> MULAI CEK KONDISI
+            </button>
+          <% } else if (nextStep.key === 'quality-check') { %>
+            <button class="btn btn-primary next-action-btn" data-action="modal" data-status="quality-check" data-title="Cek Hasil Cuci" data-desc="Unggah foto sepatu yang sudah selesai dicuci sebagai bukti kualitas (QC)." style="padding: 14px 40px; font-weight: 800; background: #f59e0b; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-camera" style="margin-right: 10px;"></i> SELESAI CUCI & CEK HASIL
+            </button>
+          <% } else if (nextStep.key === 'delivery') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="delivery" style="padding: 14px 40px; font-weight: 800; background: #10b981; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-truck-fast" style="margin-right: 10px;"></i> KIRIM SEPATU KE PELANGGAN
+            </button>
+          <% } else if (nextStep.key === 'completed') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="completed" style="padding: 14px 40px; font-weight: 800; background: #10b981; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-check-double" style="margin-right: 10px;"></i> SELESAIKAN PESANAN
+            </button>
+          <% } else if (nextStep.key === 'received') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="received" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-box-open" style="margin-right: 10px;"></i> KONFIRMASI TERIMA SEPATU
+            </button>
+          <% } else if (nextStep.key === 'pickup') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="pickup" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-truck-pickup" style="margin-right: 10px;"></i> KONFIRMASI PENJEMPUTAN
+            </button>
+          <% } else if (nextStep.key === 'in-progress') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="in-progress" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-soap" style="margin-right: 10px;"></i> MULAI PROSES CUCI
+            </button>
+          <% } %>
+        </div>
+      <% } else { %>
+        <div style="color: #10b981; font-weight: 800; font-size: 18px;">
+          <i class="fa-solid fa-circle-check" style="margin-right: 10px;"></i> PESANAN INI TELAH SELESAI
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="admin-grid-layout" style="grid-template-columns: 2fr 1fr; gap: 20px;">
+    <!-- Bagian Kiri: Detail Items & Customer -->
+    <div>
+      <div class="admin-panel" style="background: #f8fafc; border: 1px solid var(--border-color); margin-bottom: 20px;">
+        <h4 style="margin-bottom: 15px; color: var(--navy);">Data Pelanggan</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 2px;">NAMA LENGKAP</p>
+            <p style="font-weight: 600;"><%= order.user ? order.user.name : 'Unknown' %></p>
+          </div>
+          <div>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 2px;">EMAIL</p>
+            <p style="font-weight: 600;"><%= order.user ? order.user.email : '-' %></p>
+          </div>
+          <div>
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 2px;">NOMOR TELEPON</p>
+            <% 
+              let displayPhone = order.logistics.pickupPhone || order.logistics.deliveryPhone || (order.user ? order.user.phone : '');
+              let waPhone = displayPhone.replace(/\D/g, '');
+              if (waPhone.startsWith('0')) waPhone = '62' + waPhone.substring(1);
+            %>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <p style="font-weight: 600; margin: 0;" id="customer-phone"><%= displayPhone || '-' %></p>
+              <% if (displayPhone) { %>
+                <button onclick="copyPhone('<%= displayPhone %>')" class="btn-icon-sm" title="Salin Nomor" style="background: none; border: none; color: var(--navy); cursor: pointer; padding: 0;">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+                <a href="https://wa.me/<%= waPhone %>" target="_blank" class="btn-icon-sm" title="Chat WhatsApp" style="color: #25D366; font-size: 16px;">
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+              <% } %>
+            </div>
+          </div>
+          <div style="grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 5px;">
+            <div>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; text-transform: uppercase;">Alamat Penjemputan</p>
+              <% const fbPickup = (order.user && order.user.addresses && order.user.addresses.length > 0) ? order.user.addresses[0].fullAddress : 'BELUM DITENTUKAN'; %>
+              <p style="font-weight: 600; font-size: 13px;"><%= order.logistics.pickupMethod === 'pickup' ? (order.logistics.pickupAddress || fbPickup) : settings.storeInfo.address + ' (Pelanggan Antar)' %></p>
+            </div>
+            <div>
+              <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; text-transform: uppercase;">Alamat Pengantaran</p>
+              <% const fbDelivery = (order.user && order.user.addresses && order.user.addresses.length > 0) ? order.user.addresses[0].fullAddress : 'BELUM DITENTUKAN'; %>
+              <p style="font-weight: 600; font-size: 13px;"><%= order.logistics.deliveryMethod === 'delivery' ? (order.logistics.deliveryAddress || fbDelivery) : settings.storeInfo.address + ' (Pelanggan Ambil)' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-panel" style="border: 1px solid var(--border-color);">
+        <h4 style="margin-bottom: 15px; color: var(--navy);">Daftar Item</h4>
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>SEPATU</th>
+              <th>LAYANAN</th>
+              <th>ADD-ONS</th>
+              <th style="text-align: right;">HARGA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.items.forEach(item => { %>
+              <tr>
+                <td style="font-weight: 600;"><%= item.shoeName %></td>
+                <td><span class="badge badge-layanan-blue"><%= item.serviceType %></span></td>
+                <td><%= item.addons && item.addons.length > 0 ? item.addons.join(', ') : '-' %></td>
+                <td style="text-align: right; font-weight: 600;">Rp <%= item.price.toLocaleString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="text-align: right; font-weight: 700; padding: 15px;">TOTAL BAYAR</td>
+              <td style="text-align: right; font-weight: 700; color: var(--navy); font-size: 1.1rem; padding: 15px;">
+                Rp <%= order.totalPrice.toLocaleString() %>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="admin-panel" style="margin-top: 20px; border: 1px solid var(--border-color);">
+        <h4 style="margin-bottom: 15px; color: var(--navy);">Riwayat Status</h4>
+        <div class="status-history">
+          <% order.statusHistory.sort((a,b) => b.updatedAt - a.updatedAt).forEach(history => { %>
+            <div style="display: flex; gap: 15px; margin-bottom: 15px; position: relative; padding-left: 10px;">
+              <div style="min-width: 80px; font-size: 11px; color: var(--text-secondary); text-align: right; padding-top: 2px;">
+                <%= new Date(history.updatedAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) %><br>
+                <%= new Date(history.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %>
+              </div>
+              <div style="width: 10px; position: relative;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--navy); z-index: 2; position: relative;"></div>
+                <div style="position: absolute; top: 10px; bottom: -15px; left: 4.5px; width: 1px; background: #e2e8f0; z-index: 1;"></div>
+              </div>
+              <div>
+                <p style="font-weight: 600; font-size: 13px; margin-bottom: 2px; text-transform: uppercase;"><%= history.status %></p>
+                <% if (history.note) { %>
+                  <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;"><%= history.note %></p>
+                <% } %>
+                <% if (history.photos && history.photos.length > 0) { %>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                    <% history.photos.forEach(photo => { %>
+                      <img src="<%= photo %>" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color); cursor: pointer;" onclick="window.open(this.src)">
+                    <% }) %>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bagian Kanan: Status & Pembayaran -->
+    <div>
+      <div class="admin-panel" style="border: 1px solid var(--border-color); background: #fff;">
+        <h4 style="margin-bottom: 15px; color: var(--navy);">Status & Pembayaran</h4>
+        
+        <div style="margin-bottom: 20px; padding: 15px; background: #f1f5f9; border-radius: 8px;">
+          <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">METODE BAYAR</p>
+          <span class="badge badge-layanan-gray" style="text-transform: uppercase; font-size: 14px;">
+            <%= order.payment.method %>
+          </span>
+          
+          <p style="font-size: 12px; color: var(--text-secondary); margin: 15px 0 5px 0;">STATUS PEMBAYARAN</p>
+          <span class="badge" style="font-size: 14px; background: <%= order.payment.status === 'paid' ? '#dcfce7' : '#fee2e2' %>; color: <%= order.payment.status === 'paid' ? '#166534' : '#991b1b' %>;">
+            <%= order.payment.status.toUpperCase() %>
+          </span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">STATUS PENGERJAAN</p>
+          <span class="badge badge-<%= order.status === 'completed' ? 'completed' : (order.status === 'pending' || order.status === 'pickup' ? 'pending' : 'processing') %>" style="font-size: 14px; padding: 8px 15px;">
+            <%= order.status.toUpperCase() %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generalized Modal for Photo Documentation -->
+<div id="conditionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="admin-panel" style="width: 90%; max-width: 500px; padding: 30px; position: relative; border-radius: 16px;">
+    <button id="closeConditionModalBtn" style="position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; color: var(--text-secondary);">
+      <i class="fa-solid fa-xmark fa-xl"></i>
+    </button>
+    
+    <h4 id="modalTitle" style="margin-bottom: 5px; color: var(--navy);">Dokumentasi Foto</h4>
+    <p id="modalDesc" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Unggah foto untuk tahap ini.</p>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 8px;">UNGGAH FOTO (WAJIB)</label>
+      <div style="border: 2px dashed #e2e8f0; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 10px;">
+        <input type="file" id="photoInput" name="photos" accept="image/*" multiple style="display: none;">
+        <label for="photoInput" style="cursor: pointer;">
+          <i class="fa-solid fa-images fa-2xl" style="color: var(--navy); margin-bottom: 10px; display: block;"></i>
+          <span id="fileName" style="font-size: 12px; color: var(--text-secondary);">Klik untuk pilih beberapa foto</span>
+        </label>
+      </div>
+      <!-- Preview Container -->
+      <div id="photoPreview" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;"></div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 25px;">
+      <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 8px;">CATATAN (OPSIONAL)</label>
+      <textarea id="noteInput" class="form-control" placeholder="Tambahkan catatan jika diperlukan..." style="width: 100%; height: 100px; resize: none; padding: 12px;"></textarea>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button id="modalSubmitBtn" class="btn btn-primary" style="flex: 2; background: var(--navy); border: none; font-weight: 700; padding: 14px; color: white; cursor: pointer; border-radius: 8px;">
+        Konfirmasi & Simpan
+      </button>
+      <button id="cancelConditionModalBtn" class="btn btn-outline" style="flex: 1; border-radius: 8px; cursor: pointer;">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+  <div class="admin-panel" style="width: 90%; max-width: 400px; padding: 35px; text-align: center; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+    <div style="width: 70px; height: 70px; background: #fef3c7; color: #d97706; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+      <i class="fa-solid fa-circle-question fa-3x"></i>
+    </div>
+    <h3 style="color: var(--navy); margin-bottom: 10px; font-weight: 800;">Konfirmasi Tahapan</h3>
+    <p id="confirmModalText" style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.5; font-size: 15px;">Apakah Anda yakin ingin melanjutkan ke tahap berikutnya?</p>
+    
+    <div style="display: flex; gap: 12px;">
+      <button id="confirmYesBtn" class="btn btn-primary" style="flex: 1; background: var(--navy); border: none; font-weight: 700; padding: 14px; color: white; cursor: pointer; border-radius: 10px;">
+        Ya, Lanjutkan
+      </button>
+      <button id="confirmNoBtn" class="btn btn-outline" style="flex: 1; border-radius: 10px; cursor: pointer; font-weight: 600;">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedFiles = [];
+let activeStatus = '';
+let pendingStatusUpdate = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Order Detail Script Initialized');
+
+    // Action Buttons Event Listeners
+    document.querySelectorAll('.next-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            console.log('Action button clicked:', btn.getAttribute('data-status'));
+            const action = btn.getAttribute('data-action');
+            const status = btn.getAttribute('data-status');
+            
+            if (action === 'modal') {
+                const title = btn.getAttribute('data-title');
+                const desc = btn.getAttribute('data-desc');
+                toggleConditionModal(status, title, desc);
+            } else if (action === 'confirm') {
+                showConfirmModal(status);
+            }
+        });
+    });
+
+    // Photo Input Event Listener
+    const photoInput = document.getElementById('photoInput');
+    if (photoInput) {
+        photoInput.addEventListener('change', () => {
+            if (photoInput.files) {
+                const newFiles = Array.from(photoInput.files);
+                selectedFiles = [...selectedFiles, ...newFiles].slice(0, 5);
+                renderPreviews();
+                photoInput.value = ''; 
+            }
+        });
+    }
+
+    // Modal Submit Event Listener
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    if (modalSubmitBtn) {
+        modalSubmitBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) {
+                alert('Harap unggah minimal 1 foto sebagai bukti.');
+                return;
+            }
+            const note = document.getElementById('noteInput').value;
+            await performStatusUpdate(activeStatus, note, selectedFiles);
+        });
+    }
+
+    // Condition Modal Close Buttons
+    ['closeConditionModalBtn', 'cancelConditionModalBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('click', () => toggleConditionModal());
+    });
+
+    // Confirm Modal Listeners
+    const confirmYesBtn = document.getElementById('confirmYesBtn');
+    if (confirmYesBtn) {
+        confirmYesBtn.addEventListener('click', async () => {
+            if (pendingStatusUpdate) {
+                await performStatusUpdate(pendingStatusUpdate);
+                toggleConfirmModal(false);
+            }
+        });
+    }
+
+    const confirmNoBtn = document.getElementById('confirmNoBtn');
+    if (confirmNoBtn) {
+        confirmNoBtn.addEventListener('click', () => toggleConfirmModal(false));
+    }
+});
+
+function toggleConditionModal(status = '', title = '', desc = '') {
+  const modal = document.getElementById('conditionModal');
+  const isOpening = modal.style.display !== 'flex';
+  modal.style.display = isOpening ? 'flex' : 'none';
+  
+  if (isOpening) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent = desc;
+    activeStatus = status;
+    selectedFiles = [];
+    document.getElementById('noteInput').value = '';
+    renderPreviews();
+  }
+}
+
+function showConfirmModal(newStatus) {
+    const statusLabels = {
+        'received': 'DITERIMA',
+        'validating-in': 'CEK KONDISI',
+        'in-progress': 'CUCI',
+        'quality-check': 'CEK HASIL',
+        'delivery': 'DIANTAR',
+        'completed': 'SELESAI',
+        'pickup': 'DIJEMPUT'
+    };
+    const label = statusLabels[newStatus] || newStatus.toUpperCase();
+    document.getElementById('confirmModalText').innerHTML = `Apakah Anda yakin ingin melanjutkan pesanan ini ke tahap <strong style="color: var(--navy);">${label}</strong>?`;
+    pendingStatusUpdate = newStatus;
+    toggleConfirmModal(true);
+}
+
+function toggleConfirmModal(show) {
+    document.getElementById('confirmModal').style.display = show ? 'flex' : 'none';
+}
+
+function renderPreviews() {
+  const preview = document.getElementById('photoPreview');
+  preview.innerHTML = '';
+  document.getElementById('fileName').textContent = selectedFiles.length > 0 
+    ? `${selectedFiles.length} foto dipilih` 
+    : "Klik untuk pilih beberapa foto";
+
+  selectedFiles.forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const div = document.createElement('div');
+      div.style.cssText = 'width: 70px; height: 70px; border-radius: 6px; overflow: hidden; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative;';
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+      const removeBtn = document.createElement('button');
+      removeBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+      removeBtn.style.cssText = 'position: absolute; top: 2px; right: 2px; background: white; border: none; border-radius: 50%; color: #ef4444; cursor: pointer; padding: 0; line-height: 1; font-size: 16px;';
+      removeBtn.onclick = (e) => {
+        e.preventDefault();
+        selectedFiles.splice(index, 1);
+        renderPreviews();
+      };
+      div.appendChild(img);
+      div.appendChild(removeBtn);
+      preview.appendChild(div);
+    }
+    reader.readAsDataURL(file);
+  });
+}
+
+async function performStatusUpdate(status, note = '', files = []) {
+    console.log('Performing status update to:', status);
+    try {
+      const btns = document.querySelectorAll('button');
+      btns.forEach(b => b.disabled = true);
+
+      const formData = new FormData();
+      formData.append('status', status);
+      if (note) formData.append('note', note);
+      files.forEach(file => formData.append('photos', file));
+
+      const response = await fetch(`/api/orders/<%= order._id %>/update-status`, {
+        method: 'PATCH',
+        body: formData
+      });
+
+      if (response.ok) {
+        console.log('Update successful, reloading...');
+        window.location.reload();
+      } else {
+        const err = await response.json();
+        alert('Gagal: ' + (err.message || 'Terjadi kesalahan'));
+        btns.forEach(b => b.disabled = false);
+      }
+    } catch (err) {
+      console.error('Update error:', err);
+      alert('Terjadi kesalahan koneksi.');
+      document.querySelectorAll('button').forEach(b => b.disabled = false);
+    }
+}
+
+function copyPhone(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('i');
+    const originalClass = icon.className;
+    icon.className = 'fa-solid fa-check';
+    btn.style.color = '#10b981';
+    
+    setTimeout(() => {
+      icon.className = originalClass;
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+</script>
+
+<%- include('../partials/dashboard-foot') %>

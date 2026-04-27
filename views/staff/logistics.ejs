@@ -1,0 +1,135 @@
+<%- include('../partials/dashboard-head') %>
+
+<div class="admin-panel">
+  <div class="admin-panel-header">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <h3 class="admin-panel-title">Kelola Logistik</h3>
+        <div class="filter-tabs" style="display: flex; gap: 10px;">
+            <a href="?filter=all" class="badge <%= filter === 'all' ? 'badge-processing' : 'badge-layanan-gray' %>" style="text-decoration: none;">Semua</a>
+            <a href="?filter=pickup" class="badge <%= filter === 'pickup' ? 'badge-processing' : 'badge-layanan-gray' %>" style="text-decoration: none;">Pickup</a>
+            <a href="?filter=delivery" class="badge <%= filter === 'delivery' ? 'badge-processing' : 'badge-layanan-gray' %>" style="text-decoration: none;">Delivery</a>
+        </div>
+    </div>
+    <p class="admin-panel-subtitle">PENJEMPUTAN DAN PENGANTARAN SEPATU</p>
+  </div>
+
+  <div class="admin-table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>ORDER ID</th>
+          <th>CUSTOMER</th>
+          <th>ALAMAT</th>
+          <th>TIPE</th>
+          <th>STATUS</th>
+          <th>AKSI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (orders && orders.length > 0) { %>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td style="font-weight: 700; color: var(--navy);"><%= order.orderId %></td>
+              <td>
+                <span class="table-client-name"><%= order.user ? order.user.name : 'Unknown' %></span>
+                <span class="table-client-sub">
+                  <%= order.items[0]?.shoeName || 'Shoe' %>
+                  <%= order.items.length > 1 ? `(+${order.items.length - 1} lainnya)` : '' %>
+                </span>
+              </td>
+              <td>
+                <span class="table-client-sub" style="max-width: 200px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <%= order.status === 'pickup' ? order.logistics.pickupAddress : order.logistics.deliveryAddress %>
+                </span>
+              </td>
+              <td>
+                <span class="badge <%= order.status === 'pickup' ? 'badge-layanan-blue' : 'badge-layanan-green' %>">
+                  <%= order.status.toUpperCase() %>
+                </span>
+              </td>
+              <td>
+                <% if (order.status === 'pending') { %>
+                  <span class="badge badge-pending">Siap Dijemput</span>
+                <% } else if (order.status === 'pickup') { %>
+                  <span class="badge badge-processing">Sedang Dijemput</span>
+                <% } else if (order.status === 'quality-check') { %>
+                  <span class="badge badge-pending">Siap Diantar</span>
+                <% } else if (order.status === 'delivery') { %>
+                  <span class="badge badge-processing">Sedang Diantar</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (order.status === 'pending' || order.status === 'pickup') { %>
+                  <button class="btn btn-primary btn-sm btn-action" data-id="<%= order._id %>" data-action="start-pickup">
+                    <%= order.status === 'pending' ? 'Mulai Pickup' : 'Update Pickup' %>
+                  </button>
+                <% } else if (order.status === 'quality-check') { %>
+                  <button class="btn btn-primary btn-sm btn-action" data-id="<%= order._id %>" data-action="start-delivery">Mulai Delivery</button>
+                <% } else if (order.status === 'delivery') { %>
+                  <button class="btn btn-success btn-sm btn-action" style="background: var(--green); border: none;" data-id="<%= order._id %>" data-action="complete-delivery">Selesai Antar</button>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } else { %>
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+              Tidak ada antrian logistik saat ini.
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.btn-action').forEach(btn => {
+    btn.onclick = async function() {
+        const id = this.dataset.id;
+        const action = this.dataset.action;
+        
+        const confirmMsg = action === 'start-pickup' 
+            ? 'Konfirmasi mulai penjemputan?' 
+            : 'Konfirmasi mulai pengantaran?';
+            
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            this.disabled = true;
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            const formData = new FormData();
+            // Transition logic
+            let newStatus = '';
+            if (action === 'start-pickup') newStatus = 'pickup';
+            else if (action === 'start-delivery') newStatus = 'delivery';
+            else if (action === 'complete-delivery') newStatus = 'completed';
+
+            formData.append('status', newStatus);
+            formData.append('note', `Staff melakukan: ${action.split('-').join(' ')}`);
+
+            const response = await fetch(`/api/orders/${id}/update-status`, {
+                method: 'PATCH',
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert('Gagal: ' + (err.message || 'Terjadi kesalahan'));
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Terjadi kesalahan koneksi.');
+            this.disabled = false;
+        }
+    }
+});
+</script>
+
+<%- include('../partials/dashboard-foot') %>

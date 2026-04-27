@@ -16,7 +16,7 @@ exports.createOrder = async (req, res) => {
         }
 
         // Fetch dynamic prices from DB
-        const dbServices = await Service.find({ isActive: true });
+        const dbServices = await Service.find();
         const SERVICE_PRICES = {};
         const ADDON_PRICES = {};
         dbServices.forEach(s => {
@@ -70,7 +70,9 @@ exports.createOrder = async (req, res) => {
                 pickupMethod: logistics.pickupMethod,
                 deliveryMethod: logistics.deliveryMethod,
                 pickupAddress: logistics.pickupAddress,
+                pickupPhone: logistics.pickupPhone || req.user.phone,
                 deliveryAddress: logistics.deliveryAddress,
+                deliveryPhone: logistics.deliveryPhone || req.user.phone,
             },
             payment,
             totalPrice,
@@ -109,6 +111,23 @@ exports.getMyOrders = async (req, res) => {
     }
 };
 
+const multer = require("multer");
+const path = require("path");
+
+// Configure multer storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "public/uploads/orders");
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+        cb(null, `order-${req.params.id}-${uniqueSuffix}${ext}`);
+    },
+});
+
+exports.upload = multer({ storage });
+
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { status, note } = req.body;
@@ -121,12 +140,56 @@ exports.updateOrderStatus = async (req, res) => {
             });
         }
 
-        order.status = status;
-        order.statusHistory.push({
+        const historyEntry = {
             status,
             updatedBy: req.user.id,
             updatedAt: Date.now(),
             note,
+            photos: [],
+        };
+
+        if (req.files && req.files.length > 0) {
+            historyEntry.photos = req.files.map(file => `/uploads/orders/${file.filename}`);
+        } else if (req.file) {
+            historyEntry.photos = [`/uploads/orders/${req.file.filename}`];
+        }
+
+        order.status = status;
+        order.statusHistory.push(historyEntry);
+
+        await order.save();
+
+        res.status(200).json({
+            status: "success",
+            data: {
+                order,
+            },
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err.message,
+        });
+    }
+};
+
+exports.confirmPayment = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({
+                status: "fail",
+                message: "Order not found",
+            });
+        }
+
+        order.payment.status = "paid";
+        order.statusHistory.push({
+            status: "paid",
+            updatedBy: req.user.id,
+            updatedAt: Date.now(),
+            note: "Payment confirmed by staff",
         });
 
         await order.save();

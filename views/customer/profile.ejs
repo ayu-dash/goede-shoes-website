@@ -89,7 +89,7 @@
         <span class="address-badge <%= addr.label.toUpperCase() === 'KANTOR' ? 'gray' : '' %>"><%= addr.label.toUpperCase() %></span>
         <h4 class="address-recipient text-truncate"><%= addr.recipientName %></h4>
         <p class="address-detail"><%= addr.fullAddress %></p>
-        <p class="address-phone"><i class="fa-solid fa-phone"></i> <%= user.phone %></p>
+        <p class="address-phone"><i class="fa-solid fa-phone"></i> <%= addr.phone || user.phone %></p>
       </div>
     <% }) %>
   <% } else { %>
@@ -217,6 +217,7 @@
     const label = document.getElementById('addr-label').value;
     const recipientName = document.getElementById('addr-recipient').value;
     const fullAddress = document.getElementById('addr-full').value;
+    const phone = document.getElementById('addr-phone').value;
     const notes = document.getElementById('addr-notes').value;
 
     if (!label || !recipientName || !fullAddress) {
@@ -233,7 +234,7 @@
       const res = await fetch('/api/users/addAddress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label, recipientName, fullAddress, notes })
+        body: JSON.stringify({ label, recipientName, fullAddress, phone, notes })
       });
 
       const data = await res.json();
@@ -256,6 +257,7 @@
     document.getElementById('edit-addr-label').value = addr.label;
     document.getElementById('edit-addr-recipient').value = addr.recipientName;
     document.getElementById('edit-addr-full').value = addr.fullAddress;
+    document.getElementById('edit-addr-phone').value = addr.phone || '';
     document.getElementById('edit-addr-notes').value = addr.notes || '';
     openModal('editAddressModal');
   }
@@ -264,6 +266,7 @@
     const label = document.getElementById('edit-addr-label').value;
     const recipientName = document.getElementById('edit-addr-recipient').value;
     const fullAddress = document.getElementById('edit-addr-full').value;
+    const phone = document.getElementById('edit-addr-phone').value;
     const notes = document.getElementById('edit-addr-notes').value;
 
     if (!label || !recipientName || !fullAddress) {
@@ -280,7 +283,7 @@
       const res = await fetch(`/api/users/updateAddress/${currentEditingAddressId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ label, recipientName, fullAddress, notes })
+        body: JSON.stringify({ label, recipientName, fullAddress, phone, notes })
       });
 
       const data = await res.json();

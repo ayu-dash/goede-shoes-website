@@ -31,10 +31,10 @@ exports.updateMe = async (req, res) => {
 
 exports.addAddress = async (req, res) => {
     try {
-        const { label, recipientName, fullAddress, notes } = req.body;
+        const { label, recipientName, fullAddress, phone, notes } = req.body;
 
         const user = await User.findById(req.user.id);
-        user.addresses.push({ label, recipientName, fullAddress, notes });
+        user.addresses.push({ label, recipientName, fullAddress, phone, notes });
         await user.save({ validateBeforeSave: false });
 
         res.status(200).json({
@@ -54,7 +54,7 @@ exports.addAddress = async (req, res) => {
 exports.updateAddress = async (req, res) => {
     try {
         const { addressId } = req.params;
-        const { label, recipientName, fullAddress, notes } = req.body;
+        const { label, recipientName, fullAddress, phone, notes } = req.body;
 
         const updatedUser = await User.findOneAndUpdate(
             { _id: req.user.id, "addresses._id": addressId },
@@ -63,6 +63,7 @@ exports.updateAddress = async (req, res) => {
                     "addresses.$.label": label,
                     "addresses.$.recipientName": recipientName,
                     "addresses.$.fullAddress": fullAddress,
+                    "addresses.$.phone": phone,
                     "addresses.$.notes": notes,
                 },
             },

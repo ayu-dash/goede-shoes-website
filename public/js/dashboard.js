@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return { min: meta.timeMin * multiplier, max: meta.timeMax * multiplier };
     };
 
-    document.querySelectorAll(".shoe-item").forEach((item) => {
+    document.querySelectorAll(".order-section .shoe-item").forEach((item) => {
       const rawShoeName = item.querySelector(".shoe-name").value.trim();
       const serviceType = item.querySelector(".service-type").value;
       const shoeLabel = item.querySelector(".shoe-item-label") ? item.querySelector(".shoe-item-label").innerText : "Item";
@@ -213,15 +213,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (pickupSelector) {
     pickupSelector.addEventListener("change", (e) => {
+      const manualContainer = document.getElementById("pickup-address-manual-container");
+      if (e.target.value === "manual") {
+        manualContainer.classList.remove("d-none");
+      } else {
+        manualContainer.classList.add("d-none");
+      }
+
       // If sync is enabled, mirror to delivery
       if (syncCheckbox && syncCheckbox.checked) {
         deliverySelector.value = e.target.value;
+        deliverySelector.dispatchEvent(new Event('change'));
       }
     });
   }
 
   if (deliverySelector) {
     deliverySelector.addEventListener("change", (e) => {
+      const manualContainer = document.getElementById("delivery-address-manual-container");
+      if (e.target.value === "manual") {
+        manualContainer.classList.remove("d-none");
+      } else {
+        manualContainer.classList.add("d-none");
+      }
+
       // If manually changing delivery, uncheck sync if it was checked but value differs
       if (syncCheckbox && syncCheckbox.checked && e.target.value !== pickupSelector.value) {
         syncCheckbox.checked = false;
@@ -357,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const shoeItems = [];
       let hasError = false;
 
-      document.querySelectorAll(".shoe-item").forEach((item) => {
+      document.querySelectorAll(".order-section .shoe-item").forEach((item) => {
         const shoeName = item.querySelector(".shoe-name").value;
         const serviceType = item.querySelector(".service-type").value;
         const addons = [];
@@ -389,17 +404,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const pickupSelector = document.getElementById("pickup-address-selector");
       const deliverySelector = document.getElementById("delivery-address-selector");
+      const pickupManualInput = document.getElementById("pickup-address-manual");
+      const deliveryManualInput = document.getElementById("delivery-address-manual");
 
-      const pickupAddress = (pickupMethod === "pickup" && pickupSelector) ? pickupSelector.value : "";
-      const deliveryAddress = (deliveryMethod === "delivery" && deliverySelector) ? deliverySelector.value : "";
+      let pickupAddress = "";
+      let pickupPhone = "";
+      if (pickupMethod === "pickup" && pickupSelector) {
+        if (pickupSelector.value === "manual") {
+          pickupAddress = pickupManualInput.value.trim();
+          pickupPhone = ""; // Manual address might not have phone input yet, fallback to user phone in controller if needed
+        } else {
+          pickupAddress = pickupSelector.value;
+          const selectedOption = pickupSelector.options[pickupSelector.selectedIndex];
+          pickupPhone = selectedOption.getAttribute('data-phone') || "";
+        }
+      }
 
-      if (pickupMethod === "pickup" && !pickupAddress) {
-        alert("Mohon pilih alamat penjemputan dari profil Anda.");
+      let deliveryAddress = "";
+      let deliveryPhone = "";
+      if (deliveryMethod === "delivery" && deliverySelector) {
+        if (deliverySelector.value === "manual") {
+          deliveryAddress = deliveryManualInput.value.trim();
+          deliveryPhone = "";
+        } else {
+          deliveryAddress = deliverySelector.value;
+          const selectedOption = deliverySelector.options[deliverySelector.selectedIndex];
+          deliveryPhone = selectedOption.getAttribute('data-phone') || "";
+        }
+      }
+
+      if (pickupMethod === "pickup" && (!pickupAddress || pickupAddress === "")) {
+        alert("Mohon masukkan atau pilih alamat penjemputan.");
         return;
       }
 
-      if (deliveryMethod === "delivery" && !deliveryAddress) {
-        alert("Mohon pilih alamat pengantaran dari profil Anda.");
+      if (deliveryMethod === "delivery" && (!deliveryAddress || deliveryAddress === "")) {
+        alert("Mohon masukkan atau pilih alamat pengantaran.");
         return;
       }
 
@@ -409,9 +449,11 @@ document.addEventListener("DOMContentLoaded", () => {
         items: shoeItems,
         logistics: {
           pickupMethod,
+          pickupPhone,
           deliveryMethod,
-          pickupAddress,
           deliveryAddress,
+          deliveryPhone,
+          pickupAddress,
         },
         payment: {
           method: paymentMethod,

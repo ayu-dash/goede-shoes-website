@@ -33,61 +33,67 @@
                   <%= item.addons.length> 0 ? '+ ' + item.addons.join(', ') : '' %>
               </span>
             </div>
+            <% 
+              const steps = [];
+              steps.push({ key: 'pending', label: 'Submit', icon: 'fa-file-invoice' });
+              if (order.payment.method !== 'cod') {
+                steps.push({ key: 'payment', label: 'Pembayaran', icon: 'fa-credit-card' });
+              }
+              
+              if (order.logistics.pickupMethod === 'pickup') {
+                steps.push({ key: 'pickup', label: 'Dijemput', icon: 'fa-truck-pickup' });
+              }
+              
+              steps.push({ key: 'received', label: 'Diterima', icon: 'fa-box-open' });
+              steps.push({ key: 'validating-in', label: 'Cek Kondisi', icon: 'fa-clipboard-check' });
+              steps.push({ key: 'in-progress', label: 'Cuci', icon: 'fa-soap' });
+              steps.push({ key: 'quality-check', label: 'Cek Hasil', icon: 'fa-magnifying-glass' });
+              
+              if (!order.logistics || !order.logistics.deliveryMethod || order.logistics.deliveryMethod.toLowerCase() !== 'self') {
+                steps.push({ key: 'delivery', label: 'Diantar', icon: 'fa-truck-fast' });
+              }
+              
+              steps.push({ key: 'completed', label: 'Selesai', icon: 'fa-check-double' });
+              
+              const currentIdx = steps.findIndex(s => s.key === order.status);
+              const pct = currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
+            %>
             <div class="detail-item-pct">
-              <% let pct=10; if(order.status==='pickup' ) pct=30; if(order.status==='in-progress' ) pct=60;
-                if(order.status==='delivery' ) pct=90; if(order.status==='completed' ) pct=100; %>
-                <span class="detail-pct-num">
-                  <%= pct %>%
-                </span>
-                <span class="detail-pct-label">COMPLETED</span>
+              <span class="detail-pct-num">
+                <%= pct %>%
+              </span>
+              <span class="detail-pct-label">COMPLETED</span>
             </div>
           </div>
 
-          <!-- Progress Timeline (Simplified for Display) -->
-          <div class="timeline">
-            <div class="timeline-step <%= order.status !== 'cancelled' ? 'completed' : '' %>">
-              <div class="timeline-dot"><i class="fa-solid fa-check"></i></div>
-              <span class="timeline-label">SUBMIT</span>
-            </div>
-            <div
-              class="timeline-line <%= ['pickup', 'in-progress', 'delivery', 'completed'].includes(order.status) ? 'completed' : '' %>">
-            </div>
-
-            <div
-              class="timeline-step <%= ['pickup', 'in-progress', 'delivery', 'completed'].includes(order.status) ? 'completed' : '' %>">
-              <div class="timeline-dot">
-                <% if(['pickup', 'in-progress' , 'delivery' , 'completed' ].includes(order.status)) { %>
-                  <i class="fa-solid fa-check"></i>
-                  <% } %>
+          <!-- Progress Timeline (Detailed) -->
+          <div class="timeline" style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--gray-light);">
+            <% steps.forEach((step, index) => { %>
+              <% 
+                let stepStatusClass = "";
+                if (order.status === 'cancelled') {
+                  stepStatusClass = "cancelled";
+                } else if (index < currentIdx || order.status === 'completed') {
+                  stepStatusClass = "completed";
+                } else if (index === currentIdx) {
+                  stepStatusClass = "active";
+                }
+              %>
+              <div class="timeline-step <%= stepStatusClass %>" style="min-width: 60px;">
+                <div class="timeline-dot"><i class="fa-solid <%= step.icon %>"></i></div>
+                <span class="timeline-label" style="font-size: 8.5px;"><%= step.label %></span>
               </div>
-              <span class="timeline-label">DITERIMA</span>
-            </div>
-            <div
-              class="timeline-line <%= ['in-progress', 'delivery', 'completed'].includes(order.status) ? 'completed' : '' %>">
-            </div>
-
-            <div
-              class="timeline-step <%= ['in-progress', 'delivery', 'completed'].includes(order.status) ? 'active' : '' %>">
-              <div class="timeline-dot">
-                <% if(order.status==='in-progress' ) { %>
-                  <i class="fa-solid fa-arrows-rotate"></i>
-                  <% } else if (['delivery', 'completed' ].includes(order.status)) { %>
-                    <i class="fa-solid fa-check"></i>
-                    <% } %>
-              </div>
-              <span class="timeline-label">PROSES</span>
-            </div>
-            <div class="timeline-line <%= ['delivery', 'completed'].includes(order.status) ? 'completed' : '' %>"></div>
-
-            <div
-              class="timeline-step <%= order.status === 'completed' ? 'completed' : (order.status === 'delivery' ? 'active' : '') %>">
-              <div class="timeline-dot">
-                <% if(order.status==='completed' ) { %>
-                  <i class="fa-solid fa-check"></i>
-                  <% } %>
-              </div>
-              <span class="timeline-label">SELESAI</span>
-            </div>
+              
+              <% if (index < steps.length - 1) { %>
+                <% 
+                  let lineStatusClass = "";
+                  if (order.status !== 'cancelled' && (index < currentIdx || order.status === 'completed')) {
+                    lineStatusClass = "completed";
+                  }
+                %>
+                <div class="timeline-line <%= lineStatusClass %>"></div>
+              <% } %>
+            <% }) %>
           </div>
         </div>
         <% }) %>
@@ -104,9 +110,12 @@
           <span class="logistics-info-label">PICKUP METHOD: <%= order.logistics.pickupMethod.toUpperCase() %></span>
           <span class="logistics-info-value">
             <% if(order.logistics.pickupMethod==='pickup' ) { %>
-              <%= order.logistics.pickupAddress %>
+              <% 
+                const fallbackPickup = (order.user && order.user.addresses && order.user.addresses.length > 0) ? order.user.addresses[0].fullAddress : 'Belum ditentukan';
+              %>
+              <%= order.logistics.pickupAddress || fallbackPickup %>
                 <% } else { %>
-                  Antar Sendiri ke Gerai
+                  <%= settings.storeInfo.address %> (Drop-off ke Gerai)
                   <% } %>
           </span>
         </div>
@@ -114,9 +123,12 @@
           <span class="logistics-info-label">DELIVERY METHOD: <%= order.logistics.deliveryMethod.toUpperCase() %></span>
           <span class="logistics-info-value">
             <% if(order.logistics.deliveryMethod==='delivery' ) { %>
-              <%= order.logistics.deliveryAddress %>
+              <% 
+                const fallbackDelivery = (order.user && order.user.addresses && order.user.addresses.length > 0) ? order.user.addresses[0].fullAddress : 'Belum ditentukan';
+              %>
+              <%= order.logistics.deliveryAddress || fallbackDelivery %>
                 <% } else { %>
-                  Ambil Sendiri di Gerai
+                  <%= settings.storeInfo.address %> (Ambil di Gerai)
                   <% } %>
           </span>
         </div>

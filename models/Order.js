@@ -38,7 +38,13 @@ const orderSchema = new mongoose.Schema(
             pickupAddress: {
                 type: String,
             },
+            pickupPhone: {
+                type: String,
+            },
             deliveryAddress: {
+                type: String,
+            },
+            deliveryPhone: {
                 type: String,
             },
         },
@@ -56,7 +62,7 @@ const orderSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "pickup", "in-progress", "delivery", "completed", "cancelled"],
+            enum: ["pending", "payment", "pickup", "received", "validating-in", "in-progress", "quality-check", "delivery", "completed", "cancelled"],
             default: "pending",
         },
         totalPrice: {
@@ -73,6 +79,7 @@ const orderSchema = new mongoose.Schema(
                 updatedAt: { type: Date, default: Date.now },
                 updatedBy: { type: mongoose.Schema.ObjectId, ref: "User" },
                 note: String,
+                photos: [String],
             },
         ],
     },
