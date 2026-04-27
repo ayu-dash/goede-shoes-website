@@ -38,7 +38,9 @@
 
       window.DYNAMIC_PRICES = {
         SERVICES: dynamicServices,
-        ADDONS: dynamicAddons
+        ADDONS: dynamicAddons,
+        PICKUP_FEE: <%= settings.shippingRatePerKm || 5000 %>,
+        DELIVERY_FEE: <%= settings.shippingRatePerKm || 5000 %>
       };
       window.DYNAMIC_SERVICES = dynamicMetadata;
     } catch (err) {

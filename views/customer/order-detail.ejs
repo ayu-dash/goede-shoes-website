@@ -23,7 +23,8 @@
       <% order.items.forEach((item, index)=> { %>
         <div class="detail-item-card">
           <div class="detail-item-top">
-            <img src="/images/hero-shoe.png" alt="<%= item.shoeName %>" class="detail-item-img" />
+            <% const detailShoePhoto = (order.statusHistory.find(h => h.status === 'validating-in') || {}).photos; %>
+            <img src="<%= (detailShoePhoto && detailShoePhoto.length > 0) ? detailShoePhoto[0] : '/images/hero-shoe.png' %>" alt="<%= item.shoeName %>" class="detail-item-img" />
             <div class="detail-item-info">
               <h4 class="detail-item-name">
                 <%= item.shoeName %>
@@ -260,13 +261,19 @@
 
               <div class="order-summary-divider"></div>
 
-              <% const isCourier=(order.logistics && (order.logistics.pickupMethod==='pickup' ||
-                order.logistics.deliveryMethod==='delivery' )); const logisticsFee=isCourier ? 15000 : 0; %>
-
+              <% if (order.logistics.pickupFee > 0) { %>
                 <div class="order-summary-row">
-                  <span>Biaya Jemput/Antar</span>
-                  <span class="summary-price">Rp <%= logisticsFee.toLocaleString('id-ID') %></span>
+                  <span>Biaya Penjemputan</span>
+                  <span class="summary-price">Rp <%= (order.logistics.pickupFee ?? 0).toLocaleString('id-ID') %></span>
                 </div>
+              <% } %>
+
+              <% if (order.logistics.deliveryFee > 0) { %>
+                <div class="order-summary-row">
+                  <span>Biaya Pengantaran</span>
+                  <span class="summary-price">Rp <%= (order.logistics.deliveryFee ?? 0).toLocaleString('id-ID') %></span>
+                </div>
+              <% } %>
 
                 <div class="order-summary-estimate">
                   <i class="fa-regular fa-clock"></i> ESTIMASI SELESAI

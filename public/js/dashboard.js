@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const SERVICE_PRICES = window.DYNAMIC_PRICES ? window.DYNAMIC_PRICES.SERVICES : {};
   const ADDON_PRICES = window.DYNAMIC_PRICES ? window.DYNAMIC_PRICES.ADDONS : {};
 
-  const LOGISTICS_FEE = 15000;
+
 
   // =========================
   // UPDATE SUMMARY LOGIC
@@ -100,10 +100,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    const PICKUP_FEE = window.DYNAMIC_PRICES ? window.DYNAMIC_PRICES.PICKUP_FEE : 15000;
+    const DELIVERY_FEE = window.DYNAMIC_PRICES ? window.DYNAMIC_PRICES.DELIVERY_FEE : 15000;
+
     const pickupMethod = document.querySelector("[data-group='pickup'].active")?.dataset.value;
     const deliveryMethod = document.querySelector("[data-group='delivery'].active")?.dataset.value;
 
-    const logisticsFee = (pickupMethod === "pickup" || deliveryMethod === "delivery") ? LOGISTICS_FEE : 0;
+    let logisticsFee = 0;
+    if (pickupMethod === "pickup") logisticsFee += PICKUP_FEE;
+    if (deliveryMethod === "delivery") logisticsFee += DELIVERY_FEE;
 
     subtotalEl.innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
     logisticsEl.innerText = `Rp ${logisticsFee.toLocaleString('id-ID')}`;

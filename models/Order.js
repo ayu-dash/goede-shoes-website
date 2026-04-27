@@ -47,6 +47,14 @@ const orderSchema = new mongoose.Schema(
             deliveryPhone: {
                 type: String,
             },
+            pickupFee: {
+                type: Number,
+                default: 0
+            },
+            deliveryFee: {
+                type: Number,
+                default: 0
+            },
         },
         payment: {
             method: {

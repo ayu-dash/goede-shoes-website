@@ -239,10 +239,28 @@
               </tr>
             <% }) %>
           </tbody>
-          <tfoot>
+            <% 
+              const subtotal = order.items.reduce((acc, item) => acc + item.price, 0);
+            %>
             <tr>
-              <td colspan="3" style="text-align: right; font-weight: 700; padding: 15px;">TOTAL BAYAR</td>
-              <td style="text-align: right; font-weight: 700; color: var(--navy); font-size: 1.1rem; padding: 15px;">
+              <td colspan="3" style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Subtotal</td>
+              <td style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Rp <%= subtotal.toLocaleString() %></td>
+            </tr>
+            <% if (order.logistics.pickupFee > 0) { %>
+            <tr>
+              <td colspan="3" style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Biaya Penjemputan</td>
+              <td style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Rp <%= (order.logistics.pickupFee ?? 0).toLocaleString() %></td>
+            </tr>
+            <% } %>
+            <% if (order.logistics.deliveryFee > 0) { %>
+            <tr>
+              <td colspan="3" style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Biaya Pengantaran</td>
+              <td style="text-align: right; color: var(--text-secondary); padding: 8px 15px;">Rp <%= (order.logistics.deliveryFee ?? 0).toLocaleString() %></td>
+            </tr>
+            <% } %>
+            <tr>
+              <td colspan="3" style="text-align: right; font-weight: 700; padding: 15px; border-top: 1px solid var(--border-color);">TOTAL BAYAR</td>
+              <td style="text-align: right; font-weight: 700; color: var(--navy); font-size: 1.1rem; padding: 15px; border-top: 1px solid var(--border-color);">
                 Rp <%= order.totalPrice.toLocaleString() %>
               </td>
             </tr>

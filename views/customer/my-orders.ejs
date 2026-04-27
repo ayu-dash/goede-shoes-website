@@ -29,7 +29,8 @@
     <% activeOrders.forEach(order => { %>
       <div class="active-order-card" data-order-status="proses">
         <div class="active-order-img">
-          <img src="/images/hero-shoe.png" alt="Sepatu" />
+          <% const activeShoePhoto = (order.statusHistory.find(h => h.status === 'validating-in') || {}).photos; %>
+          <img src="<%= (activeShoePhoto && activeShoePhoto.length > 0) ? activeShoePhoto[0] : '/images/hero-shoe.png' %>" alt="Sepatu" />
         </div>
         <div class="active-order-content">
           <div class="active-order-top">
@@ -99,7 +100,8 @@
       <% historyOrders.forEach(order => { %>
         <div class="history-card" data-order-status="<%= order.status === 'completed' ? 'selesai' : 'batal' %>">
           <div class="history-card-top">
-            <img src="/images/hero-shoe.png" alt="Sepatu" class="history-card-img" />
+            <% const histShoePhoto = (order.statusHistory.find(h => h.status === 'validating-in') || {}).photos; %>
+            <img src="<%= (histShoePhoto && histShoePhoto.length > 0) ? histShoePhoto[0] : '/images/hero-shoe.png' %>" alt="Sepatu" class="history-card-img" />
             <div class="history-card-info">
               <span class="history-card-id">#<%= order.orderId %></span>
               <span class="history-status-badge"><%= order.status.toUpperCase() %></span>

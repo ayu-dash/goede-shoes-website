@@ -1,8 +1,9 @@
 const Order = require("../models/Order");
 
 const Service = require("../models/Service");
+const Settings = require("../models/Settings");
 
-const LOGISTICS_FEE = 15000;
+
 
 exports.createOrder = async (req, res) => {
     try {
@@ -15,8 +16,10 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        // Fetch dynamic prices from DB
+        // Fetch dynamic prices and settings from DB
         const dbServices = await Service.find();
+        const settings = await Settings.findOne() || { shippingRatePerKm: 5000 };
+        
         const SERVICE_PRICES = {};
         const ADDON_PRICES = {};
         dbServices.forEach(s => {
@@ -60,7 +63,11 @@ exports.createOrder = async (req, res) => {
         }
 
         const subtotal = processedItems.reduce((acc, item) => acc + item.price, 0);
-        const totalLogistics = (logistics.pickupMethod === "pickup" || logistics.deliveryMethod === "delivery") ? LOGISTICS_FEE : 0;
+        
+        let totalLogistics = 0;
+        if (logistics.pickupMethod === "pickup") totalLogistics += (settings.shippingRatePerKm || 5000);
+        if (logistics.deliveryMethod === "delivery") totalLogistics += (settings.shippingRatePerKm || 5000);
+        
         const totalPrice = subtotal + totalLogistics;
 
         const newOrder = await Order.create({
@@ -73,6 +80,8 @@ exports.createOrder = async (req, res) => {
                 pickupPhone: logistics.pickupPhone || req.user.phone,
                 deliveryAddress: logistics.deliveryAddress,
                 deliveryPhone: logistics.deliveryPhone || req.user.phone,
+                pickupFee: logistics.pickupMethod === "pickup" ? (settings.shippingRatePerKm || 5000) : 0,
+                deliveryFee: logistics.deliveryMethod === "delivery" ? (settings.shippingRatePerKm || 5000) : 0,
             },
             payment,
             totalPrice,

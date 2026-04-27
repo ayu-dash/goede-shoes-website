@@ -59,6 +59,7 @@ exports.renderCustomerDashboard = async (req, res) => {
 exports.renderCustomerCreateOrder = async (req, res) => {
   try {
     const services = await Service.find().sort("name");
+    const settings = await Settings.findOne() || { shippingRatePerKm: 5000 };
 
     const mainServices = services.filter(
       (s) => s.category !== "Additional Cost",
@@ -69,6 +70,7 @@ exports.renderCustomerCreateOrder = async (req, res) => {
       activePage: "dashboard",
       mainServices,
       addOns,
+      settings,
     });
   } catch (err) {
     console.error("Create Order Error:", err);
@@ -96,13 +98,9 @@ exports.renderCustomerOrderDetail = async (req, res) => {
       user: req.user._id,
     }).populate("user");
 
-    if (!order) {
-      return res
-        .status(404)
-        .render("error", { message: "Pesanan tidak ditemukan." });
-    }
+    const settings = await Settings.findOne() || { pickupFee: 15000, deliveryFee: 15000 };
 
-    res.render("customer/order-detail", { activePage: "my-orders", order });
+    res.render("customer/order-detail", { activePage: "my-orders", order, settings });
   } catch (err) {
     res
       .status(500)
@@ -250,11 +248,8 @@ exports.renderStaffHistory = async (req, res) => {
 
 exports.renderStaffOrderDetail = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate("user");
-    if (!order) {
-      return res.status(404).render("error", { message: "Pesanan tidak ditemukan." });
-    }
-    res.render("staff/order-detail", { activePage: "washing", order });
+    const settings = await Settings.findOne() || { pickupFee: 15000, deliveryFee: 15000 };
+    res.render("staff/order-detail", { activePage: "washing", order, settings });
   } catch (err) {
     res.status(500).render("error", { message: "Gagal memuat detail pesanan." });
   }
