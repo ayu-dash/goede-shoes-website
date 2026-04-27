@@ -16,32 +16,68 @@
     <div style="display: flex; justify-content: space-between; position: relative; margin-bottom: 30px;">
       <% 
         const steps = [];
-        steps.push({ key: 'pending', label: 'Submit', icon: 'fa-file-invoice' });
+        // Step 1: Submit / Pending
+        let pendingLabel = 'Submit';
+        if (order.logistics.pickupMethod === 'self' && order.status === 'pending') {
+          pendingLabel = 'Menunggu Antaran';
+        }
+        steps.push({ key: 'pending', label: pendingLabel, icon: 'fa-file-invoice' });
 
+        // Step: Pickup (Only if pickup method is 'pickup')
         if (order.logistics.pickupMethod === 'pickup') {
           steps.push({ key: 'pickup', label: 'Dijemput', icon: 'fa-truck-pickup' });
         }
         
+        // Step: Received
         steps.push({ key: 'received', label: 'Diterima', icon: 'fa-box-open' });
+        
+        // Core Steps
         steps.push({ key: 'validating-in', label: 'Cek Kondisi', icon: 'fa-clipboard-check' });
         steps.push({ key: 'in-progress', label: 'Cuci', icon: 'fa-soap' });
+        
+        // Quality Check Step
         steps.push({ key: 'quality-check', label: 'Cek Hasil', icon: 'fa-magnifying-glass' });
         
-        if (!order.logistics || !order.logistics.deliveryMethod || order.logistics.deliveryMethod.toLowerCase() !== 'self') {
+        // Step: Ready for Pickup (Only if delivery method is 'self')
+        if (order.logistics.deliveryMethod === 'self') {
+          steps.push({ key: 'ready-to-pickup', label: 'Menunggu Diambil', icon: 'fa-box-archive' });
+        }
+        
+        // Step: Delivery (Only if delivery method is 'delivery')
+        if (order.logistics.deliveryMethod === 'delivery') {
           steps.push({ key: 'delivery', label: 'Diantar', icon: 'fa-truck-fast' });
+        }
+        
+        // Step: Final Payment Validation (Only for COD)
+        if (order.payment.method === 'cod') {
+          steps.push({ key: 'payment-cod', label: 'Validasi Bayar', icon: 'fa-hand-holding-dollar' });
         }
         
         steps.push({ key: 'completed', label: 'Selesai', icon: 'fa-check-double' });
         
         let effectiveStatus = order.status;
         if (effectiveStatus === 'payment') effectiveStatus = 'pending';
+        
+        // If delivery is self and status is quality-check, it means it's ready for pickup
+        if (order.logistics.deliveryMethod === 'self' && effectiveStatus === 'quality-check') {
+          effectiveStatus = 'ready-to-pickup';
+        }
+
+        // If COD and order is at the final logistics stage (delivery or ready-to-pickup),
+        // we move the effective status to 'payment-cod' so the staff can either:
+        // 1. Confirm payment (if not paid)
+        // 2. Complete the order (if already paid)
+        if (order.payment.method === 'cod' && (effectiveStatus === 'delivery' || effectiveStatus === 'ready-to-pickup')) {
+          effectiveStatus = 'payment-cod';
+        }
+
         const currentIdx = steps.findIndex(s => s.key === effectiveStatus);
       %>
       
       <!-- Progress Line Background -->
       <div style="position: absolute; top: 19px; left: 5%; right: 5%; height: 4px; background: #e2e8f0; z-index: 1;"></div>
       <!-- Active Progress Line -->
-      <div style="position: absolute; top: 19px; left: 5%; width: <%= (currentIdx / (steps.length - 1)) * 90 %>%; height: 4px; background: var(--navy); z-index: 1; transition: width 0.5s ease;"></div>
+      <div style="position: absolute; top: 19px; left: 5%; width: <%= steps.length > 1 ? (currentIdx / (steps.length - 1)) * 90 : 0 %>%; height: 4px; background: var(--navy); z-index: 1; transition: width 0.5s ease;"></div>
 
       <% steps.forEach((step, index) => { %>
         <div style="text-align: center; z-index: 2; width: <%= 100 / steps.length %>%;">
@@ -91,9 +127,22 @@
         </p>
         
         <div style="display: flex; justify-content: center; gap: 20px;">
-          <% if (nextStep.key === 'validating-in') { %>
+          <% if (nextStep.key === 'pickup') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="pickup" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-truck-pickup" style="margin-right: 10px;"></i> MULAI PENJEMPUTAN
+            </button>
+          <% } else if (nextStep.key === 'received') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="received" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-box-open" style="margin-right: 10px;"></i> 
+              <%= order.logistics.pickupMethod === 'pickup' ? 'SELESAI JEMPUT & TERIMA' : 'PELANGGAN ANTAR SEPATU (TERIMA)' %>
+            </button>
+          <% } else if (nextStep.key === 'validating-in') { %>
             <button class="btn btn-primary next-action-btn" data-action="modal" data-status="validating-in" data-title="Dokumentasi Drop-off" data-desc="Unggah foto sepatu saat diterima untuk mencatat kondisi awal." style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
               <i class="fa-solid fa-camera" style="margin-right: 10px;"></i> MULAI CEK KONDISI
+            </button>
+          <% } else if (nextStep.key === 'in-progress') { %>
+            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="in-progress" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+              <i class="fa-solid fa-soap" style="margin-right: 10px;"></i> MULAI PROSES CUCI
             </button>
           <% } else if (nextStep.key === 'quality-check') { %>
             <button class="btn btn-primary next-action-btn" data-action="modal" data-status="quality-check" data-title="Cek Hasil Cuci" data-desc="Unggah foto sepatu yang sudah selesai dicuci sebagai bukti kualitas (QC)." style="padding: 14px 40px; font-weight: 800; background: #f59e0b; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
@@ -101,24 +150,19 @@
             </button>
           <% } else if (nextStep.key === 'delivery') { %>
             <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="delivery" style="padding: 14px 40px; font-weight: 800; background: #10b981; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
-              <i class="fa-solid fa-truck-fast" style="margin-right: 10px;"></i> KIRIM SEPATU KE PELANGGAN
+              <i class="fa-solid fa-truck-fast" style="margin-right: 10px;"></i> MULAI PENGANTARAN (DELIVERY)
             </button>
           <% } else if (nextStep.key === 'completed') { %>
-            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="completed" style="padding: 14px 40px; font-weight: 800; background: #10b981; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
-              <i class="fa-solid fa-check-double" style="margin-right: 10px;"></i> SELESAIKAN PESANAN
-            </button>
-          <% } else if (nextStep.key === 'received') { %>
-            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="received" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
-              <i class="fa-solid fa-box-open" style="margin-right: 10px;"></i> KONFIRMASI TERIMA SEPATU
-            </button>
-          <% } else if (nextStep.key === 'pickup') { %>
-            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="pickup" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
-              <i class="fa-solid fa-truck-pickup" style="margin-right: 10px;"></i> KONFIRMASI PENJEMPUTAN
-            </button>
-          <% } else if (nextStep.key === 'in-progress') { %>
-            <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="in-progress" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
-              <i class="fa-solid fa-soap" style="margin-right: 10px;"></i> MULAI PROSES CUCI
-            </button>
+            <% if (order.payment.method === 'cod' && order.payment.status !== 'paid') { %>
+              <button class="btn btn-primary next-action-btn" data-action="payment" style="padding: 14px 40px; font-weight: 800; background: #f59e0b; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+                <i class="fa-solid fa-hand-holding-dollar" style="margin-right: 10px;"></i> TERIMA PEMBAYARAN COD
+              </button>
+            <% } else { %>
+              <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="completed" style="padding: 14px 40px; font-weight: 800; background: #10b981; border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
+                <i class="fa-solid fa-check-double" style="margin-right: 10px;"></i> 
+                <%= order.logistics.deliveryMethod === 'delivery' ? 'SELESAI ANTAR & TUTUP PESANAN' : 'PELANGGAN AMBIL SEPATU (SELESAI)' %>
+              </button>
+            <% } %>
           <% } %>
         </div>
       <% } else { %>
@@ -345,6 +389,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleConditionModal(status, title, desc);
             } else if (action === 'confirm') {
                 showConfirmModal(status);
+            } else if (action === 'payment') {
+                if (confirm('Konfirmasi terima pembayaran COD dari pelanggan?')) {
+                    const response = await fetch(`/api/orders/<%= order._id %>/confirm-payment`, {
+                        method: 'PATCH'
+                    });
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        const err = await response.json();
+                        alert('Gagal konfirmasi pembayaran: ' + (err.message || 'Terjadi kesalahan'));
+                    }
+                }
             }
         });
     });

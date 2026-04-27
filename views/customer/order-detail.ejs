@@ -36,26 +36,55 @@
             <% 
               const steps = [];
               steps.push({ key: 'pending', label: 'Submit', icon: 'fa-file-invoice' });
+              
               if (order.payment.method !== 'cod') {
                 steps.push({ key: 'payment', label: 'Pembayaran', icon: 'fa-credit-card' });
               }
               
+              // If pickup method is self, change pending label if status is pending
+              if (order.logistics.pickupMethod === 'self' && order.status === 'pending') {
+                steps[0].label = 'Menunggu Antaran';
+              }
+
               if (order.logistics.pickupMethod === 'pickup') {
                 steps.push({ key: 'pickup', label: 'Dijemput', icon: 'fa-truck-pickup' });
               }
               
+              // Core Steps
               steps.push({ key: 'received', label: 'Diterima', icon: 'fa-box-open' });
               steps.push({ key: 'validating-in', label: 'Cek Kondisi', icon: 'fa-clipboard-check' });
               steps.push({ key: 'in-progress', label: 'Cuci', icon: 'fa-soap' });
               steps.push({ key: 'quality-check', label: 'Cek Hasil', icon: 'fa-magnifying-glass' });
               
-              if (!order.logistics || !order.logistics.deliveryMethod || order.logistics.deliveryMethod.toLowerCase() !== 'self') {
+              // Step: Ready for Pickup (Only if delivery method is 'self')
+              if (order.logistics.deliveryMethod === 'self') {
+                steps.push({ key: 'ready-to-pickup', label: 'Menunggu Diambil', icon: 'fa-box-archive' });
+              }
+              
+              if (order.logistics.deliveryMethod === 'delivery') {
                 steps.push({ key: 'delivery', label: 'Diantar', icon: 'fa-truck-fast' });
+              }
+              
+              // Step: Final Payment Validation (Only for COD)
+              if (order.payment.method === 'cod') {
+                steps.push({ key: 'payment-cod', label: 'Validasi Bayar', icon: 'fa-hand-holding-dollar' });
               }
               
               steps.push({ key: 'completed', label: 'Selesai', icon: 'fa-check-double' });
               
-              const currentIdx = steps.findIndex(s => s.key === order.status);
+              let effectiveStatus = order.status;
+              // If delivery is self and status is quality-check, it means it's ready for pickup
+              if (order.logistics.deliveryMethod === 'self' && effectiveStatus === 'quality-check') {
+                effectiveStatus = 'ready-to-pickup';
+              }
+
+              // If COD and order is at the final logistics stage (delivery or ready-to-pickup),
+              // we move the effective status to 'payment-cod' so the user sees it's time to pay.
+              if (order.payment.method === 'cod' && (effectiveStatus === 'delivery' || effectiveStatus === 'ready-to-pickup')) {
+                effectiveStatus = 'payment-cod';
+              }
+
+              const currentIdx = steps.findIndex(s => s.key === effectiveStatus);
               const pct = currentIdx >= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
             %>
             <div class="detail-item-pct">
