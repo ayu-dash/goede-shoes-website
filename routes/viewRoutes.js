@@ -111,6 +111,13 @@ router.get(
 );
 
 router.get(
+  "/admin/transactions",
+  protect,
+  restrictTo("admin"),
+  viewController.renderAdminTransactions,
+);
+
+router.get(
   "/admin/profile",
   protect,
   restrictTo("admin"),

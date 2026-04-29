@@ -500,3 +500,43 @@ exports.renderAdminProfile = async (req, res) => {
     res.status(500).render("error", { message: "Gagal memuat profil admin." });
   }
 };
+exports.renderAdminTransactions = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let query = {};
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    const orders = await Order.find(query)
+      .sort("-createdAt")
+      .populate("user", "name email");
+
+    const totalRevenue = orders.reduce((acc, order) => {
+      if (order.status !== "cancelled") {
+        return acc + order.totalPrice;
+      }
+      return acc;
+    }, 0);
+
+    res.render("admin/transactions", {
+      activePage: "transaksi",
+      orders,
+      totalRevenue,
+      startDate: startDate || "",
+      endDate: endDate || "",
+    });
+  } catch (err) {
+    console.error("Transactions Error:", err);
+    res.status(500).render("error", { message: "Gagal memuat laporan transaksi." });
+  }
+};
