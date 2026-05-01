@@ -40,7 +40,7 @@ const navLinksEl = document.getElementById("nav-links");
 
 if (hamburger) {
   hamburger.addEventListener("click", () => {
-    navLinksEl.classList.toggle("nav-open");
+    navLinksEl.classList.toggle("open");
     hamburger.classList.toggle("active");
   });
 }

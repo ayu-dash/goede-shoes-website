@@ -1201,7 +1201,7 @@
   }
 
   .service-cat-grid-bottom {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .ops-layout {
@@ -1211,15 +1211,54 @@
   .cust-detail-stats {
     grid-template-columns: 1fr;
   }
+
+  .modal-content--lg {
+    max-width: 95%;
+  }
 }
 
 @media (max-width: 768px) {
   .admin-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .admin-panel {
+    overflow: hidden;
+    padding: 16px;
   }
 
   .admin-table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+
+  .admin-table {
+    min-width: 600px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+
+  .table-client-name {
+    font-size: 13px;
+  }
+
+  .table-client-sub {
+    font-size: 10px;
+  }
+
+  .table-client-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .table-client-info {
+    gap: 8px;
   }
 
   .ops-form-row {
@@ -1229,5 +1268,91 @@
   .cust-detail-meta {
     flex-direction: column;
     gap: 8px;
+  }
+
+  .cust-detail-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .service-cat-grid {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .cat-card.large,
+  .cat-card.medium {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .service-cat-grid-bottom {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .cat-card {
+    min-height: 140px;
+  }
+
+  .cat-card h3 {
+    font-size: 20px;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .transaction-filter-form .filter-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .transaction-filter-form .input-field {
+    min-width: 0;
+    flex: 1 1 120px;
+  }
+
+  .transaction-filter-form .input-field label {
+    font-size: 10px;
+  }
+
+  .transaction-filter-form .modal-input {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .filter-actions {
+    flex-direction: row;
+  }
+
+  .revenue-summary {
+    align-items: center;
+    text-align: center;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .toggle-label {
+    font-size: 10px;
+  }
+
+  .action-buttons {
+    gap: 8px;
+  }
+
+  .admin-stat-card {
+    padding: 14px 16px;
+    min-height: 80px;
   }
 }

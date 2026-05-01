@@ -196,3 +196,59 @@
   color: white;
   transform: scale(1.1);
 }
+
+/* ===========================
+   STAFF RESPONSIVE
+   =========================== */
+@media (max-width: 1024px) {
+  .staff-timeline-dot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .staff-timeline-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .staff-timeline-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .staff-timeline-dot i {
+    font-size: 12px !important;
+  }
+
+  .staff-timeline-label {
+    font-size: 9px;
+  }
+
+  .staff-progress-line-bg,
+  .staff-progress-line-active {
+    top: 14px;
+    height: 3px;
+  }
+
+  .revenue-summary {
+    padding: 12px 20px;
+  }
+
+  .revenue-summary .value {
+    font-size: 20px;
+  }
+
+  .transaction-filter-form .filter-group {
+    flex-direction: column;
+  }
+
+  .transaction-filter-form .input-field {
+    min-width: unset;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+  }
+}

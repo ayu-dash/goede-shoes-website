@@ -10,6 +10,7 @@
   display: flex;
   min-height: 100vh;
   background: #f4f5f7;
+  overflow-x: hidden;
 }
 
 /* ===========================
@@ -94,6 +95,7 @@
   margin-left: 200px;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .topbar {
@@ -174,6 +176,7 @@
 .dashboard-content {
   padding: 28px 32px;
   flex: 1;
+  overflow-x: hidden;
 }
 
 /* Page Headers */
@@ -1642,25 +1645,42 @@
 /* ===========================
    DASHBOARD RESPONSIVE
 =========================== */
-@media (max-width: 1024px) {
-  .dash-body {
-    grid-template-columns: 1fr;
-  }
 
-  .order-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .history-grid {
-    grid-template-columns: 1fr;
-  }
+/* Sidebar toggle button (hidden on desktop) */
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s;
 }
 
-@media (max-width: 768px) {
+.sidebar-toggle:hover {
+  background: var(--off-white);
+}
+
+/* Sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* --- Tablet (max 1024px) --- */
+@media (max-width: 1024px) {
   .sidebar {
     width: 64px;
   }
@@ -1690,12 +1710,97 @@
     margin-left: 64px;
   }
 
+  .dash-body {
+    grid-template-columns: 1fr;
+  }
+
+  .order-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-sidebar-col {
+    position: static;
+  }
+
+  .order-summary-col {
+    position: static;
+  }
+}
+
+/* --- Mobile (max 768px) --- */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .topbar {
+    justify-content: space-between;
+  }
+
+  .sidebar {
+    width: 200px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+    opacity: 1;
+  }
+
+  .sidebar-link span {
+    display: inline;
+  }
+
+  .sidebar-logo .logo {
+    font-size: 40px;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px;
+  }
+
+  .sidebar-nav {
+    padding: 16px 12px;
+  }
+
+  .sidebar-link {
+    justify-content: flex-start;
+    padding: 12px 16px;
+  }
+
+  .dashboard-main {
+    margin-left: 0;
+  }
+
   .dashboard-content {
     padding: 20px 16px;
   }
 
   .topbar {
     padding: 0 16px;
+  }
+
+  .topbar-user-info {
+    display: none;
+  }
+
+  .page-title--xl {
+    font-size: 24px;
   }
 
   .active-order-card {
@@ -1705,6 +1810,15 @@
   .active-order-img {
     width: 100%;
     height: 200px;
+  }
+
+  .active-order-top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .active-order-status-wrap {
+    text-align: left;
   }
 
   .shoe-item-fields {
@@ -1721,6 +1835,58 @@
 
   .dash-stats {
     grid-template-columns: 1fr;
+  }
+
+  .dash-banner-title {
+    font-size: 22px;
+  }
+
+  .dash-banner-content {
+    padding: 24px 20px;
+  }
+
+  .profile-fields-grid,
+  .profile-stats-grid,
+  .address-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .profile-info-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .modal-content {
+    max-width: 95% !important;
+    padding: 24px !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-form-group.full {
+    grid-column: auto;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .order-tabs {
+    flex-wrap: wrap;
+  }
+
+  .page-header--detail {
+    flex-direction: column;
   }
 }
 
@@ -2155,19 +2321,8 @@ textarea.modal-input {
   margin-top: 32px;
 }
 
-/* Responsive Overrides */
-@media (max-width: 768px) {
-  .profile-fields-grid,
-  .profile-stats-grid,
-  .address-grid,
-  .modal-form-grid {
-    grid-template-columns: 1fr;
-  }
 
-  .modal-form-group.full {
-    grid-column: auto;
-  }
-}
+
 
 /* ===========================
    UTILITY FOR INLINE STYLES
