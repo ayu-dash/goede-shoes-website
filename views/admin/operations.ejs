@@ -1,5 +1,47 @@
 <%- include('../partials/dashboard-head') %>
 
+<style>
+  .ops-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+  }
+  .ops-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .ops-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 20px;
+  }
+  .ops-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+  input:checked + .ops-toggle-slider {
+    background-color: #0d47a1;
+  }
+  input:checked + .ops-toggle-slider:before {
+    transform: translateX(20px);
+  }
+</style>
+
   <div class="page-header" style="margin-bottom: 32px">
     <h1 class="page-title page-title--xl">Manajemen Operasional</h1>
   </div>
@@ -29,6 +71,31 @@
         </div>
         <button class="ops-edit-tarif-btn" style="margin-top: 12px; width: 100%; justify-content: center;" onclick="openModal('aboutModal')">
           <i class="fa-solid fa-pen"></i> Edit Teks
+        </button>
+      </div>
+
+      <!-- SOCIAL MEDIA -->
+      <div class="admin-panel ops-social-section" style="margin-top: 24px">
+        <h4 class="ops-section-label">MEDIA SOSIAL</h4>
+        <div class="ops-social-list" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.instagram?.isActive ? 1 : 0.5 %>">
+            <i class="fa-brands fa-instagram" style="width: 20px; color: #e1306c;"></i>
+            <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.instagram?.url || '#' %></span>
+            <% if (!settings.socialLinks?.instagram?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.youtube?.isActive ? 1 : 0.5 %>">
+            <i class="fa-brands fa-youtube" style="width: 20px; color: #ff0000;"></i>
+            <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.youtube?.url || '#' %></span>
+            <% if (!settings.socialLinks?.youtube?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.tiktok?.isActive ? 1 : 0.5 %>">
+            <i class="fa-brands fa-tiktok" style="width: 20px; color: #000000;"></i>
+            <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.tiktok?.url || '#' %></span>
+            <% if (!settings.socialLinks?.tiktok?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
+          </div>
+        </div>
+        <button class="ops-edit-tarif-btn" style="margin-top: 20px; width: 100%; justify-content: center;" onclick="openModal('socialModal')">
+          <i class="fa-solid fa-share-nodes"></i> Edit Media Sosial
         </button>
       </div>
 
@@ -181,6 +248,61 @@
   <!-- ==================== MODALS ==================== -->
 
 
+<!-- Modal Social Media -->
+<div class="modal-overlay" id="socialModal" onclick="closeModal(event, 'socialModal')">
+  <div class="modal-content" style="max-width: 500px; padding: 32px">
+    <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 8px; font-size: 20px">Media Sosial</h3>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Link ini akan muncul sebagai ikon di bagian bawah website (footer).</p>
+    
+    <form onsubmit="saveSocialLinks(event)">
+      <div class="modal-form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="modal-label" style="margin-bottom: 0;">INSTAGRAM URL</label>
+          <label class="ops-toggle-switch">
+            <input type="checkbox" name="instagram_active" <%= settings.socialLinks?.instagram?.isActive ? 'checked' : '' %>>
+            <span class="ops-toggle-slider"></span>
+          </label>
+        </div>
+        <input type="text" name="instagram_url" class="modal-input" placeholder="https://instagram.com/username" value="<%= settings.socialLinks?.instagram?.url %>">
+      </div>
+      <div class="modal-form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="modal-label" style="margin-bottom: 0;">YOUTUBE URL</label>
+          <label class="ops-toggle-switch">
+            <input type="checkbox" name="youtube_active" <%= settings.socialLinks?.youtube?.isActive ? 'checked' : '' %>>
+            <span class="ops-toggle-slider"></span>
+          </label>
+        </div>
+        <input type="text" name="youtube_url" class="modal-input" placeholder="https://youtube.com/@channel" value="<%= settings.socialLinks?.youtube?.url %>">
+      </div>
+      <div class="modal-form-group" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="modal-label" style="margin-bottom: 0;">TIKTOK URL</label>
+          <label class="ops-toggle-switch">
+            <input type="checkbox" name="tiktok_active" <%= settings.socialLinks?.tiktok?.isActive ? 'checked' : '' %>>
+            <span class="ops-toggle-slider"></span>
+          </label>
+        </div>
+        <input type="text" name="tiktok_url" class="modal-input" placeholder="https://tiktok.com/@username" value="<%= settings.socialLinks?.tiktok?.url %>">
+      </div>
+      <div class="modal-form-group" style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label class="modal-label" style="margin-bottom: 0;">FACEBOOK URL</label>
+          <label class="ops-toggle-switch">
+            <input type="checkbox" name="facebook_active" <%= settings.socialLinks?.facebook?.isActive ? 'checked' : '' %>>
+            <span class="ops-toggle-slider"></span>
+          </label>
+        </div>
+        <input type="text" name="facebook_url" class="modal-input" placeholder="https://facebook.com/page" value="<%= settings.socialLinks?.facebook?.url %>">
+      </div>
+      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
+        <button type="button" class="btn btn-ghost-cancel" onclick="closeModalRaw('socialModal')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
   <!-- Modal About Footer -->
 <div class="modal-overlay" id="aboutModal" onclick="closeModal(event, 'aboutModal')">
   <div class="modal-content" style="max-width: 500px; padding: 32px">
@@ -307,7 +429,37 @@
     }
 
 
-    async function saveAboutText(e) {
+      async function saveSocialLinks(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = {
+      socialLinks: {
+        instagram: { url: formData.get('instagram_url'), isActive: formData.get('instagram_active') === 'on' },
+        youtube: { url: formData.get('youtube_url'), isActive: formData.get('youtube_active') === 'on' },
+        tiktok: { url: formData.get('tiktok_url'), isActive: formData.get('tiktok_active') === 'on' },
+        facebook: { url: formData.get('facebook_url'), isActive: formData.get('facebook_active') === 'on' }
+      }
+    };
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        showCustomAlert("Berhasil", "Link media sosial telah disimpan.", "success", () => {
+          location.reload();
+        });
+      } else {
+        showCustomAlert("Gagal", "Gagal menyimpan link media sosial.", "error");
+      }
+    } catch (err) {
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+    }
+  }
+
+  async function saveAboutText(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = {

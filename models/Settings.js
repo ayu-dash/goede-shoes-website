@@ -37,6 +37,12 @@ const settingsSchema = new mongoose.Schema(
     aboutText: {
       type: String,
       default: "GOEDE SHOES adalah jasa perawatan sepatu premium yang berfokus pada kualitas dan detail. Kami melayani berbagai jenis sepatu dengan teknik yang tepat dan bahan berkualitas tinggi."
+    },
+    socialLinks: {
+      instagram: { url: { type: String, default: "https://www.instagram.com/goede.shoestreat/" }, isActive: { type: Boolean, default: true } },
+      youtube: { url: { type: String, default: "#" }, isActive: { type: Boolean, default: false } },
+      tiktok: { url: { type: String, default: "#" }, isActive: { type: Boolean, default: false } },
+      facebook: { url: { type: String, default: "#" }, isActive: { type: Boolean, default: false } }
     }
   },
   { timestamps: true },

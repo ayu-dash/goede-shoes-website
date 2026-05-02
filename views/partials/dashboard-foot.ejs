@@ -9,12 +9,26 @@
         <p><%= settings.aboutText %></p>
 
         <div class="social-links">
-          <a href="#" class="social-btn" aria-label="Instagram">
+          <% if (settings.socialLinks?.instagram?.isActive) { %>
+          <a href="<%= settings.socialLinks.instagram.url %>" class="social-btn" aria-label="Instagram" target="_blank">
             <i class="fa-brands fa-instagram" style="font-size: 20px;"></i>
           </a>
-          <a href="#" class="social-btn" aria-label="YouTube">
+          <% } %>
+          <% if (settings.socialLinks?.youtube?.isActive) { %>
+          <a href="<%= settings.socialLinks.youtube.url %>" class="social-btn" aria-label="YouTube" target="_blank">
             <i class="fa-brands fa-youtube" style="font-size: 20px;"></i>
           </a>
+          <% } %>
+          <% if (settings.socialLinks?.tiktok?.isActive) { %>
+          <a href="<%= settings.socialLinks.tiktok.url %>" class="social-btn" aria-label="TikTok" target="_blank">
+            <i class="fa-brands fa-tiktok" style="font-size: 20px;"></i>
+          </a>
+          <% } %>
+          <% if (settings.socialLinks?.facebook?.isActive) { %>
+          <a href="<%= settings.socialLinks.facebook.url %>" class="social-btn" aria-label="Facebook" target="_blank">
+            <i class="fa-brands fa-facebook" style="font-size: 20px;"></i>
+          </a>
+          <% } %>
         </div>
       </div>
 
