@@ -19,6 +19,9 @@
           pendingLabel = 'Menunggu Antaran';
         }
         steps.push({ key: 'pending', label: pendingLabel, icon: 'fa-file-invoice' });
+        
+        // Step: Payment
+        steps.push({ key: 'payment', label: 'Pembayaran', icon: 'fa-credit-card' });
 
         // Step: Pickup (Only if pickup method is 'pickup')
         if (order.logistics.pickupMethod === 'pickup') {
@@ -53,7 +56,17 @@
         steps.push({ key: 'completed', label: 'Selesai', icon: 'fa-check-double' });
         
         let effectiveStatus = order.status;
-        if (effectiveStatus === 'payment') effectiveStatus = 'pending';
+        
+        // Logika loncat step untuk Staff (sama dengan Customer)
+        if (effectiveStatus === 'pending') {
+          if (order.payment && (order.payment.status === 'paid' || order.payment.method === 'cod')) {
+            // Jika sudah bayar / COD, lewati step payment dan fokus ke step berikutnya (Pickup/Received)
+            // Kita cari index step setelah 'payment'
+            effectiveStatus = order.logistics.pickupMethod === 'pickup' ? 'pickup' : 'received';
+          } else if (order.payment && order.payment.method === 'bank' && order.payment.status === 'pending') {
+            effectiveStatus = 'payment';
+          }
+        }
         
         // If delivery is self and status is quality-check, it means it's ready for pickup
         if (order.logistics.deliveryMethod === 'self' && effectiveStatus === 'quality-check') {
@@ -110,7 +123,12 @@
         </p>
         
         <div style="display: flex; justify-content: center; gap: 20px;">
-          <% if (nextStep.key === 'pickup') { %>
+          <% if (nextStep.key === 'payment') { %>
+            <div style="padding: 15px 30px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; color: #92400e; font-weight: 700;">
+              <i class="fa-solid fa-hourglass-half" style="margin-right: 10px;"></i> 
+              MENUNGGU PELANGGAN MELAKUKAN PEMBAYARAN
+            </div>
+          <% } else if (nextStep.key === 'pickup') { %>
             <button class="btn btn-primary next-action-btn" data-action="confirm" data-status="pickup" style="padding: 14px 40px; font-weight: 800; background: var(--navy); border: none; font-size: 15px; border-radius: 8px; color: white; cursor: pointer;">
               <i class="fa-solid fa-truck-pickup" style="margin-right: 10px;"></i> MULAI PENJEMPUTAN
             </button>
@@ -405,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (action === 'confirm') {
                 showConfirmModal(status);
             } else if (action === 'payment') {
-                if (confirm('Konfirmasi terima pembayaran COD dari pelanggan?')) {
+                showCustomConfirm('Konfirmasi Pembayaran', 'Apakah Anda yakin ingin mengonfirmasi penerimaan pembayaran COD dari pelanggan?', 'warning', async () => {
                     const response = await fetch(`/api/orders/<%= order._id %>/confirm-payment`, {
                         method: 'PATCH'
                     });
@@ -413,9 +431,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.reload();
                     } else {
                         const err = await response.json();
-                        alert('Gagal konfirmasi pembayaran: ' + (err.message || 'Terjadi kesalahan'));
+                        showCustomAlert("Gagal", "Gagal konfirmasi pembayaran: " + (err.message || "Terjadi kesalahan"), "error");
                     }
-                }
+                });
             }
         });
     });
@@ -437,10 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalSubmitBtn = document.getElementById('modalSubmitBtn');
     if (modalSubmitBtn) {
         modalSubmitBtn.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) {
-                alert('Harap unggah minimal 1 foto sebagai bukti.');
-                return;
-            }
+                showCustomAlert("Peringatan", "Harap unggah minimal 1 foto sebagai bukti.", "warning");
             const note = document.getElementById('noteInput').value;
             await performStatusUpdate(activeStatus, note, selectedFiles);
         });
@@ -552,16 +567,17 @@ async function performStatusUpdate(status, note = '', files = []) {
       });
 
       if (response.ok) {
-        console.log('Update successful, reloading...');
-        window.location.reload();
+        showCustomAlert("Sukses", "Status pesanan berhasil diperbarui.", "success", () => {
+          window.location.reload();
+        });
       } else {
         const err = await response.json();
-        alert('Gagal: ' + (err.message || 'Terjadi kesalahan'));
+        showCustomAlert("Gagal", (err.message || "Terjadi kesalahan saat memperbarui status."), "error");
         btns.forEach(b => b.disabled = false);
       }
     } catch (err) {
       console.error('Update error:', err);
-      alert('Terjadi kesalahan koneksi.');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       document.querySelectorAll('button').forEach(b => b.disabled = false);
     }
 }

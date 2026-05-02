@@ -397,12 +397,14 @@
       });
       const result = await res.json();
       if (result.status === "success") {
-        location.reload();
+        showCustomAlert("Berhasil", "Karyawan baru telah ditambahkan.", "success", () => {
+          location.reload();
+        });
       } else {
-        alert(result.message || "Gagal menambah karyawan");
+        showCustomAlert("Gagal", (result.message || "Gagal menambah karyawan"), "error");
       }
     } catch (err) {
-      alert("Terjadi kesalahan");
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   });
 
@@ -420,34 +422,36 @@
       const result = await res.json();
       if (result.status === "success") {
         label.textContent = isActive ? "AKTIF" : "NON-AKTIF";
-        updateStats(); // REALTIME UPDATE
+        updateStats(); 
       } else {
         checkbox.checked = !isActive;
-        alert(result.message || "Gagal update status");
+        showCustomAlert("Gagal", (result.message || "Gagal update status"), "error");
       }
     } catch (err) {
       checkbox.checked = !isActive;
-      alert("Terjadi kesalahan");
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
   // Delete Employee
   async function deleteEmployee(id) {
-    if (!confirm("Yakin ingin menghapus karyawan ini?")) return;
-
-    try {
-      const res = await fetch(`/api/admin/staff/${id}`, {
-        method: "DELETE"
-      });
-      if (res.status === 204) {
-        location.reload();
-      } else {
-        const result = await res.json();
-        alert(result.message || "Gagal menghapus karyawan");
+    showCustomConfirm("Hapus Karyawan", "Apakah Anda yakin ingin menghapus karyawan ini?", "error", async () => {
+      try {
+        const res = await fetch(`/api/admin/staff/${id}`, {
+          method: "DELETE"
+        });
+        if (res.status === 204) {
+          showCustomAlert("Berhasil", "Data karyawan telah dihapus.", "success", () => {
+            location.reload();
+          });
+        } else {
+          const result = await res.json();
+          showCustomAlert("Gagal", (result.message || "Gagal menghapus karyawan"), "error");
+        }
+      } catch (err) {
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       }
-    } catch (err) {
-      alert("Terjadi kesalahan");
-    }
+    });
   }
 
   // Edit Employee
@@ -475,12 +479,14 @@
       });
       const result = await res.json();
       if (result.status === "success") {
-        location.reload();
+        showCustomAlert("Berhasil", "Data karyawan berhasil diperbarui.", "success", () => {
+          location.reload();
+        });
       } else {
-        alert(result.message || "Gagal update karyawan");
+        showCustomAlert("Gagal", (result.message || "Gagal update karyawan"), "error");
       }
     } catch (err) {
-      alert("Terjadi kesalahan");
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   });
 </script>

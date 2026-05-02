@@ -483,12 +483,14 @@
         body: JSON.stringify(data)
       });
       if (res.ok) {
-        location.reload();
+        showCustomAlert("Berhasil", "Pengaturan toko telah diperbarui.", "success", () => {
+          location.reload();
+        });
       } else {
-        alert('Gagal menyimpan perubahan');
+        showCustomAlert("Gagal", "Gagal menyimpan perubahan pengaturan toko.", "error");
       }
     } catch (err) {
-      alert('Terjadi kesalahan');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
@@ -503,12 +505,14 @@
         body: JSON.stringify({ shippingRatePerKm: rate })
       });
       if (res.ok) {
-        location.reload();
+        showCustomAlert("Berhasil", "Tarif pengiriman telah diperbarui.", "success", () => {
+          location.reload();
+        });
       } else {
-        alert('Gagal menyimpan tarif');
+        showCustomAlert("Gagal", "Gagal menyimpan tarif pengiriman.", "error");
       }
     } catch (err) {
-      alert('Terjadi kesalahan');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
@@ -522,10 +526,10 @@
       if (res.ok) {
         location.reload();
       } else {
-        alert('Gagal memperbarui rekening');
+        showCustomAlert("Gagal", "Gagal memperbarui daftar rekening.", "error");
       }
     } catch (err) {
-      alert('Terjadi kesalahan');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
@@ -565,9 +569,10 @@
   }
 
   async function deleteBank(index) {
-    if (!confirm('Yakin ingin menghapus rekening ini?')) return;
-    const newList = currentBankAccounts.filter((_, i) => i !== parseInt(index));
-    await updateBankAccounts(newList);
+    showCustomConfirm("Hapus Rekening", "Apakah Anda yakin ingin menghapus rekening bank ini?", "error", async () => {
+      const newList = currentBankAccounts.filter((_, i) => i !== parseInt(index));
+      await updateBankAccounts(newList);
+    });
   }
 
   async function saveMidtransConfig(e) {
@@ -589,12 +594,14 @@
         body: JSON.stringify(data)
       });
       if (res.ok) {
-        location.reload();
+        showCustomAlert("Berhasil", "Konfigurasi Midtrans telah disimpan.", "success", () => {
+          location.reload();
+        });
       } else {
-        alert('Gagal menyimpan konfigurasi Midtrans');
+        showCustomAlert("Gagal", "Gagal menyimpan konfigurasi Midtrans.", "error");
       }
     } catch (err) {
-      alert('Terjadi kesalahan');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
@@ -608,10 +615,10 @@
       if (res.ok) {
         location.reload();
       } else {
-        alert('Gagal mengubah status Midtrans');
+        showCustomAlert("Gagal", "Gagal mengubah status aktif Midtrans.", "error");
       }
     } catch (err) {
-      alert('Terjadi kesalahan');
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 </script>

@@ -44,14 +44,33 @@
                 </span>
               </div>
 
-              <% var steps=[ { key: 'pending' , label: 'Submit' , icon: 'fa-file-invoice' }, { key: 'pickup' ,
-                label: 'Penjemputan' , icon: 'fa-truck-pickup' }, { key: 'validating-in' , label: 'Cek Kondisi' ,
-                icon: 'fa-clipboard-check' }, { key: 'in-progress' , label: 'Pencucian' , icon: 'fa-soap' }, {
-                key: 'quality-check' , label: 'Cek Hasil' , icon: 'fa-magnifying-glass' }, { key: 'delivery' ,
-                label: 'Pengantaran' , icon: 'fa-truck' }, { key: 'completed' , label: 'Selesai' ,
-                icon: 'fa-check-circle' } ]; var effectiveStatus=order.status; var currentIdx=-1; for (var j=0; j <
-                steps.length; j++) { if (steps[j].key===effectiveStatus) { currentIdx=j; break; } } var pct=currentIdx>=
-                0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
+              <% var steps=[ 
+                  { key: 'pending' , label: 'Submit' , icon: 'fa-file-invoice' }, 
+                  { key: 'payment' , label: 'Pembayaran' , icon: 'fa-credit-card' }, 
+                  { key: 'pickup' , label: 'Penjemputan' , icon: 'fa-truck-pickup' }, 
+                  { key: 'validating-in' , label: 'Cek Kondisi' , icon: 'fa-clipboard-check' }, 
+                  { key: 'in-progress' , label: 'Pencucian' , icon: 'fa-soap' }, 
+                  { key: 'quality-check' , label: 'Cek Hasil' , icon: 'fa-magnifying-glass' }, 
+                  { key: 'delivery' , label: 'Pengantaran' , icon: 'fa-truck' }, 
+                  { key: 'completed' , label: 'Selesai' , icon: 'fa-check-circle' } 
+                ]; 
+                var effectiveStatus=order.status; 
+                var currentIdx=-1; 
+                for (var j=0; j < steps.length; j++) { 
+                  if (steps[j].key===effectiveStatus) { 
+                    currentIdx=j; 
+                    break; 
+                  } 
+                } 
+                // Logika loncat step berdasarkan status pembayaran:
+                if (effectiveStatus === 'pending' && order.payment) {
+                  if (order.payment.status === 'paid' || order.payment.method === 'cod') {
+                    currentIdx = 2; // Langsung ke Penjemputan
+                  } else if (order.payment.method === 'bank' && order.payment.status === 'pending') {
+                    currentIdx = 1; // Aktif di Pembayaran
+                  }
+                }
+                var pct=currentIdx>= 0 ? Math.round((currentIdx / (steps.length - 1)) * 100) : 0;
                 %>
                 <div class="detail-item-pct">
                   <span class="detail-pct-num">
@@ -242,13 +261,132 @@
                     </div>
                     <% } %>
 
+                      <div class="order-summary-row" style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-top: 10px; border-top: 1px solid #eee;">
+                        <span>Status Pembayaran</span>
+                        <span style="font-weight: 700; color: <%= order.payment && order.payment.status === 'paid' ? '#15803d' : '#d97706' %>;">
+                          <%= order.payment && order.payment.status === 'paid' ? 'LUNAS' : 'BELUM BAYAR' %>
+                        </span>
+                      </div>
+
                       <div class="order-summary-row order-summary-total"
                         style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.1rem; color: var(--navy);">
                         <span>TOTAL</span>
                         <span>Rp <%= order.totalPrice.toLocaleString('id-ID') %></span>
                       </div>
+
+                      <style>
+                        .btn-premium-pay {
+                          width: 100%;
+                          margin-top: 24px;
+                          padding: 16px 20px;
+                          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                          border: none;
+                          border-radius: 14px;
+                          color: white !important;
+                          font-weight: 800;
+                          font-size: 14px;
+                          letter-spacing: 0.5px;
+                          cursor: pointer;
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                          box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.3), 0 4px 6px -4px rgba(217, 119, 6, 0.1);
+                          text-decoration: none;
+                        }
+
+                        .btn-premium-pay:hover {
+                          transform: translateY(-2px);
+                          box-shadow: 0 20px 25px -5px rgba(217, 119, 6, 0.4), 0 8px 10px -6px rgba(217, 119, 6, 0.2);
+                          filter: brightness(1.1);
+                        }
+
+                        .btn-content {
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                        }
+
+                        .arrow-icon {
+                          font-size: 12px;
+                          opacity: 0.7;
+                          transition: transform 0.3s ease;
+                        }
+
+                        .btn-premium-pay:hover .arrow-icon {
+                          transform: translateX(4px);
+                        }
+
+                        .badge-paid-premium {
+                          margin-top: 24px;
+                          padding: 14px;
+                          background: #f0fdf4;
+                          border: 1px solid #bbf7d0;
+                          border-radius: 14px;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          gap: 10px;
+                          color: #15803d;
+                          font-weight: 700;
+                          font-size: 13px;
+                        }
+
+                        .badge-paid-premium i {
+                          font-size: 18px;
+                          color: #22c55e;
+                        }
+                      </style>
+
+                      <% if (order.payment && order.payment.method === 'bank' && order.payment.status === 'pending' && order.payment.snapToken) { %>
+                        <button class="btn-premium-pay" id="btn-pay-now" data-snap-token="<%= order.payment.snapToken %>">
+                          <div class="btn-content">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span>BAYAR SEKARANG</span>
+                          </div>
+                          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                        </button>
+                      <% } else if (order.payment && order.payment.status === 'paid') { %>
+                        <div class="badge-paid-premium">
+                          <i class="fa-solid fa-circle-check"></i>
+                          <span>PEMBAYARAN TELAH LUNAS</span>
+                        </div>
+                      <% } %>
       </div>
     </div>
   </div>
 
+  <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<%= midtransClientKey %>"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const btnPay = document.getElementById('btn-pay-now');
+      if (btnPay) {
+        btnPay.addEventListener('click', function() {
+          const token = this.dataset.snapToken;
+          if (token) {
+            window.snap.pay(token, {
+              onSuccess: function(result) {
+                showCustomAlert("Pembayaran Berhasil", "Terima kasih! Pembayaran Anda telah kami terima.", "success", () => {
+                  window.location.href = "/customer/my-orders";
+                });
+              },
+              onPending: function(result) {
+                console.log("Payment pending:", result);
+                showCustomAlert("Pembayaran Pending", "Silakan selesaikan pembayaran sesuai instruksi di aplikasi Midtrans.", "warning", () => {
+                  window.location.href = "/customer/my-orders";
+                });
+              },
+              onError: function(result) {
+                console.log("Payment error:", result);
+                showCustomAlert("Pembayaran Gagal", "Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.", "error");
+              },
+              onClose: function() {
+                console.log("Payment popup closed");
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
   <%- include('../partials/dashboard-foot') %>

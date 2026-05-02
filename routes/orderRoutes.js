@@ -4,7 +4,10 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Protect all routes
+// Public Routes (Accessible by Midtrans)
+router.post("/notification", orderController.handleNotification);
+
+// Protect all routes below
 router.use(authMiddleware.protect);
 
 router.post("/", orderController.createOrder);

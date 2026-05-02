@@ -5,6 +5,8 @@ const Settings = require("../models/Settings");
 
 
 
+const snap = require("../utils/midtrans");
+
 exports.createOrder = async (req, res) => {
     try {
         const { items, logistics, payment } = req.body;
@@ -62,15 +64,65 @@ exports.createOrder = async (req, res) => {
             });
         }
 
+        // 1. Calculate prices
         const subtotal = processedItems.reduce((acc, item) => acc + item.price, 0);
-        
         let totalLogistics = 0;
         if (logistics.pickupMethod === "pickup") totalLogistics += (settings.shippingRatePerKm || 5000);
         if (logistics.deliveryMethod === "delivery") totalLogistics += (settings.shippingRatePerKm || 5000);
-        
         const totalPrice = subtotal + totalLogistics;
 
+        // 2. Prepare Order Object (But don't save to DB yet if bank payment)
+        const orderId = `GS-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        
+        let snapToken = null;
+        let snapRedirectUrl = null;
+
+        if (payment.method === "bank") {
+            try {
+                const parameter = {
+                    transaction_details: {
+                        order_id: orderId,
+                        gross_amount: totalPrice,
+                    },
+                    customer_details: {
+                        first_name: req.user.name,
+                        email: req.user.email,
+                        phone: req.user.phone,
+                    },
+                    item_details: processedItems.map(item => ({
+                        id: item.serviceType,
+                        price: item.price,
+                        quantity: 1,
+                        name: `${item.shoeName} (${item.serviceType})`,
+                    })).concat([
+                        {
+                            id: 'shipping-fee',
+                            price: totalLogistics,
+                            quantity: 1,
+                            name: 'Biaya Penjemputan & Pengantaran'
+                        }
+                    ]),
+                    callbacks: {
+                        finish: `${req.protocol}://${req.get('host')}/customer/my-orders`,
+                        error: `${req.protocol}://${req.get('host')}/customer/my-orders`,
+                        pending: `${req.protocol}://${req.get('host')}/customer/my-orders`
+                    }
+                };
+
+                const transaction = await snap.createTransaction(parameter);
+                snapToken = transaction.token;
+                snapRedirectUrl = transaction.redirect_url;
+            } catch (snapError) {
+                return res.status(400).json({
+                    status: "fail",
+                    message: "Midtrans Error: " + snapError.message,
+                });
+            }
+        }
+
+        // 3. Save to Database (Only if Snap token is secured or payment is COD)
         const newOrder = await Order.create({
+            orderId,
             user: req.user.id,
             items: processedItems,
             logistics: {
@@ -83,7 +135,10 @@ exports.createOrder = async (req, res) => {
                 pickupFee: logistics.pickupMethod === "pickup" ? (settings.shippingRatePerKm || 5000) : 0,
                 deliveryFee: logistics.deliveryMethod === "delivery" ? (settings.shippingRatePerKm || 5000) : 0,
             },
-            payment,
+            payment: {
+                ...payment,
+                snapToken
+            },
             totalPrice,
         });
 
@@ -91,6 +146,8 @@ exports.createOrder = async (req, res) => {
             status: "success",
             data: {
                 order: newOrder,
+                snapToken,
+                snapRedirectUrl
             },
         });
     } catch (err) {
@@ -146,6 +203,14 @@ exports.updateOrderStatus = async (req, res) => {
             return res.status(404).json({
                 status: "fail",
                 message: "Order not found",
+            });
+        }
+
+        // Check if Bank Transfer must be paid first
+        if (order.payment.method === 'bank' && order.payment.status !== 'paid') {
+            return res.status(400).json({
+                status: "fail",
+                message: "Pesanan dengan metode Transfer harus dilunasi terlebih dahulu sebelum diproses."
             });
         }
 
@@ -213,6 +278,58 @@ exports.confirmPayment = async (req, res) => {
         res.status(400).json({
             status: "fail",
             message: err.message,
+        });
+    }
+};
+// 4. Handle Midtrans Notification (Webhook)
+exports.handleNotification = async (req, res) => {
+    try {
+        const statusResponse = req.body;
+        const orderId = statusResponse.order_id;
+        const transactionStatus = statusResponse.transaction_status;
+        const fraudStatus = statusResponse.fraud_status;
+
+        console.log(`Notification received. Order ID: ${orderId}. Status: ${transactionStatus}`);
+
+        const order = await Order.findOne({ orderId: orderId });
+
+        if (!order) {
+            return res.status(404).json({
+                status: "error",
+                message: "Order not found"
+            });
+        }
+
+        if (transactionStatus == 'capture') {
+            if (fraudStatus == 'challenge') {
+                // TODO: set transaction status on your database to 'challenge'
+                // e.g: herOrder.paymentStatus = 'challenge';
+            } else if (fraudStatus == 'accept') {
+                order.payment.status = 'paid';
+                order.status = 'pickup'; // Langsung lanjut ke penjemputan
+            }
+        } else if (transactionStatus == 'settlement') {
+            order.payment.status = 'paid';
+            order.status = 'pickup'; // Langsung lanjut ke penjemputan
+        } else if (transactionStatus == 'cancel' ||
+            transactionStatus == 'deny' ||
+            transactionStatus == 'expire') {
+            order.payment.status = 'failed';
+        } else if (transactionStatus == 'pending') {
+            order.payment.status = 'pending';
+        }
+
+        await order.save();
+
+        return res.status(200).json({
+            status: "success",
+            message: "OK"
+        });
+    } catch (err) {
+        console.error("Webhook Error:", err);
+        return res.status(500).json({
+            status: "error",
+            message: err.message
         });
     }
 };

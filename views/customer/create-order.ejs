@@ -1,4 +1,5 @@
 <%- include('../partials/dashboard-head') %>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<%= midtransClientKey %>"></script>
 
   <!-- PAGE HEADER -->
   <div class="page-header">
@@ -306,3 +307,119 @@
   </div>
 
   <%- include('../partials/dashboard-foot') %>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const btnConfirm = document.getElementById("btn-confirm-order");
+      if (!btnConfirm) return;
+
+      btnConfirm.addEventListener("click", async function(e) {
+        e.preventDefault(); // Mencegah default action apapun
+
+        // 1. Ambil Data Item
+        const shoeItems = [];
+        document.querySelectorAll(".shoe-item:not(#shoe-item-template .shoe-item)").forEach(item => {
+          const nameEl = item.querySelector(".shoe-name");
+          const serviceEl = item.querySelector(".service-type");
+          if (!nameEl || !serviceEl) return;
+          
+          const name = nameEl.value;
+          const serviceType = serviceEl.value;
+          const addons = [];
+          item.querySelectorAll(".addon-tag input:checked").forEach(cb => addons.push(cb.value));
+          
+          if (name && serviceType) {
+            shoeItems.push({ shoeName: name, serviceType, addons });
+          }
+        });
+
+        if (shoeItems.length === 0) {
+          alert("Silakan tambahkan setidaknya satu item sepatu.");
+          return;
+        }
+
+        // 2. Ambil Data Logistik
+        const pickupBtn = document.querySelector('[data-group="pickup"].active');
+        const deliveryBtn = document.querySelector('[data-group="delivery"].active');
+        const pickupMethod = pickupBtn ? pickupBtn.dataset.value : "self";
+        const deliveryMethod = deliveryBtn ? deliveryBtn.dataset.value : "self";
+        
+        let pickupAddress = "";
+        if (pickupMethod === "pickup") {
+          const sel = document.getElementById("pickup-address-selector");
+          pickupAddress = sel.value === "manual" ? document.getElementById("pickup-address-manual").value : sel.value;
+          if (!pickupAddress) return alert("Alamat jemput wajib diisi.");
+        }
+
+        let deliveryAddress = "";
+        if (deliveryMethod === "delivery") {
+          const sel = document.getElementById("delivery-address-selector");
+          deliveryAddress = sel.value === "manual" ? document.getElementById("delivery-address-manual").value : sel.value;
+          if (!deliveryAddress) return alert("Alamat antar wajib diisi.");
+        }
+
+        // 3. Ambil Metode Pembayaran
+        const paymentMethodEl = document.querySelector('input[name="payment"]:checked');
+        const paymentMethod = paymentMethodEl ? paymentMethodEl.value : "bank";
+
+        // 4. Kirim ke Server
+        btnConfirm.disabled = true;
+        btnConfirm.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+        try {
+          const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              items: shoeItems,
+              logistics: { pickupMethod, deliveryMethod, pickupAddress, deliveryAddress },
+              payment: { method: paymentMethod }
+            })
+          });
+
+          const result = await response.json();
+
+          if (result.status === "success") {
+            if (paymentMethod === "bank") {
+              if (result.data.snapToken) {
+                console.log("Snap Token ditemukan:", result.data.snapToken);
+                window.snap.pay(result.data.snapToken, {
+                  onSuccess: function(res) { 
+                    alert("Pembayaran Berhasil!"); 
+                    window.location.href = "/customer/my-orders"; 
+                  },
+                  onPending: function(res) { 
+                    // JANGAN redirect di sini agar popup VA/instruksi tetap terbuka
+                    console.log("Payment pending:", res);
+                  },
+                  onError: function(res) { 
+                    alert("Pembayaran Gagal."); 
+                    window.location.href = "/customer/my-orders"; 
+                  },
+                  onClose: function() { 
+                    // Hanya redirect setelah user menutup popup secara manual
+                    window.location.href = "/customer/my-orders"; 
+                  }
+                });
+              } else {
+                alert("Error: Token Midtrans tidak ditemukan. Mengarahkan ke riwayat pesanan.");
+                window.location.href = "/customer/my-orders";
+              }
+            } else {
+              alert("Pesanan COD berhasil dibuat!");
+              window.location.href = "/customer/my-orders";
+            }
+          } else {
+            alert("Gagal: " + result.message);
+            btnConfirm.disabled = false;
+            btnConfirm.innerHTML = "Konfirmasi Pesanan";
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Terjadi kesalahan koneksi.");
+          btnConfirm.disabled = false;
+          btnConfirm.innerHTML = "Konfirmasi Pesanan";
+        }
+      });
+    });
+  </script>

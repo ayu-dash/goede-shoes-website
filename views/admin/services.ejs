@@ -239,9 +239,9 @@
       if (res.ok) {
         window.location.reload();
       } else {
-        if (submitBtn) submitBtn.disabled = false;
         const errorData = await res.json();
-        alert("Gagal menambahkan layanan: " + (errorData.message || ""));
+        showCustomAlert("Gagal", "Gagal menambahkan layanan: " + (errorData.message || ""), "error");
+        if (submitBtn) submitBtn.disabled = false;
       }
     } catch (err) {
       if (submitBtn) submitBtn.disabled = false;
@@ -283,9 +283,9 @@
       if (res.ok) {
         window.location.reload();
       } else {
-        if (submitBtn) submitBtn.disabled = false;
         const errorData = await res.json();
-        alert("Gagal memperbarui layanan: " + (errorData.message || ""));
+        showCustomAlert("Gagal", "Gagal memperbarui layanan: " + (errorData.message || ""), "error");
+        if (submitBtn) submitBtn.disabled = false;
       }
     } catch (err) {
       if (submitBtn) submitBtn.disabled = false;
@@ -294,18 +294,21 @@
   }
 
   async function deleteService(id) {
-    if (confirm("Apakah anda yakin ingin menghapus layanan ini?")) {
+    showCustomConfirm("Hapus Layanan", "Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.", "error", async () => {
       try {
         const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
         if (res.ok) {
-          window.location.reload();
+          showCustomAlert("Berhasil", "Layanan telah dihapus.", "success", () => {
+            window.location.reload();
+          });
         } else {
-          alert("Gagal menghapus layanan");
+          showCustomAlert("Gagal", "Gagal menghapus layanan.", "error");
         }
       } catch (err) {
         console.error(err);
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       }
-    }
+    });
   }
 </script>
 

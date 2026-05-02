@@ -71,16 +71,18 @@
             </div>
           </div>
 
-          <div class="active-order-bottom">
-            <div class="active-order-estimate">
-              <i class="fa-regular fa-calendar"></i>
-              <div>
-                <span class="estimate-label">TANGGAL PESAN</span>
-                <span class="estimate-value"><%= new Date(order.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+            <div class="active-order-bottom">
+              <div class="active-order-estimate">
+                <i class="fa-regular fa-calendar"></i>
+                <div>
+                  <span class="estimate-label">TANGGAL PESAN</span>
+                  <span class="estimate-value"><%= new Date(order.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="/customer/order-detail?id=<%= order._id %>" class="btn btn-primary btn-sm">DETAIL</a>
               </div>
             </div>
-            <a href="/customer/order-detail?id=<%= order._id %>" class="btn btn-primary btn-sm">DETAIL</a>
-          </div>
         </div>
       </div>
     <% }) %>
@@ -120,6 +122,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Progress bar fill
     document.querySelectorAll('.progress-fill').forEach(el => {
       if (el.dataset.progress) {
         el.style.width = el.dataset.progress + '%';

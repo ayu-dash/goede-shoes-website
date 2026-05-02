@@ -1,0 +1,121 @@
+/* Custom Alert Styles */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.custom-alert-overlay.active {
+    opacity: 1;
+}
+
+.custom-alert-modal {
+    background: white;
+    width: 90%;
+    max-width: 400px;
+    padding: 40px 30px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-alert-overlay.active .custom-alert-modal {
+    transform: scale(1);
+}
+
+.custom-alert-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.custom-alert-icon.success {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.custom-alert-icon.error {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.custom-alert-icon.warning {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.custom-alert-icon.info {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.custom-alert-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 12px;
+}
+
+.custom-alert-message {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.custom-alert-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-alert-btn.success {
+    background: #10b981;
+    color: white;
+}
+
+.custom-alert-btn.error {
+    background: #ef4444;
+    color: white;
+}
+
+.custom-alert-btn.warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.custom-alert-btn.info {
+    background: #3b82f6;
+    color: white;
+}
+
+.custom-alert-btn:hover {
+    filter: brightness(0.9);
+    transform: translateY(-2px);
+}
+
+.custom-alert-btn:active {
+    transform: translateY(0);
+}

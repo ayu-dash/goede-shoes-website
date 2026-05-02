@@ -67,6 +67,9 @@ const orderSchema = new mongoose.Schema(
                 enum: ["pending", "paid"],
                 default: "pending",
             },
+            snapToken: {
+                type: String,
+            },
         },
         status: {
             type: String,

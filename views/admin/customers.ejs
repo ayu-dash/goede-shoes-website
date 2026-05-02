@@ -235,31 +235,33 @@
         updateStats(); // REALTIME UPDATE
       } else {
         checkbox.checked = !isActive;
-        alert(result.message || "Gagal update status");
+        showCustomAlert("Gagal", (result.message || "Gagal update status"), "error");
       }
     } catch (err) {
       checkbox.checked = !isActive;
-      alert("Terjadi kesalahan");
+      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
   // Delete Customer
   async function deleteCustomer(id) {
-    if (!confirm("Yakin ingin menghapus customer ini?")) return;
-
-    try {
-      const res = await fetch(`/api/admin/customers/${id}`, {
-        method: "DELETE"
-      });
-      if (res.status === 204) {
-        location.reload();
-      } else {
-        const result = await res.json();
-        alert(result.message || "Gagal menghapus customer");
+    showCustomConfirm("Hapus Customer", "Apakah Anda yakin ingin menghapus customer ini? Semua data terkait akan ikut terhapus.", "error", async () => {
+      try {
+        const res = await fetch(`/api/admin/customers/${id}`, {
+          method: "DELETE"
+        });
+        if (res.status === 204) {
+          showCustomAlert("Berhasil", "Data customer telah dihapus.", "success", () => {
+            location.reload();
+          });
+        } else {
+          const result = await res.json();
+          showCustomAlert("Gagal", (result.message || "Gagal menghapus customer"), "error");
+        }
+      } catch (err) {
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       }
-    } catch (err) {
-      alert("Terjadi kesalahan");
-    }
+    });
   }
 
   // Customer Detail Modal

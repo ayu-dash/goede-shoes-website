@@ -89,45 +89,42 @@ document.querySelectorAll('.btn-action').forEach(btn => {
         const id = this.dataset.id;
         const action = this.dataset.action;
         
-        const confirmMsg = action === 'start-pickup' 
-            ? 'Konfirmasi mulai penjemputan?' 
-            : 'Konfirmasi mulai pengantaran?';
-            
-        if (!confirm(confirmMsg)) return;
+        showCustomConfirm("Konfirmasi Tindakan", confirmMsg, "info", async () => {
+            try {
+                this.disabled = true;
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-        try {
-            this.disabled = true;
-            const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                const formData = new FormData();
+                let newStatus = '';
+                if (action === 'start-pickup') newStatus = 'pickup';
+                else if (action === 'start-delivery') newStatus = 'delivery';
+                else if (action === 'complete-delivery') newStatus = 'completed';
 
-            const formData = new FormData();
-            // Transition logic
-            let newStatus = '';
-            if (action === 'start-pickup') newStatus = 'pickup';
-            else if (action === 'start-delivery') newStatus = 'delivery';
-            else if (action === 'complete-delivery') newStatus = 'completed';
+                formData.append('status', newStatus);
+                formData.append('note', `Staff melakukan: ${action.split('-').join(' ')}`);
 
-            formData.append('status', newStatus);
-            formData.append('note', `Staff melakukan: ${action.split('-').join(' ')}`);
+                const response = await fetch(`/api/orders/${id}/update-status`, {
+                    method: 'PATCH',
+                    body: formData
+                });
 
-            const response = await fetch(`/api/orders/${id}/update-status`, {
-                method: 'PATCH',
-                body: formData
-            });
-
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                const err = await response.json();
-                alert('Gagal: ' + (err.message || 'Terjadi kesalahan'));
+                if (response.ok) {
+                    showCustomAlert("Berhasil", "Status logistik berhasil diperbarui.", "success", () => {
+                        window.location.reload();
+                    });
+                } else {
+                    const err = await response.json();
+                    showCustomAlert("Gagal", (err.message || "Terjadi kesalahan"), "error");
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }
+            } catch (err) {
+                console.error(err);
+                showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
                 this.disabled = false;
-                this.innerHTML = originalText;
             }
-        } catch (err) {
-            console.error(err);
-            alert('Terjadi kesalahan koneksi.');
-            this.disabled = false;
-        }
+        });
     }
 });
 </script>

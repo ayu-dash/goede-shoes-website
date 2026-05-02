@@ -71,6 +71,7 @@ exports.renderCustomerCreateOrder = async (req, res) => {
       mainServices,
       addOns,
       settings,
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY
     });
   } catch (err) {
     console.error("Create Order Error:", err);
@@ -83,7 +84,11 @@ exports.renderCustomerCreateOrder = async (req, res) => {
 exports.renderCustomerMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id }).sort("-createdAt");
-    res.render("customer/my-orders", { activePage: "my-orders", orders });
+    res.render("customer/my-orders", { 
+        activePage: "my-orders", 
+        orders,
+        midtransClientKey: process.env.MIDTRANS_CLIENT_KEY 
+    });
   } catch (err) {
     res
       .status(500)
@@ -104,6 +109,7 @@ exports.renderCustomerOrderDetail = async (req, res) => {
       activePage: "my-orders",
       order,
       settings,
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY
     });
   } catch (err) {
     res
