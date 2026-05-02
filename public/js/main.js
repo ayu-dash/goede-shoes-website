@@ -23,8 +23,10 @@ function updateActiveNav() {
     if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
       navLinks.forEach((link) => {
         link.classList.remove("active");
-        if (link.getAttribute("href") === `#${sectionId}` || 
-            (sectionId === "beranda" && link.getAttribute("href") === "/")) {
+        const href = link.getAttribute("href");
+        if (href === `#${sectionId}` || 
+            href === `/#${sectionId}` ||
+            (sectionId === "beranda" && href === "/")) {
           link.classList.add("active");
         }
       });
@@ -130,3 +132,29 @@ if (otpGroup) {
     });
   }
 }
+
+// Smooth scroll for anchors with /#
+document.querySelectorAll('a[href^="/#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        const targetId = href.split('#')[1];
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement && window.location.pathname === '/') {
+            e.preventDefault();
+            const offsetTop = targetElement.offsetTop - 80;
+            window.scrollTo({
+                top: offsetTop,
+                behavior: "smooth"
+            });
+            
+            // Close mobile menu if open
+            const navLinksEl = document.getElementById("nav-links");
+            const hamburger = document.getElementById("hamburger");
+            if (navLinksEl && navLinksEl.classList.contains("open")) {
+                navLinksEl.classList.remove("open");
+                hamburger.classList.remove("active");
+            }
+        }
+    });
+});
