@@ -333,3 +333,63 @@ exports.handleNotification = async (req, res) => {
         });
     }
 };
+exports.cancelOrder = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({
+                status: "fail",
+                message: "Order not found",
+            });
+        }
+
+        // Check ownership
+        const isStaffOrAdmin = ["admin", "staff"].includes(req.user.role);
+        if (order.user.toString() !== req.user._id.toString() && !isStaffOrAdmin) {
+            return res.status(403).json({
+                status: "fail",
+                message: "You are not authorized to cancel this order",
+            });
+        }
+
+        // Check if status allows cancellation (Always allow for staff/admin, check for customers)
+        const allowedStatuses = ["pending", "payment", "pickup"];
+        if (!isStaffOrAdmin && !allowedStatuses.includes(order.status)) {
+            return res.status(400).json({
+                status: "fail",
+                message: `Cannot cancel order with status: ${order.status}`,
+            });
+        }
+
+        // Prevent cancellation if already paid (Only for customers, staff/admin can bypass)
+        if (!isStaffOrAdmin && order.payment && order.payment.status === "paid") {
+            return res.status(400).json({
+                status: "fail",
+                message: "Paid orders cannot be cancelled automatically. Please contact admin for a refund.",
+            });
+        }
+
+        // Update status
+        order.status = "cancelled";
+        order.statusHistory.push({
+            status: "cancelled",
+            updatedBy: req.user._id,
+            note: "Dibatalkan oleh pelanggan",
+        });
+
+        await order.save();
+
+        res.status(200).json({
+            status: "success",
+            message: "Order cancelled successfully",
+            data: order,
+        });
+    } catch (err) {
+        console.error("Cancel order error:", err);
+        res.status(500).json({
+            status: "error",
+            message: "An internal server error occurred",
+        });
+    }
+};

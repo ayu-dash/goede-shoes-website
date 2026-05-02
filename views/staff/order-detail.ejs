@@ -327,6 +327,14 @@
             <%= order.status.toUpperCase() %>
           </span>
         </div>
+
+        <% if (order.status !== 'completed' && order.status !== 'cancelled') { %>
+          <button onclick="cancelOrder('<%= order._id %>')" 
+            style="width: 100%; margin-top: 10px; padding: 12px; background: #fff1f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.3s ease;">
+            <i class="fa-solid fa-ban" style="margin-right: 8px;"></i> BATALKAN PESANAN
+          </button>
+          <p style="font-size: 11px; color: #991b1b; text-align: center; margin-top: 5px; opacity: 0.8;">*Gunakan jika pesanan gagal diproses atau refund manual dilakukan.</p>
+        <% } %>
       </div>
     </div>
   </div>
@@ -596,6 +604,31 @@ function copyPhone(text) {
     }, 2000);
   });
 }
+  async function cancelOrder(orderId) {
+    const isPaid = '<%= order.payment && order.payment.status === "paid" %>' === 'true';
+    const warningText = isPaid 
+      ? "Pesanan ini SUDAH DIBAYAR. Pastikan Anda telah melakukan REFUND MANUAL sebelum membatalkan di sistem. Lanjutkan?"
+      : "Apakah Anda yakin ingin membatalkan pesanan ini?";
+
+    showCustomConfirm("Konfirmasi Pembatalan", warningText, "error", async () => {
+      try {
+        const res = await fetch(`/api/orders/${orderId}/cancel`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showCustomAlert("Berhasil", "Pesanan telah dibatalkan.", "success", () => {
+            window.location.reload();
+          });
+        } else {
+          showCustomAlert("Gagal", data.message || "Gagal membatalkan pesanan.", "error");
+        }
+      } catch (err) {
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+      }
+    });
+  }
 </script>
 
 <%- include('../partials/dashboard-foot') %>

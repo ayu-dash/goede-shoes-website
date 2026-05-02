@@ -12,6 +12,7 @@ router.use(authMiddleware.protect);
 
 router.post("/", orderController.createOrder);
 router.get("/my-orders", orderController.getMyOrders);
+router.patch("/:id/cancel", orderController.cancelOrder);
 
 // Staff & Admin Routes
 router.patch(

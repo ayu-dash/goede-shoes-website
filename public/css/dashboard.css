@@ -236,6 +236,11 @@
   color: var(--white);
 }
 
+.status-badge--cancel {
+  background: #ef4444;
+  color: var(--white);
+}
+
 /* ===========================
    DASHBOARD BANNER
 =========================== */
@@ -1556,6 +1561,16 @@
 .timeline-step.completed .timeline-label,
 .timeline-step.active .timeline-label {
   color: var(--navy-dark);
+}
+
+.timeline-step.cancelled .timeline-dot {
+  background: #ef4444;
+  color: var(--white);
+  border-color: #ef4444;
+}
+
+.timeline-step.cancelled .timeline-label {
+  color: #ef4444;
 }
 
 .timeline-line {

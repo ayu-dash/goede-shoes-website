@@ -351,6 +351,13 @@
                           <i class="fa-solid fa-circle-check"></i>
                           <span>PEMBAYARAN TELAH LUNAS</span>
                         </div>
+                                      <% } %>
+                      
+                      <% if (['pending', 'payment', 'pickup'].includes(order.status) && order.payment?.status !== 'paid') { %>
+                        <button onclick="cancelOrder('<%= order._id %>')" 
+                          style="width: 100%; margin-top: 12px; padding: 12px; background: transparent; border: 1px solid #fee2e2; color: #ef4444; border-radius: 12px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.3s ease;">
+                          BATALKAN PESANAN
+                        </button>
                       <% } %>
       </div>
     </div>
@@ -388,5 +395,31 @@
         });
       }
     });
+
+    async function cancelOrder(orderId) {
+      showCustomAlert(
+        "Konfirmasi Pembatalan",
+        "Apakah Anda yakin ingin membatalkan pesanan ini?",
+        "warning",
+        async () => {
+          try {
+            const res = await fetch(`/api/orders/${orderId}/cancel`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (res.ok) {
+              showCustomAlert("Berhasil", "Pesanan telah dibatalkan.", "success", () => {
+                window.location.href = "/customer/my-orders";
+              });
+            } else {
+              showCustomAlert("Gagal", data.message || "Gagal membatalkan pesanan.", "error");
+            }
+          } catch (err) {
+            showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+          }
+        }
+      );
+    }
   </script>
   <%- include('../partials/dashboard-foot') %>
