@@ -404,7 +404,7 @@
                   }
                 });
               } else {
-                showCustomAlert("Sistem Error", "Token Midtrans tidak ditemukan. Mengarahkan ke riwayat pesanan.", "error", () => {
+                showCustomAlert("Kesalahan Sistem", "Token Midtrans tidak ditemukan. Mengarahkan ke riwayat pesanan.", "error", () => {
                   window.location.href = "/customer/my-orders";
                 });
               }
@@ -420,7 +420,7 @@
           }
         } catch (err) {
           console.error(err);
-          showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+          showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
           btnConfirm.disabled = false;
           btnConfirm.innerHTML = "Konfirmasi Pesanan";
         }

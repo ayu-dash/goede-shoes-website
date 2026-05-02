@@ -89,6 +89,8 @@ document.querySelectorAll('.btn-action').forEach(btn => {
         const id = this.dataset.id;
         const action = this.dataset.action;
         
+        let confirmMsg = "Apakah Anda yakin ingin memperbarui status pesanan ini?";
+        
         showCustomConfirm("Konfirmasi Tindakan", confirmMsg, "info", async () => {
             try {
                 this.disabled = true;
@@ -121,7 +123,7 @@ document.querySelectorAll('.btn-action').forEach(btn => {
                 }
             } catch (err) {
                 console.error(err);
-                showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+                showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
                 this.disabled = false;
             }
         });

@@ -239,7 +239,7 @@
       }
     } catch (err) {
       checkbox.checked = !isActive;
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+      showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
     }
   }
 
@@ -259,7 +259,7 @@
           showCustomAlert("Gagal", (result.message || "Gagal menghapus customer"), "error");
         }
       } catch (err) {
-        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+        showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       }
     });
   }
@@ -274,7 +274,7 @@
     document.getElementById("detailId").textContent = `#CST-${cust._id.toString().slice(-4).toUpperCase()}`;
     document.getElementById("detailEmail").innerHTML = `<i class="fa-regular fa-envelope"></i> ${cust.email}`;
     document.getElementById("detailPhone").innerHTML = `<i class="fa-solid fa-phone"></i> ${cust.phone}`;
-    document.getElementById("detailJoinDate").innerHTML = `<i class="fa-regular fa-calendar"></i> Joined ${new Date(cust.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+    document.getElementById("detailJoinDate").innerHTML = `<i class="fa-regular fa-calendar"></i> Bergabung ${new Date(cust.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}`;
 
     // Fetch and fill orders
     const orderTableBody = document.getElementById("orderHistoryBody");

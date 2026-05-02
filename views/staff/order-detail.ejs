@@ -585,7 +585,7 @@ async function performStatusUpdate(status, note = '', files = []) {
       }
     } catch (err) {
       console.error('Update error:', err);
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+      showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       document.querySelectorAll('button').forEach(b => b.disabled = false);
     }
 }
@@ -625,7 +625,7 @@ function copyPhone(text) {
           showCustomAlert("Gagal", data.message || "Gagal membatalkan pesanan.", "error");
         }
       } catch (err) {
-        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+        showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       }
     });
   }

@@ -78,17 +78,17 @@
       <div class="admin-panel ops-social-section" style="margin-top: 24px">
         <h4 class="ops-section-label">MEDIA SOSIAL</h4>
         <div class="ops-social-list" style="display: flex; flex-direction: column; gap: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.instagram?.isActive ? 1 : 0.5 %>">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; <%= settings.socialLinks?.instagram?.isActive ? '' : 'opacity: 0.5' %>">
             <i class="fa-brands fa-instagram" style="width: 20px; color: #e1306c;"></i>
             <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.instagram?.url || '#' %></span>
             <% if (!settings.socialLinks?.instagram?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.youtube?.isActive ? 1 : 0.5 %>">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; <%= settings.socialLinks?.youtube?.isActive ? '' : 'opacity: 0.5' %>">
             <i class="fa-brands fa-youtube" style="width: 20px; color: #ff0000;"></i>
             <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.youtube?.url || '#' %></span>
             <% if (!settings.socialLinks?.youtube?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; opacity: <%= settings.socialLinks?.tiktok?.isActive ? 1 : 0.5 %>">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; <%= settings.socialLinks?.tiktok?.isActive ? '' : 'opacity: 0.5' %>">
             <i class="fa-brands fa-tiktok" style="width: 20px; color: #000000;"></i>
             <span style="color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= settings.socialLinks?.tiktok?.url || '#' %></span>
             <% if (!settings.socialLinks?.tiktok?.isActive) { %><span style="font-size: 10px; background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px;">Nonaktif</span><% } %>
@@ -402,7 +402,7 @@
           showCustomAlert("Gagal", "Gagal menyimpan perubahan pengaturan toko.", "error");
         }
       } catch (err) {
-        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+        showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       }
     }
 
@@ -424,7 +424,7 @@
           showCustomAlert("Gagal", "Gagal menyimpan tarif pengiriman.", "error");
         }
       } catch (err) {
-        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
+        showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       }
     }
 

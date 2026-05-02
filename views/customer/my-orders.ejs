@@ -106,7 +106,7 @@
             <img src="<%= (histShoePhoto && histShoePhoto.length > 0) ? histShoePhoto[0] : '/images/hero-shoe.png' %>" alt="Sepatu" class="history-card-img" />
             <div class="history-card-info">
               <span class="history-card-id">#<%= order.orderId %></span>
-              <span class="history-status-badge" style="<%= order.status === 'cancelled' ? 'background: #ef4444; color: #ffffff; border: none;' : '' %>">
+              <span class="history-status-badge" <%= order.status === 'cancelled' ? 'style="background: #ef4444; color: #ffffff; border: none;"' : '' %>>
                 <%= order.status.toUpperCase() %>
               </span>
               <h4 class="history-card-name"><%= order.items[0].shoeName %></h4>
