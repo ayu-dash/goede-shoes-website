@@ -334,7 +334,7 @@
         });
 
         if (shoeItems.length === 0) {
-          alert("Silakan tambahkan setidaknya satu item sepatu.");
+          showCustomAlert("Item Kosong", "Silakan tambahkan setidaknya satu item sepatu.", "warning");
           return;
         }
 
@@ -348,14 +348,14 @@
         if (pickupMethod === "pickup") {
           const sel = document.getElementById("pickup-address-selector");
           pickupAddress = sel.value === "manual" ? document.getElementById("pickup-address-manual").value : sel.value;
-          if (!pickupAddress) return alert("Alamat jemput wajib diisi.");
+          if (!pickupAddress) return showCustomAlert("Alamat Kurang", "Alamat jemput wajib diisi.", "warning");
         }
 
         let deliveryAddress = "";
         if (deliveryMethod === "delivery") {
           const sel = document.getElementById("delivery-address-selector");
           deliveryAddress = sel.value === "manual" ? document.getElementById("delivery-address-manual").value : sel.value;
-          if (!deliveryAddress) return alert("Alamat antar wajib diisi.");
+          if (!deliveryAddress) return showCustomAlert("Alamat Kurang", "Alamat antar wajib diisi.", "warning");
         }
 
         // 3. Ambil Metode Pembayaran
@@ -385,16 +385,18 @@
                 console.log("Snap Token ditemukan:", result.data.snapToken);
                 window.snap.pay(result.data.snapToken, {
                   onSuccess: function(res) { 
-                    alert("Pembayaran Berhasil!"); 
-                    window.location.href = "/customer/my-orders"; 
+                    showCustomAlert("Berhasil", "Pembayaran Berhasil!", "success", () => {
+                      window.location.href = "/customer/my-orders";
+                    });
                   },
                   onPending: function(res) { 
                     // JANGAN redirect di sini agar popup VA/instruksi tetap terbuka
                     console.log("Payment pending:", res);
                   },
                   onError: function(res) { 
-                    alert("Pembayaran Gagal."); 
-                    window.location.href = "/customer/my-orders"; 
+                    showCustomAlert("Gagal", "Pembayaran Gagal.", "error", () => {
+                      window.location.href = "/customer/my-orders";
+                    });
                   },
                   onClose: function() { 
                     // Hanya redirect setelah user menutup popup secara manual
@@ -402,21 +404,23 @@
                   }
                 });
               } else {
-                alert("Error: Token Midtrans tidak ditemukan. Mengarahkan ke riwayat pesanan.");
-                window.location.href = "/customer/my-orders";
+                showCustomAlert("Sistem Error", "Token Midtrans tidak ditemukan. Mengarahkan ke riwayat pesanan.", "error", () => {
+                  window.location.href = "/customer/my-orders";
+                });
               }
             } else {
-              alert("Pesanan COD berhasil dibuat!");
-              window.location.href = "/customer/my-orders";
+              showCustomAlert("Berhasil", "Pesanan COD berhasil dibuat!", "success", () => {
+                window.location.href = "/customer/my-orders";
+              });
             }
           } else {
-            alert("Gagal: " + result.message);
+            showCustomAlert("Gagal", result.message, "error");
             btnConfirm.disabled = false;
             btnConfirm.innerHTML = "Konfirmasi Pesanan";
           }
         } catch (err) {
           console.error(err);
-          alert("Terjadi kesalahan koneksi.");
+          showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
           btnConfirm.disabled = false;
           btnConfirm.innerHTML = "Konfirmasi Pesanan";
         }

@@ -34,6 +34,10 @@ const settingsSchema = new mongoose.Schema(
         lng: Number,
       },
     },
+    aboutText: {
+      type: String,
+      default: "GOEDE SHOES adalah jasa perawatan sepatu premium yang berfokus pada kualitas dan detail. Kami melayani berbagai jenis sepatu dengan teknik yang tepat dan bahan berkualitas tinggi."
+    }
   },
   { timestamps: true },
 );

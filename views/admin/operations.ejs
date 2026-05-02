@@ -1,228 +1,73 @@
 <%- include('../partials/dashboard-head') %>
 
-<div class="page-header" style="margin-bottom: 32px">
-  <h1 class="page-title page-title--xl">Manajemen Operasional</h1>
-</div>
-
-<div class="ops-layout">
-  <!-- LEFT COLUMN -->
-  <div class="ops-left">
-    <!-- REKENING BANK -->
-    <div class="admin-panel ops-bank-section">
-      <h4 class="ops-section-label">REKENING BANK</h4>
-
-      <div id="bankAccountsList">
-        <% settings.bankAccounts.forEach((bank, index) => { %>
-        <div class="ops-bank-card" style="margin-bottom: 16px">
-          <div class="ops-bank-card-header">
-            <span class="ops-bank-name"><%= bank.bankName %></span>
-            <div class="ops-bank-actions">
-              <button class="ops-bank-btn" onclick="openEditBankModal('<%= index %>', '<%= bank.bankName %>', '<%= bank.accountNumber %>', '<%= bank.accountHolder %>')">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </button>
-              <button class="ops-bank-btn" style="color: #ef4444" onclick="deleteBank('<%= index %>')">
-                <i class="fa-regular fa-trash-can"></i>
-              </button>
-            </div>
-          </div>
-          <div class="ops-bank-detail">
-            <span class="ops-bank-label">ACCOUNT NUMBER</span>
-            <span class="ops-bank-number"><%= bank.accountNumber %></span>
-          </div>
-          <div class="ops-bank-detail">
-            <span class="ops-bank-label">ACCOUNT HOLDER</span>
-            <span class="ops-bank-holder"><%= bank.accountHolder %></span>
-          </div>
-        </div>
-        <% }) %>
-      </div>
-
-      <button class="ops-add-bank-btn" onclick="openModal('addBankModal')">+ Tambah Rekening</button>
-    </div>
-
-    <!-- TARIF PENGIRIMAN -->
-    <div class="admin-panel ops-tarif-section">
-      <h4 class="ops-section-label">TARIF PENGIRIMAN</h4>
-      <div class="ops-tarif-display">
-        <span class="ops-tarif-value" id="displayTarif">Rp <%= settings.shippingRatePerKm.toLocaleString('id-ID') %></span>
-        <span class="ops-tarif-unit">/km</span>
-      </div>
-      <button class="ops-edit-tarif-btn" onclick="openModal('editTarifModal')">
-        <i class="fa-solid fa-pen"></i> Edit Tarif
-      </button>
-    </div>
-
-    <!-- MIDTRANS CONFIG -->
-    <div class="admin-panel ops-midtrans-section" style="margin-top: 24px">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
-        <h4 class="ops-section-label" style="margin-bottom: 0">MIDTRANS GATEWAY</h4>
-        <label class="toggle-switch">
-          <input type="checkbox" id="midtransActive" <%= settings.midtransConfig.isActive ? 'checked' : '' %> onchange="saveMidtransStatus(this.checked)" />
-          <span class="toggle-slider"></span>
-          <span class="toggle-label" style="margin-left: 10px; font-size: 11px;"><%= settings.midtransConfig.isActive ? 'AKTIF' : 'NONAKTIF' %></span>
-        </label>
-      </div>
-
-      <div class="ops-midtrans-status <%= settings.midtransConfig.isProduction ? 'ops-midtrans-production' : 'ops-midtrans-sandbox' %>">
-        <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--status-color)"></div>
-        <span style="font-size: 11px; font-weight: 700; color: var(--status-color)">
-          MODE: <%= settings.midtransConfig.isProduction ? 'PRODUCTION' : 'SANDBOX' %>
-        </span>
-      </div>
-
-      <div class="ops-form-group">
-        <label class="ops-field-label">CLIENT KEY</label>
-        <div class="ops-field-value-box" style="font-family: monospace; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          <%= settings.midtransConfig.clientKey || 'Belum diatur' %>
-        </div>
-      </div>
-      
-      <button class="ops-add-bank-btn" style="margin-top: 12px; border-style: solid; background: #f8fafc;" onclick="openModal('midtransModal')">
-        <i class="fa-solid fa-key"></i> Konfigurasi Midtrans
-      </button>
-    </div>
+  <div class="page-header" style="margin-bottom: 32px">
+    <h1 class="page-title page-title--xl">Manajemen Operasional</h1>
   </div>
 
-  <!-- RIGHT COLUMN -->
-  <div class="ops-right">
-    <div class="admin-panel ops-store-section" id="storePanel">
-      <h4 class="ops-section-label">LOKASI TOKO</h4>
+  <div class="ops-layout">
+    <!-- LEFT COLUMN -->
+    <div class="ops-left" style="position: sticky; top: 24px; align-self: start;">
 
-      <!-- View Mode -->
-      <div class="ops-store-view" id="storeViewMode">
-        <div class="ops-form-group">
-          <label class="ops-field-label">NAMA TOKO</label>
-          <div class="ops-field-value-box"><%= settings.storeInfo.name %></div>
+      <!-- TARIF PENGIRIMAN -->
+      <div class="admin-panel ops-tarif-section">
+        <h4 class="ops-section-label">TARIF PENGIRIMAN</h4>
+        <div class="ops-tarif-display">
+          <span class="ops-tarif-value" id="displayTarif">Rp <%= settings.shippingRatePerKm.toLocaleString('id-ID') %>
+              </span>
+          <span class="ops-tarif-unit">/km</span>
         </div>
-
-        <div class="ops-form-group">
-          <label class="ops-field-label">ALAMAT TOKO</label>
-          <div class="ops-field-value-box">
-            <%= settings.storeInfo.address %>
-          </div>
-        </div>
-
-        <div class="ops-form-row">
-          <div class="ops-form-group">
-            <label class="ops-field-label">WAKTU BUKA</label>
-            <div class="ops-field-value-box ops-field-icon-right">
-              <%= settings.storeInfo.openTime %>
-              <i class="fa-regular fa-clock"></i>
-            </div>
-          </div>
-          <div class="ops-form-group">
-            <label class="ops-field-label">WAKTU TUTUP</label>
-            <div class="ops-field-value-box ops-field-icon-right">
-              <%= settings.storeInfo.closeTime %>
-              <i class="fa-regular fa-clock"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="ops-form-row">
-          <div class="ops-form-group">
-            <label class="ops-field-label">NOMOR TELEPON</label>
-            <div class="ops-field-value-box ops-field-icon-right">
-              <%= settings.storeInfo.phone %>
-              <i class="fa-solid fa-phone"></i>
-            </div>
-          </div>
-          <div class="ops-form-group">
-            <label class="ops-field-label">ALAMAT EMAIL</label>
-            <div class="ops-field-value-box ops-field-icon-right">
-              <%= settings.storeInfo.email %>
-              <i class="fa-regular fa-envelope"></i>
-            </div>
-          </div>
-        </div>
-
-        <div class="ops-form-row">
-          <div class="ops-form-group">
-            <label class="ops-field-label">LATITUDE</label>
-            <div class="ops-field-value-box"><%= settings.storeInfo.coordinates ? settings.storeInfo.coordinates.lat : '-' %></div>
-          </div>
-          <div class="ops-form-group">
-            <label class="ops-field-label">LONGITUDE</label>
-            <div class="ops-field-value-box"><%= settings.storeInfo.coordinates ? settings.storeInfo.coordinates.lng : '-' %></div>
-          </div>
-        </div>
-
-        <!-- Map -->
-        <div class="ops-map-container" style="height: 300px; border-radius: 12px; overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
-          <% 
-            var mapUrl = "https://maps.google.com/maps?q=" + encodeURIComponent(settings.storeInfo.address) + "&t=&z=15&ie=UTF8&iwloc=&output=embed";
-            if (settings.storeInfo.coordinates && settings.storeInfo.coordinates.lat && settings.storeInfo.coordinates.lng) {
-              mapUrl = "https://maps.google.com/maps?q=" + settings.storeInfo.coordinates.lat + "," + settings.storeInfo.coordinates.lng + "&t=&z=15&ie=UTF8&iwloc=&output=embed";
-            }
-          %>
-          <iframe 
-            width="100%" 
-            height="100%" 
-            frameborder="0" 
-            style="border:0" 
-            src="<%= mapUrl %>" 
-            allowfullscreen>
-          </iframe>
-        </div>
-        <button
-          class="btn btn-primary"
-          style="width: 100%; justify-content: center; background: #0d47a1;"
-          onclick="toggleEditMode(true)"
-        >
-          <i class="fa-solid fa-pen-to-square" style="margin-right: 8px;"></i> Edit Info Toko
+        <button class="ops-edit-tarif-btn" onclick="openModal('editTarifModal')">
+          <i class="fa-solid fa-pen"></i> Edit Tarif
         </button>
       </div>
 
-      <!-- Edit Mode -->
-      <form id="storeSettingsForm" onsubmit="saveStoreSettings(event)">
-        <div class="ops-store-edit" id="storeEditMode" style="display: none">
+      <!-- ABOUT FOOTER -->
+      <div class="admin-panel ops-about-section" style="margin-top: 24px">
+        <h4 class="ops-section-label">ABOUT FOOTER</h4>
+        <div class="ops-form-group">
+          <div class="ops-field-value-box" style="height: auto; min-height: 80px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; background: #f8fafc; border-color: #e2e8f0;"><%= settings.aboutText || 'Belum diatur' %></div>
+        </div>
+        <button class="ops-edit-tarif-btn" style="margin-top: 12px; width: 100%; justify-content: center;" onclick="openModal('aboutModal')">
+          <i class="fa-solid fa-pen"></i> Edit Teks
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="ops-right">
+      <div class="admin-panel ops-store-section" id="storePanel">
+        <h4 class="ops-section-label">LOKASI TOKO</h4>
+
+        <!-- View Mode -->
+        <div class="ops-store-view" id="storeViewMode">
           <div class="ops-form-group">
             <label class="ops-field-label">NAMA TOKO</label>
-            <input
-              type="text"
-              name="name"
-              class="ops-field-input"
-              value="<%= settings.storeInfo.name %>"
-              required
-            />
+            <div class="ops-field-value-box">
+              <%= settings.storeInfo.name %>
+            </div>
           </div>
 
           <div class="ops-form-group">
             <label class="ops-field-label">ALAMAT TOKO</label>
-            <input
-              type="text"
-              name="address"
-              class="ops-field-input"
-              value="<%= settings.storeInfo.address %>"
-              required
-            />
+            <div class="ops-field-value-box">
+              <%= settings.storeInfo.address %>
+            </div>
           </div>
 
           <div class="ops-form-row">
             <div class="ops-form-group">
               <label class="ops-field-label">WAKTU BUKA</label>
-              <div class="ops-field-input-icon">
-                <input
-                  type="time"
-                  name="openTime"
-                  class="ops-field-input"
-                  value="<%= settings.storeInfo.openTime %>"
-                  required
-                />
-                <i class="fa-regular fa-clock"></i>
+              <div class="ops-field-value-box ops-field-icon-right">
+                <%= settings.storeInfo.openTime %>
+                  <i class="fa-regular fa-clock"></i>
               </div>
             </div>
             <div class="ops-form-group">
               <label class="ops-field-label">WAKTU TUTUP</label>
-              <div class="ops-field-input-icon">
-                <input
-                  type="time"
-                  name="closeTime"
-                  class="ops-field-input"
-                  value="<%= settings.storeInfo.closeTime %>"
-                  required
-                />
-                <i class="fa-regular fa-clock"></i>
+              <div class="ops-field-value-box ops-field-icon-right">
+                <%= settings.storeInfo.closeTime %>
+                  <i class="fa-regular fa-clock"></i>
               </div>
             </div>
           </div>
@@ -230,361 +75,243 @@
           <div class="ops-form-row">
             <div class="ops-form-group">
               <label class="ops-field-label">NOMOR TELEPON</label>
-              <div class="ops-field-input-icon">
-                <input
-                  type="tel"
-                  name="phone"
-                  class="ops-field-input"
-                  value="<%= settings.storeInfo.phone %>"
-                  required
-                />
-                <i class="fa-solid fa-phone"></i>
+              <div class="ops-field-value-box ops-field-icon-right">
+                <%= settings.storeInfo.phone %>
+                  <i class="fa-solid fa-phone"></i>
               </div>
             </div>
             <div class="ops-form-group">
               <label class="ops-field-label">ALAMAT EMAIL</label>
-              <div class="ops-field-input-icon">
-                <input
-                  type="email"
-                  name="email"
-                  class="ops-field-input"
-                  value="<%= settings.storeInfo.email %>"
-                  required
-                />
-                <i class="fa-regular fa-envelope"></i>
+              <div class="ops-field-value-box ops-field-icon-right">
+                <%= settings.storeInfo.email %>
+                  <i class="fa-regular fa-envelope"></i>
               </div>
             </div>
           </div>
 
-          <div class="ops-form-row" style="margin-top: 16px;">
-            <div class="ops-form-group">
-              <label class="ops-field-label">LATITUDE</label>
-              <input
-                type="text"
-                name="lat"
-                class="ops-field-input"
-                value="<%= settings.storeInfo.coordinates ? settings.storeInfo.coordinates.lat : '' %>"
-                placeholder="-6.200000"
-              />
-            </div>
-            <div class="ops-form-group">
-              <label class="ops-field-label">LONGITUDE</label>
-              <input
-                type="text"
-                name="lng"
-                class="ops-field-input"
-                value="<%= settings.storeInfo.coordinates ? settings.storeInfo.coordinates.lng : '' %>"
-                placeholder="106.816666"
-              />
-            </div>
-          </div>
 
-          <div class="ops-map-container" style="height: 150px; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; margin-top: 20px;">
-            <div style="text-align: center; color: var(--text-secondary);">
-              <i class="fa-solid fa-map-location-dot" style="font-size: 24px; margin-bottom: 8px;"></i>
-              <p style="font-size: 11px; font-weight: 600;">Peta akan diperbarui otomatis setelah alamat disimpan</p>
+          <!-- Map -->
+          <div class="ops-map-container"
+            style="height: 300px; border-radius: 12px; overflow: hidden; margin-top: 20px; margin-bottom: 20px;">
+            <iframe width="100%" height="100%" frameborder="0" style="border:0"
+              src="https://maps.google.com/maps?q=<%= encodeURIComponent(settings.storeInfo.address) %>&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <button class="btn btn-primary" style="width: 100%; justify-content: center; background: #0d47a1;"
+            onclick="toggleEditMode(true)">
+            <i class="fa-solid fa-pen-to-square" style="margin-right: 8px;"></i> Edit Info Toko
+          </button>
+        </div>
+
+        <!-- Edit Mode -->
+        <form id="storeSettingsForm" onsubmit="saveStoreSettings(event)">
+          <div class="ops-store-edit" id="storeEditMode" style="display: none">
+            <div class="ops-form-group">
+              <label class="ops-field-label">NAMA TOKO</label>
+              <input type="text" name="name" class="ops-field-input" value="<%= settings.storeInfo.name %>" required />
+            </div>
+
+            <div class="ops-form-group">
+              <label class="ops-field-label">ALAMAT TOKO</label>
+              <input type="text" name="address" class="ops-field-input" value="<%= settings.storeInfo.address %>"
+                required />
+            </div>
+
+            <div class="ops-form-row">
+              <div class="ops-form-group">
+                <label class="ops-field-label">WAKTU BUKA</label>
+                <div class="ops-field-input-icon">
+                  <input type="time" name="openTime" class="ops-field-input" value="<%= settings.storeInfo.openTime %>"
+                    required />
+                  <i class="fa-regular fa-clock"></i>
+                </div>
+              </div>
+              <div class="ops-form-group">
+                <label class="ops-field-label">WAKTU TUTUP</label>
+                <div class="ops-field-input-icon">
+                  <input type="time" name="closeTime" class="ops-field-input"
+                    value="<%= settings.storeInfo.closeTime %>" required />
+                  <i class="fa-regular fa-clock"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="ops-form-row">
+              <div class="ops-form-group">
+                <label class="ops-field-label">NOMOR TELEPON</label>
+                <div class="ops-field-input-icon">
+                  <input type="tel" name="phone" class="ops-field-input" value="<%= settings.storeInfo.phone %>"
+                    required />
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+              </div>
+              <div class="ops-form-group">
+                <label class="ops-field-label">ALAMAT EMAIL</label>
+                <div class="ops-field-input-icon">
+                  <input type="email" name="email" class="ops-field-input" value="<%= settings.storeInfo.email %>"
+                    required />
+                  <i class="fa-regular fa-envelope"></i>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="ops-map-container"
+              style="height: 150px; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #cbd5e1; margin-top: 20px;">
+              <div style="text-align: center; color: var(--text-secondary);">
+                <i class="fa-solid fa-map-location-dot" style="font-size: 24px; margin-bottom: 8px;"></i>
+                <p style="font-size: 11px; font-weight: 600;">Peta akan diperbarui otomatis setelah alamat disimpan</p>
+              </div>
+            </div>
+            <div class="ops-edit-actions" style="margin-top: 20px;">
+              <button type="button" class="btn btn-ghost-cancel" onclick="toggleEditMode(false)">
+                Batal
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-regular fa-circle-check"></i> Simpan Perubahan
+              </button>
             </div>
           </div>
-          <div class="ops-edit-actions" style="margin-top: 20px;">
-            <button
-              type="button"
-              class="btn btn-ghost-cancel"
-              onclick="toggleEditMode(false)"
-            >
-              Batal
-            </button>
-            <button type="submit" class="btn btn-primary">
-              <i class="fa-regular fa-circle-check"></i> Simpan Perubahan
-            </button>
-          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+
+  <!-- Modal About Footer -->
+<div class="modal-overlay" id="aboutModal" onclick="closeModal(event, 'aboutModal')">
+  <div class="modal-content" style="max-width: 500px; padding: 32px">
+    <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 8px; font-size: 20px">About Footer</h3>
+    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Teks ini akan muncul di bagian bawah website (footer).</p>
+    
+    <form onsubmit="saveAboutText(event)">
+      <div class="modal-form-group" style="margin-bottom: 24px">
+        <label class="modal-label">TEKS ABOUT</label>
+        <textarea name="aboutText" class="modal-input" style="width: 100%; height: 150px; resize: vertical; padding: 12px; font-family: inherit; font-size: 13px;" required><%= settings.aboutText %></textarea>
+      </div>
+      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
+        <button type="button" class="btn btn-ghost-cancel" onclick="closeModalRaw('aboutModal')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+  <div class="modal-overlay" id="editTarifModal" onclick="closeModal(event, 'editTarifModal')">
+    <div class="modal-content" style="max-width: 400px; padding: 32px">
+      <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 24px; font-size: 20px">
+        Edit Tarif Pengiriman
+      </h3>
+      <form onsubmit="saveShippingRate(event)">
+        <div class="modal-form-group" style="margin-bottom: 24px">
+          <label class="modal-label">TARIF PER KM (Rp)</label>
+          <input type="number" id="inputTarif" class="modal-input" value="<%= settings.shippingRatePerKm %>" required />
+        </div>
+        <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
+          <button type="button" class="btn btn-ghost-cancel" style="font-weight: 700"
+            onclick="closeModalRaw('editTarifModal')">
+            Batal
+          </button>
+          <button type="submit" class="btn btn-primary" style="background: #0d47a1; border-radius: 8px">
+            Simpan
+          </button>
         </div>
       </form>
     </div>
   </div>
-</div>
 
-<!-- ==================== MODALS ==================== -->
 
-<!-- Modal Add Bank -->
-<div class="modal-overlay" id="addBankModal" onclick="closeModal(event, 'addBankModal')">
-  <div class="modal-content" style="max-width: 450px; padding: 32px">
-    <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 24px; font-size: 20px">Tambah Rekening</h3>
-    <form onsubmit="addBank(event)">
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">NAMA BANK</label>
-        <input type="text" name="bankName" class="modal-input" placeholder="Contoh: BCA, Mandiri" required />
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">NOMOR REKENING</label>
-        <input type="text" name="accountNumber" class="modal-input" required />
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 24px">
-        <label class="modal-label">NAMA PEMILIK</label>
-        <input type="text" name="accountHolder" class="modal-input" required />
-      </div>
-      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
-        <button type="button" class="btn btn-ghost-cancel" onclick="closeModalRaw('addBankModal')">Batal</button>
-        <button type="submit" class="btn btn-primary">Tambah</button>
-      </div>
-    </form>
-  </div>
-</div>
 
-<!-- Modal Edit Bank -->
-<div class="modal-overlay" id="editBankModal" onclick="closeModal(event, 'editBankModal')">
-  <div class="modal-content" style="max-width: 450px; padding: 32px">
-    <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 24px; font-size: 20px">Edit Rekening</h3>
-    <form onsubmit="saveEditBank(event)">
-      <input type="hidden" id="editBankIndex" />
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">NAMA BANK</label>
-        <input type="text" id="editBankName" name="bankName" class="modal-input" required />
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">NOMOR REKENING</label>
-        <input type="text" id="editBankAccountNumber" name="accountNumber" class="modal-input" required />
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 24px">
-        <label class="modal-label">NAMA PEMILIK</label>
-        <input type="text" id="editBankAccountHolder" name="accountHolder" class="modal-input" required />
-      </div>
-      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
-        <button type="button" class="btn btn-ghost-cancel" onclick="closeModalRaw('editBankModal')">Batal</button>
-        <button type="submit" class="btn btn-primary">Simpan</button>
-      </div>
-    </form>
-  </div>
-</div>
+  <script>
 
-<!-- Modal Edit Tarif -->
-<div
-  class="modal-overlay"
-  id="editTarifModal"
-  onclick="closeModal(event, 'editTarifModal')"
->
-  <div class="modal-content" style="max-width: 400px; padding: 32px">
-    <h3
-      class="modal-title"
-      style="color: #0d47a1; margin-bottom: 24px; font-size: 20px"
-    >
-      Edit Tarif Pengiriman
-    </h3>
-    <form onsubmit="saveShippingRate(event)">
-      <div class="modal-form-group" style="margin-bottom: 24px">
-        <label class="modal-label">TARIF PER KM (Rp)</label>
-        <input type="number" id="inputTarif" class="modal-input" value="<%= settings.shippingRatePerKm %>" required />
-      </div>
-      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
-        <button
-          type="button"
-          class="btn btn-ghost-cancel"
-          style="font-weight: 700"
-          onclick="closeModalRaw('editTarifModal')"
-        >
-          Batal
-        </button>
-        <button
-          type="submit"
-          class="btn btn-primary"
-          style="background: #0d47a1; border-radius: 8px"
-        >
-          Simpan
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal Midtrans Config -->
-<div class="modal-overlay" id="midtransModal" onclick="closeModal(event, 'midtransModal')">
-  <div class="modal-content" style="max-width: 500px; padding: 32px">
-    <h3 class="modal-title" style="color: #0d47a1; margin-bottom: 8px; font-size: 20px">Konfigurasi Midtrans</h3>
-    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Hubungkan website dengan payment gateway untuk pembayaran otomatis.</p>
-    
-    <form onsubmit="saveMidtransConfig(event)">
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">ENVIRONMENT</label>
-        <select name="isProduction" class="modal-input" style="width: 100%; appearance: auto;">
-          <option value="false" <%= !settings.midtransConfig.isProduction ? 'selected' : '' %>>Sandbox (Testing)</option>
-          <option value="true" <%= settings.midtransConfig.isProduction ? 'selected' : '' %>>Production (Live)</option>
-        </select>
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 16px">
-        <label class="modal-label">CLIENT KEY</label>
-        <input type="text" name="clientKey" class="modal-input" value="<%= settings.midtransConfig.clientKey %>" placeholder="Masukkkan Client Key dari dashboard Midtrans" required />
-      </div>
-      <div class="modal-form-group" style="margin-bottom: 24px">
-        <label class="modal-label">SERVER KEY</label>
-        <input type="text" name="serverKey" class="modal-input" value="<%= settings.midtransConfig.serverKey %>" placeholder="Masukkan Server Key dari dashboard Midtrans" required />
-      </div>
-      <div class="modal-actions" style="justify-content: flex-end; gap: 16px">
-        <button type="button" class="btn btn-ghost-cancel" onclick="closeModalRaw('midtransModal')">Batal</button>
-        <button type="submit" class="btn btn-primary">Simpan Konfigurasi</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script id="bank-accounts-data" type="application/json">
-  <%- JSON.stringify(settings.bankAccounts) %>
-</script>
-
-<script>
-  let currentBankAccounts = JSON.parse(document.getElementById('bank-accounts-data').textContent);
-
-  function toggleEditMode(isEditing) {
-    document.getElementById("storeViewMode").style.display = isEditing
-      ? "none"
-      : "block";
-    document.getElementById("storeEditMode").style.display = isEditing
-      ? "block"
-      : "none";
-  }
-
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-      modal.classList.add("active");
-    } else {
-      console.error('Modal with ID ' + id + ' not found');
+    function toggleEditMode(isEditing) {
+      document.getElementById("storeViewMode").style.display = isEditing
+        ? "none"
+        : "block";
+      document.getElementById("storeEditMode").style.display = isEditing
+        ? "block"
+        : "none";
     }
-  }
-  function closeModal(e, id) {
-    if (e.target.id === id) {
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add("active");
+      } else {
+        console.error('Modal with ID ' + id + ' not found');
+      }
+    }
+    function closeModal(e, id) {
+      if (e.target.id === id) {
+        document.getElementById(id).classList.remove("active");
+      }
+    }
+    function closeModalRaw(id) {
       document.getElementById(id).classList.remove("active");
     }
-  }
-  function closeModalRaw(id) {
-    document.getElementById(id).classList.remove("active");
-  }
 
-  async function saveStoreSettings(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = {
-      storeInfo: {
-        name: formData.get('name'),
-        address: formData.get('address'),
-        openTime: formData.get('openTime'),
-        closeTime: formData.get('closeTime'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        coordinates: {
-          lat: parseFloat(formData.get('lat')),
-          lng: parseFloat(formData.get('lng'))
+    async function saveStoreSettings(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = {
+        storeInfo: {
+          name: formData.get('name'),
+          address: formData.get('address'),
+          openTime: formData.get('openTime'),
+          closeTime: formData.get('closeTime'),
+          phone: formData.get('phone'),
+          email: formData.get('email')
         }
-      }
-    };
+      };
 
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        showCustomAlert("Berhasil", "Pengaturan toko telah diperbarui.", "success", () => {
-          location.reload();
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
         });
-      } else {
-        showCustomAlert("Gagal", "Gagal menyimpan perubahan pengaturan toko.", "error");
+        if (res.ok) {
+          showCustomAlert("Berhasil", "Pengaturan toko telah diperbarui.", "success", () => {
+            location.reload();
+          });
+        } else {
+          showCustomAlert("Gagal", "Gagal menyimpan perubahan pengaturan toko.", "error");
+        }
+      } catch (err) {
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       }
-    } catch (err) {
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
-  }
 
-  async function saveShippingRate(e) {
-    e.preventDefault();
-    const rate = document.getElementById('inputTarif').value;
-    
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shippingRatePerKm: rate })
-      });
-      if (res.ok) {
-        showCustomAlert("Berhasil", "Tarif pengiriman telah diperbarui.", "success", () => {
-          location.reload();
+    async function saveShippingRate(e) {
+      e.preventDefault();
+      const rate = document.getElementById('inputTarif').value;
+
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shippingRatePerKm: rate })
         });
-      } else {
-        showCustomAlert("Gagal", "Gagal menyimpan tarif pengiriman.", "error");
+        if (res.ok) {
+          showCustomAlert("Berhasil", "Tarif pengiriman telah diperbarui.", "success", () => {
+            location.reload();
+          });
+        } else {
+          showCustomAlert("Gagal", "Gagal menyimpan tarif pengiriman.", "error");
+        }
+      } catch (err) {
+        showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
       }
-    } catch (err) {
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
     }
-  }
 
-  async function updateBankAccounts(newList) {
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bankAccounts: newList })
-      });
-      if (res.ok) {
-        location.reload();
-      } else {
-        showCustomAlert("Gagal", "Gagal memperbarui daftar rekening.", "error");
-      }
-    } catch (err) {
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
-    }
-  }
 
-  async function addBank(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newBank = {
-      bankName: formData.get('bankName'),
-      accountNumber: formData.get('accountNumber'),
-      accountHolder: formData.get('accountHolder')
-    };
-    const newList = [...currentBankAccounts, newBank];
-    await updateBankAccounts(newList);
-  }
-
-  function openEditBankModal(index, name, number, holder) {
-    document.getElementById('editBankIndex').value = index;
-    document.getElementById('editBankName').value = name;
-    document.getElementById('editBankAccountNumber').value = number;
-    document.getElementById('editBankAccountHolder').value = holder;
-    openModal('editBankModal');
-  }
-
-  async function saveEditBank(e) {
-    e.preventDefault();
-    const index = document.getElementById('editBankIndex').value;
-    const formData = new FormData(e.target);
-    const updatedBank = {
-      bankName: formData.get('bankName'),
-      accountNumber: formData.get('accountNumber'),
-      accountHolder: formData.get('accountHolder')
-    };
-    
-    const newList = [...currentBankAccounts];
-    newList[index] = updatedBank;
-    await updateBankAccounts(newList);
-  }
-
-  async function deleteBank(index) {
-    showCustomConfirm("Hapus Rekening", "Apakah Anda yakin ingin menghapus rekening bank ini?", "error", async () => {
-      const newList = currentBankAccounts.filter((_, i) => i !== parseInt(index));
-      await updateBankAccounts(newList);
-    });
-  }
-
-  async function saveMidtransConfig(e) {
+    async function saveAboutText(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = {
-      midtransConfig: {
-        serverKey: formData.get('serverKey'),
-        clientKey: formData.get('clientKey'),
-        isProduction: formData.get('isProduction') === 'true',
-        isActive: document.getElementById('midtransActive').checked
-      }
+      aboutText: formData.get('aboutText')
     };
 
     try {
@@ -594,28 +321,11 @@
         body: JSON.stringify(data)
       });
       if (res.ok) {
-        showCustomAlert("Berhasil", "Konfigurasi Midtrans telah disimpan.", "success", () => {
+        showCustomAlert("Berhasil", "Teks About Footer telah disimpan.", "success", () => {
           location.reload();
         });
       } else {
-        showCustomAlert("Gagal", "Gagal menyimpan konfigurasi Midtrans.", "error");
-      }
-    } catch (err) {
-      showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
-    }
-  }
-
-  async function saveMidtransStatus(isActive) {
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 'midtransConfig.isActive': isActive })
-      });
-      if (res.ok) {
-        location.reload();
-      } else {
-        showCustomAlert("Gagal", "Gagal mengubah status aktif Midtrans.", "error");
+        showCustomAlert("Gagal", "Gagal menyimpan teks About.", "error");
       }
     } catch (err) {
       showCustomAlert("Error", "Terjadi kesalahan koneksi.", "error");
@@ -623,4 +333,4 @@
   }
 </script>
 
-<%- include('../partials/dashboard-foot') %>
+  <%- include('../partials/dashboard-foot') %>
