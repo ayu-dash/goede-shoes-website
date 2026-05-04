@@ -70,7 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const getDays = (name) => {
       const meta = SERVICE_METADATA[name];
       if (!meta) return { min: 0, max: 0 };
-      const multiplier = meta.timeUnit === "Minggu" ? 7 : 1;
+      let multiplier = 1;
+      if (meta.timeUnit === "Minggu") multiplier = 7;
+      if (meta.timeUnit === "Jam") multiplier = 1 / 24;
       return { min: meta.timeMin * multiplier, max: meta.timeMax * multiplier };
     };
 
@@ -181,6 +183,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (estimateBadge) {
       if (maxDaysMax === 0) {
         estimateBadge.innerText = "0 Hari";
+      } else if (maxDaysMax < 1) {
+        const hMin = Math.round(maxDaysMin * 24);
+        const hMax = Math.round(maxDaysMax * 24);
+        estimateBadge.innerText =
+          hMin === hMax ? `${hMax} Jam` : `${hMin}-${hMax} Jam`;
       } else {
         estimateBadge.innerText =
           maxDaysMin === maxDaysMax

@@ -27,7 +27,7 @@ const serviceSchema = new mongoose.Schema(
         estimatedTimeUnit: {
             type: String,
             required: [true, "Satuan waktu harus diisi"],
-            enum: ["Hari", "Minggu"]
+            enum: ["Jam", "Hari", "Minggu"]
         }
     },
     {

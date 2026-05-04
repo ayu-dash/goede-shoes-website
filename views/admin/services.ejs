@@ -1,315 +1,349 @@
 <%- include('../partials/dashboard-head') %>
 
-<div class="page-header" style="margin-bottom: 32px;">
-  <h1 class="page-title page-title--xl">Manajemen Layanan</h1>
-</div>
-
-<!-- CATEGORY CARDS -->
-<div class="service-cat-grid">
-  <!-- Top Row -->
-  <div class="cat-card large navy">
-    <h3>Menu Treatment</h3>
-    <div class="badge"><%= categories["Menu Treatment"] %> LAYANAN</div>
-  </div>
-  <div class="cat-card medium gray">
-    <h3>Helmet Treatment</h3>
-    <div class="badge"><%= categories["Helmet Treatment"] %> LAYANAN</div>
-  </div>
-  
-  <!-- Bottom Row -->
-  <div class="service-cat-grid-bottom">
-    <div class="cat-card orange-light">
-      <h3>Reglue &<br>Repair</h3>
-      <div class="badge"><%= categories["Reglue & Repair"] %> LAYANAN</div>
-    </div>
-    <div class="cat-card gray">
-      <h3>Additional<br>Cost</h3>
-      <div class="badge"><%= categories["Additional Cost"] %> LAYANAN</div>
-    </div>
-    <div class="cat-card blue-light">
-      <h3>Bag &<br>Luggage</h3>
-      <div class="badge"><%= categories["Bag & Luggage"] %> LAYANAN</div>
-    </div>
-    <div class="cat-card white-border">
-      <h3>Repaint</h3>
-      <div class="badge"><%= categories["Repaint"] %> LAYANAN</div>
-    </div>
-  </div>
-</div>
-
-<!-- SERVICES TABLE -->
-<div class="admin-panel">
-  <div class="filter-bar">
-    <div class="search-wrapper">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" class="search-input" placeholder="Cari layanan...">
-    </div>
-    <button class="btn btn-primary" onclick="openModal('addServiceModal')">+ TAMBAH LAYANAN</button>
+  <div class="page-header" style="margin-bottom: 32px;">
+    <h1 class="page-title page-title--xl">Manajemen Layanan</h1>
   </div>
 
-  <div class="admin-table-wrapper" style="overflow-x: auto;">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>NAMA LAYANAN</th>
-          <th>KATEGORI</th>
-          <th>HARGA</th>
-          <th>EST. WAKTU</th>
-          <th style="text-align: right;">AKSI</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (services && services.length > 0) { %>
-          <% services.forEach(service => { 
-                let badgeClass = "badge-layanan-gray";
-                if (service.category === "Reglue & Repair") badgeClass = "badge-layanan-orange";
-                else if (service.category === "Repaint") badgeClass = "badge-layanan-orange";
-                else if (service.category === "Bag & Luggage") badgeClass = "badge-layanan-blue";
-          %>
-            <tr>
-              <td style="font-weight: 700; color: var(--navy-dark);"><%= service.name %></td>
-              <td><span class="badge <%= badgeClass %>"><%= service.category.toUpperCase() %></span></td>
-              <td style="font-weight: 700; color: #0D47A1;">Rp <%= service.price.toLocaleString("id-ID") %></td>
-              <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i> <%= service.estimatedTimeMin %>-<%= service.estimatedTimeMax %> <%= service.estimatedTimeUnit %></td>
-              <td>
-                <% const editClick = `onclick="openEditModal('${service._id}', '${service.name}', '${service.category}', ${service.price}, ${service.estimatedTimeMin}, ${service.estimatedTimeMax}, '${service.estimatedTimeUnit}')"`; %>
-                <% const delClick = `onclick="deleteService('${service._id}')"`; %>
-                <div class="action-buttons" style="justify-content: flex-end;">
-                  <button class="edit" <%- editClick %>><i class="fa-regular fa-pen-to-square"></i></button>
-                  <button class="delete" <%- delClick %>><i class="fa-regular fa-trash-can"></i></button>
-                </div>
-              </td>
-            </tr>
-          <% }); %>
-        <% } else { %>
+  <!-- CATEGORY CARDS -->
+  <div class="service-cat-grid">
+    <!-- Top Row -->
+    <div class="cat-card large navy">
+      <h3>Menu Treatment</h3>
+      <div class="badge">
+        <%= categories["Menu Treatment"] %> LAYANAN
+      </div>
+    </div>
+    <div class="cat-card medium gray">
+      <h3>Helmet Treatment</h3>
+      <div class="badge">
+        <%= categories["Helmet Treatment"] %> LAYANAN
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="service-cat-grid-bottom">
+      <div class="cat-card orange-light">
+        <h3>Reglue &<br>Repair</h3>
+        <div class="badge">
+          <%= categories["Reglue & Repair"] %> LAYANAN
+        </div>
+      </div>
+      <div class="cat-card gray">
+        <h3>Additional<br>Cost</h3>
+        <div class="badge">
+          <%= categories["Additional Cost"] %> LAYANAN
+        </div>
+      </div>
+      <div class="cat-card blue-light">
+        <h3>Bag &<br>Luggage</h3>
+        <div class="badge">
+          <%= categories["Bag & Luggage"] %> LAYANAN
+        </div>
+      </div>
+      <div class="cat-card white-border">
+        <h3>Repaint</h3>
+        <div class="badge">
+          <%= categories["Repaint"] %> LAYANAN
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES TABLE -->
+  <div class="admin-panel">
+    <div class="filter-bar">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="search-input" placeholder="Cari layanan...">
+      </div>
+      <button class="btn btn-primary" onclick="openModal('addServiceModal')">+ TAMBAH LAYANAN</button>
+    </div>
+
+    <div class="admin-table-wrapper" style="overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
           <tr>
-            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Belum ada layanan terdaftar.</td>
+            <th>NAMA LAYANAN</th>
+            <th>KATEGORI</th>
+            <th>HARGA</th>
+            <th>EST. WAKTU</th>
+            <th style="text-align: right;">AKSI</th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% if (services && services.length> 0) { %>
+            <% services.forEach(service=> {
+              let badgeClass = "badge-layanan-gray";
+              if (service.category === "Reglue & Repair") badgeClass = "badge-layanan-orange";
+              else if (service.category === "Repaint") badgeClass = "badge-layanan-orange";
+              else if (service.category === "Bag & Luggage") badgeClass = "badge-layanan-blue";
+              %>
+              <tr>
+                <td style="font-weight: 700; color: var(--navy-dark);">
+                  <%= service.name %>
+                </td>
+                <td><span class="badge <%= badgeClass %>">
+                    <%= service.category.toUpperCase() %>
+                  </span></td>
+                <td style="font-weight: 700; color: #0D47A1;">Rp <%= service.price.toLocaleString("id-ID") %>
+                </td>
+                <td style="color: var(--text-secondary);"><i class="fa-regular fa-clock"></i>
+                  <%= service.estimatedTimeMin %>-<%= service.estimatedTimeMax %>
+                      <%= service.estimatedTimeUnit %>
+                </td>
+                <td>
+                  <% const
+                    editClick=`onclick="openEditModal('${service._id}', '${service.name}', '${service.category}', ${service.price}, ${service.estimatedTimeMin}, ${service.estimatedTimeMax}, '${service.estimatedTimeUnit}')"
+                    `; %>
+                    <% const delClick=`onclick="deleteService('${service._id}')" `; %>
+                      <div class="action-buttons" style="justify-content: flex-end;">
+                        <button class="edit" <%- editClick %>><i class="fa-regular fa-pen-to-square"></i></button>
+                        <button class="delete" <%- delClick %>><i class="fa-regular fa-trash-can"></i></button>
+                      </div>
+                </td>
+              </tr>
+              <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">Belum ada
+                      layanan terdaftar.</td>
+                  </tr>
+                  <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
   </div>
 
-  <div class="pagination">
-    <button class="page-btn"><i class="fa-solid fa-chevron-left"></i></button>
-    <button class="page-btn active">1</button>
-    <button class="page-btn">2</button>
-    <button class="page-btn">3</button>
-    <button class="page-btn"><i class="fa-solid fa-chevron-right"></i></button>
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal Add Service -->
+  <div class="modal-overlay" id="addServiceModal" onclick="closeModal(event, 'addServiceModal')">
+    <div class="modal-content" style="max-width: 500px; padding: 32px;">
+      <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Tambah Layanan Baru</h3>
+      <form id="addServiceForm" onsubmit="createService(event)">
+
+        <div class="modal-form-group" style="margin-bottom: 20px;">
+          <label class="modal-label">NAMA LAYANAN</label>
+          <input type="text" name="name" class="modal-input" placeholder="Contoh: Deep Clean Regular" required>
+        </div>
+
+        <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
+          <div class="modal-form-group">
+            <label class="modal-label">KATEGORI</label>
+            <select name="category" class="modal-input" style="color: var(--text-secondary);" required>
+              <option value="" disabled selected>Pilih Kategori</option>
+              <option value="Menu Treatment">Menu Treatment</option>
+              <option value="Main Treatment">Main Treatment</option>
+              <option value="Reglue & Repair">Reglue & Repair</option>
+              <option value="Helmet Treatment">Helmet Treatment</option>
+              <option value="Bag & Luggage">Bag & Luggage</option>
+              <option value="Repaint">Repaint</option>
+              <option value="Additional Cost">Additional Cost</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label class="modal-label">HARGA (RP)</label>
+            <input type="number" name="price" class="modal-input" placeholder="40000" required>
+          </div>
+        </div>
+
+        <div class="modal-form-group" style="margin-bottom: 32px;">
+          <label class="modal-label">ESTIMASI WAKTU</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <input type="number" name="estimatedTimeMin" class="modal-input" placeholder="Min"
+              style="padding: 10px 12px;" required>
+            <input type="number" name="estimatedTimeMax" class="modal-input" placeholder="Max"
+              style="padding: 10px 12px;" required>
+            <select name="estimatedTimeUnit" class="modal-input" style="padding: 10px 12px;" required>
+              <option value="Jam">Jam</option>
+              <option value="Hari">Hari</option>
+              <option value="Minggu">Minggu</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
+          <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;"
+            onclick="closeModalRaw('addServiceModal')">Batal</button>
+          <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan
+            Layanan</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<!-- ==================== MODALS ==================== -->
+  <!-- Modal Edit Service -->
+  <div class="modal-overlay" id="editServiceModal" onclick="closeModal(event, 'editServiceModal')">
+    <div class="modal-content" style="max-width: 500px; padding: 32px;">
+      <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Edit Layanan</h3>
+      <form id="editServiceForm" onsubmit="updateService(event)">
+        <input type="hidden" name="id" id="editServiceId">
+        <div class="modal-form-group" style="margin-bottom: 20px;">
+          <label class="modal-label">NAMA LAYANAN</label>
+          <input type="text" name="name" id="editServiceName" class="modal-input" required>
+        </div>
 
-<!-- Modal Add Service -->
-<div class="modal-overlay" id="addServiceModal" onclick="closeModal(event, 'addServiceModal')">
-  <div class="modal-content" style="max-width: 500px; padding: 32px;">
-    <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Tambah Layanan Baru</h3>
-    <form id="addServiceForm" onsubmit="createService(event)">
-      
-      <div class="modal-form-group" style="margin-bottom: 20px;">
-        <label class="modal-label">NAMA LAYANAN</label>
-        <input type="text" name="name" class="modal-input" placeholder="Contoh: Deep Clean Regular" required>
-      </div>
-      
-      <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
-        <div class="modal-form-group">
-          <label class="modal-label">KATEGORI</label>
-          <select name="category" class="modal-input" style="color: var(--text-secondary);" required>
-            <option value="" disabled selected>Pilih Kategori</option>
-            <option value="Menu Treatment">Menu Treatment</option>
-            <option value="Main Treatment">Main Treatment</option>
-            <option value="Reglue & Repair">Reglue & Repair</option>
-            <option value="Helmet Treatment">Helmet Treatment</option>
-            <option value="Bag & Luggage">Bag & Luggage</option>
-            <option value="Repaint">Repaint</option>
-            <option value="Additional Cost">Additional Cost</option>
-          </select>
+        <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
+          <div class="modal-form-group">
+            <label class="modal-label">KATEGORI</label>
+            <select name="category" id="editServiceCategory" class="modal-input" required>
+              <option value="Menu Treatment">Menu Treatment</option>
+              <option value="Main Treatment">Main Treatment</option>
+              <option value="Reglue & Repair">Reglue & Repair</option>
+              <option value="Helmet Treatment">Helmet Treatment</option>
+              <option value="Bag & Luggage">Bag & Luggage</option>
+              <option value="Repaint">Repaint</option>
+              <option value="Additional Cost">Additional Cost</option>
+            </select>
+          </div>
+          <div class="modal-form-group">
+            <label class="modal-label">HARGA (RP)</label>
+            <input type="number" name="price" id="editServicePrice" class="modal-input" required>
+          </div>
         </div>
-        <div class="modal-form-group">
-          <label class="modal-label">HARGA (RP)</label>
-          <input type="number" name="price" class="modal-input" placeholder="40000" required>
+
+        <div class="modal-form-group" style="margin-bottom: 32px;">
+          <label class="modal-label">ESTIMASI WAKTU</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <input type="number" name="estimatedTimeMin" id="editServiceTimeMin" class="modal-input"
+              style="padding: 10px 12px;" required>
+            <input type="number" name="estimatedTimeMax" id="editServiceTimeMax" class="modal-input"
+              style="padding: 10px 12px;" required>
+            <select name="estimatedTimeUnit" id="editServiceTimeUnit" class="modal-input" style="padding: 10px 12px;"
+              required>
+              <option value="Jam">Jam</option>
+              <option value="Hari">Hari</option>
+              <option value="Minggu">Minggu</option>
+            </select>
+          </div>
         </div>
-      </div>
-      
-      <div class="modal-form-group" style="margin-bottom: 32px;">
-        <label class="modal-label">ESTIMASI WAKTU</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-          <input type="number" name="estimatedTimeMin" class="modal-input" placeholder="Min" style="padding: 10px 12px;" required>
-          <input type="number" name="estimatedTimeMax" class="modal-input" placeholder="Max" style="padding: 10px 12px;" required>
-          <select name="estimatedTimeUnit" class="modal-input" style="padding: 10px 12px;" required>
-            <option value="Hari">Hari</option>
-            <option value="Minggu">Minggu</option>
-          </select>
+
+        <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
+          <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;"
+            onclick="closeModalRaw('editServiceModal')">Batal</button>
+          <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan
+            Layanan</button>
         </div>
-      </div>
-      
-      <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
-        <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;" onclick="closeModalRaw('addServiceModal')">Batal</button>
-        <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan Layanan</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
-</div>
 
-<!-- Modal Edit Service -->
-<div class="modal-overlay" id="editServiceModal" onclick="closeModal(event, 'editServiceModal')">
-  <div class="modal-content" style="max-width: 500px; padding: 32px;">
-    <h3 class="modal-title" style="color: #0D47A1; margin-bottom: 24px; font-size: 20px;">Edit Layanan</h3>
-    <form id="editServiceForm" onsubmit="updateService(event)">
-      <input type="hidden" name="id" id="editServiceId">
-      <div class="modal-form-group" style="margin-bottom: 20px;">
-        <label class="modal-label">NAMA LAYANAN</label>
-        <input type="text" name="name" id="editServiceName" class="modal-input" required>
-      </div>
-      
-      <div class="modal-form-grid" style="gap: 16px; margin-bottom: 20px;">
-        <div class="modal-form-group">
-          <label class="modal-label">KATEGORI</label>
-          <select name="category" id="editServiceCategory" class="modal-input" required>
-            <option value="Menu Treatment">Menu Treatment</option>
-            <option value="Main Treatment">Main Treatment</option>
-            <option value="Reglue & Repair">Reglue & Repair</option>
-            <option value="Helmet Treatment">Helmet Treatment</option>
-            <option value="Bag & Luggage">Bag & Luggage</option>
-            <option value="Repaint">Repaint</option>
-            <option value="Additional Cost">Additional Cost</option>
-          </select>
-        </div>
-        <div class="modal-form-group">
-          <label class="modal-label">HARGA (RP)</label>
-          <input type="number" name="price" id="editServicePrice" class="modal-input" required>
-        </div>
-      </div>
-      
-      <div class="modal-form-group" style="margin-bottom: 32px;">
-        <label class="modal-label">ESTIMASI WAKTU</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-          <input type="number" name="estimatedTimeMin" id="editServiceTimeMin" class="modal-input" style="padding: 10px 12px;" required>
-          <input type="number" name="estimatedTimeMax" id="editServiceTimeMax" class="modal-input" style="padding: 10px 12px;" required>
-          <select name="estimatedTimeUnit" id="editServiceTimeUnit" class="modal-input" style="padding: 10px 12px;" required>
-            <option value="Hari">Hari</option>
-            <option value="Minggu">Minggu</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="modal-actions" style="justify-content: flex-end; align-items: center; gap: 24px;">
-        <button type="button" class="btn btn-ghost-cancel" style="font-weight:700;" onclick="closeModalRaw('editServiceModal')">Batal</button>
-        <button type="submit" class="btn btn-primary" style="background:#0D47A1; border-radius: 8px;">Simpan Layanan</button>
-      </div>
-    </form>
-  </div>
-</div>
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
 
-<script>
-  function openModal(id) {
-    document.getElementById(id).classList.add('active');
-  }
+    function closeModal(e, id) {
+      if (e.target.id === id) {
+        document.getElementById(id).classList.remove('active');
+      }
+    }
 
-  function closeModal(e, id) {
-    if (e.target.id === id) {
+    function closeModalRaw(id) {
       document.getElementById(id).classList.remove('active');
     }
-  }
 
-  function closeModalRaw(id) {
-    document.getElementById(id).classList.remove('active');
-  }
+    async function createService(event) {
+      event.preventDefault();
+      const submitBtn = event.target.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
 
-  async function createService(event) {
-    event.preventDefault();
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.disabled = true;
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData.entries());
 
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
-    
-    // Konversi tipe data agar sesuai mongoose schema (menjadi nomor)
-    data.price = Number(data.price);
-    data.estimatedTimeMin = Number(data.estimatedTimeMin);
-    data.estimatedTimeMax = Number(data.estimatedTimeMax);
+      // Konversi tipe data agar sesuai mongoose schema (menjadi nomor)
+      data.price = Number(data.price);
+      data.estimatedTimeMin = Number(data.estimatedTimeMin);
+      data.estimatedTimeMax = Number(data.estimatedTimeMax);
 
-    try {
-      const res = await fetch('/api/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        const errorData = await res.json();
-        showCustomAlert("Gagal", "Gagal menambahkan layanan: " + (errorData.message || ""), "error");
-        if (submitBtn) submitBtn.disabled = false;
-      }
-    } catch (err) {
-      if (submitBtn) submitBtn.disabled = false;
-      console.error(err);
-    }
-  }
-
-  function openEditModal(id, name, category, price, timeMin, timeMax, timeUnit) {
-    document.getElementById('editServiceId').value = id;
-    document.getElementById('editServiceName').value = name;
-    document.getElementById('editServiceCategory').value = category;
-    document.getElementById('editServicePrice').value = price;
-    document.getElementById('editServiceTimeMin').value = timeMin;
-    document.getElementById('editServiceTimeMax').value = timeMax;
-    document.getElementById('editServiceTimeUnit').value = timeUnit;
-    openModal('editServiceModal');
-  }
-
-  async function updateService(event) {
-    event.preventDefault();
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.disabled = true;
-
-    const formData = new FormData(event.target);
-    const data = Object.fromEntries(formData.entries());
-    const id = data.id;
-    delete data.id;
-
-    data.price = Number(data.price);
-    data.estimatedTimeMin = Number(data.estimatedTimeMin);
-    data.estimatedTimeMax = Number(data.estimatedTimeMax);
-
-    try {
-      const res = await fetch(`/api/services/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        window.location.reload();
-      } else {
-        const errorData = await res.json();
-        showCustomAlert("Gagal", "Gagal memperbarui layanan: " + (errorData.message || ""), "error");
-        if (submitBtn) submitBtn.disabled = false;
-      }
-    } catch (err) {
-      if (submitBtn) submitBtn.disabled = false;
-      console.error(err);
-    }
-  }
-
-  async function deleteService(id) {
-    showCustomConfirm("Hapus Layanan", "Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.", "error", async () => {
       try {
-        const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+        const res = await fetch('/api/services', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
         if (res.ok) {
-          showCustomAlert("Berhasil", "Layanan telah dihapus.", "success", () => {
-            window.location.reload();
-          });
+          window.location.reload();
         } else {
-          showCustomAlert("Gagal", "Gagal menghapus layanan.", "error");
+          const errorData = await res.json();
+          showCustomAlert("Gagal", "Gagal menambahkan layanan: " + (errorData.message || ""), "error");
+          if (submitBtn) submitBtn.disabled = false;
         }
       } catch (err) {
+        if (submitBtn) submitBtn.disabled = false;
         console.error(err);
-        showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
       }
-    });
-  }
-</script>
+    }
 
-<%- include('../partials/dashboard-foot') %>
+    function openEditModal(id, name, category, price, timeMin, timeMax, timeUnit) {
+      document.getElementById('editServiceId').value = id;
+      document.getElementById('editServiceName').value = name;
+      document.getElementById('editServiceCategory').value = category;
+      document.getElementById('editServicePrice').value = price;
+      document.getElementById('editServiceTimeMin').value = timeMin;
+      document.getElementById('editServiceTimeMax').value = timeMax;
+      document.getElementById('editServiceTimeUnit').value = timeUnit;
+      openModal('editServiceModal');
+    }
+
+    async function updateService(event) {
+      event.preventDefault();
+      const submitBtn = event.target.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData.entries());
+      const id = data.id;
+      delete data.id;
+
+      data.price = Number(data.price);
+      data.estimatedTimeMin = Number(data.estimatedTimeMin);
+      data.estimatedTimeMax = Number(data.estimatedTimeMax);
+
+      try {
+        const res = await fetch(`/api/services/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          const errorData = await res.json();
+          showCustomAlert("Gagal", "Gagal memperbarui layanan: " + (errorData.message || ""), "error");
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      } catch (err) {
+        if (submitBtn) submitBtn.disabled = false;
+        console.error(err);
+      }
+    }
+
+    async function deleteService(id) {
+      showCustomConfirm("Hapus Layanan", "Apakah Anda yakin ingin menghapus layanan ini? Tindakan ini tidak dapat dibatalkan.", "error", async () => {
+        try {
+          const res = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            showCustomAlert("Berhasil", "Layanan telah dihapus.", "success", () => {
+              window.location.reload();
+            });
+          } else {
+            showCustomAlert("Gagal", "Gagal menghapus layanan.", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showCustomAlert("Kesalahan", "Terjadi kesalahan koneksi.", "error");
+        }
+      });
+    }
+  </script>
+
+  <%- include('../partials/dashboard-foot') %>
