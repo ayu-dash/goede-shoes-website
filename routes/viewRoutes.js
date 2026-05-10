@@ -7,6 +7,36 @@ const {
 } = require("../middlewares/authMiddleware");
 const viewController = require("../controllers/viewController");
 
+// // === MOCK MIDDLEWARE UNTUK TESTING FRONTEND ===
+// // Bikin data user buatan yang lumayan lengkap biar controller nggak rewel
+// const mockUser = {
+//   id: "65f1a2b3c4d5e6f7g8h9i0j1", // Contoh ID dummy (kalau pakai MongoDB) atau angka "1" (kalau MySQL/Postgres)
+//   name: "Ibrahim",
+//   role: "admin", // Ganti ke "staff" atau "customer" kalau mau cek view lain
+//   email: "test@mail.com",
+// };
+
+// // 1. isLoggedIn
+// const isLoggedIn = (req, res, next) => {
+//   res.locals.user = mockUser; // Buat EJS
+//   req.user = mockUser; // Buat Controller
+//   next();
+// };
+
+// // 2. protect
+// const protect = (req, res, next) => {
+//   res.locals.user = mockUser;
+//   req.user = mockUser;
+//   next();
+// };
+
+// // 3. restrictTo
+// const restrictTo = (...roles) => {
+//   return (req, res, next) => {
+//     next(); // Langsung lolosin aja
+//   };
+// };
+
 // Apply isLoggedIn to all view routes to populate res.locals.user
 router.use(isLoggedIn);
 

@@ -184,10 +184,19 @@
   text-decoration: none;
 }
 
-/* Admin Tables (Transaksi, Layanan, Customer) */
+/* Admin Tables (Transaksi, Layanan, Customer, Staff) */
+.admin-table-wrapper,
+.admin-table-container {
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: 60vh;
+  -webkit-overflow-scrolling: touch;
+}
+
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: var(--font-body);
 }
 
@@ -201,6 +210,9 @@
   padding: 12px 16px;
   background: #f8f9fa;
   border-bottom: 1px solid var(--gray-light);
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .admin-table th:first-child {
@@ -1185,6 +1197,28 @@
   background: #fff1f2;
 }
 
+/* ===========================
+   PROFILE PAGE LAYOUT
+   =========================== */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.profile-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.profile-form-row--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-bottom: 32px;
+}
+
 /* Responsive Admin */
 @media (max-width: 1024px) {
   .admin-stats-grid {
@@ -1214,6 +1248,14 @@
 
   .modal-content--lg {
     max-width: 95%;
+  }
+
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-form-row--3col {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -1309,28 +1351,49 @@
     width: 100%;
   }
 
+  .transaction-filter-form {
+    width: 100%;
+  }
+
   .transaction-filter-form .filter-group {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 12px;
+    align-items: end;
   }
 
   .transaction-filter-form .input-field {
+    width: 100% !important;
     min-width: 0;
-    flex: 1 1 120px;
   }
 
-  .transaction-filter-form .input-field label {
+  /* .transaction-filter-form .input-field label {
     font-size: 10px;
   }
 
   .transaction-filter-form .modal-input {
     padding: 10px 12px;
     font-size: 12px;
+  } */
+
+  .transaction-filter-form .filter-actions {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px;
+    margin-top: 4px;
   }
 
-  .filter-actions {
-    flex-direction: row;
+  .transaction-filter-form .filter-actions .btn,
+  .transaction-filter-form .filter-actions .btn-ghost-reset {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    text-align: center;
   }
 
   .revenue-summary {
@@ -1354,5 +1417,76 @@
   .admin-stat-card {
     padding: 14px 16px;
     min-height: 80px;
+  }
+}
+
+/* ===========================
+   TABLE PAGINATION
+   =========================== */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 0;
+  font-family: var(--font-body);
+}
+
+.table-pagination-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.table-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-pagination-controls button {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid var(--gray-light);
+  background: var(--white);
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-pagination-controls button:hover {
+  background: #f1f5f9;
+  color: var(--navy-dark);
+  border-color: var(--navy-dark);
+}
+
+.table-pagination-controls button.active {
+  background: var(--navy-dark);
+  color: var(--white);
+  border-color: var(--navy-dark);
+}
+
+.table-pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.table-pagination-controls button:disabled:hover {
+  background: var(--white);
+  color: var(--text-secondary);
+  border-color: var(--gray-light);
+}
+
+@media (max-width: 768px) {
+  .table-pagination {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
   }
 }
