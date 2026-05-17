@@ -2,8 +2,8 @@ const Order = require("../models/Order");
 
 const Service = require("../models/Service");
 const Settings = require("../models/Settings");
-
-
+const { notifyUser } = require("../utils/notificationHelper");
+const User = require("../models/User");
 
 const snap = require("../utils/midtrans");
 
@@ -142,6 +142,36 @@ exports.createOrder = async (req, res) => {
             totalPrice,
         });
 
+        // Kirim Notifikasi Ganda (In-App & Email) ke Pelanggan
+        const paymentMethodLabel = newOrder.payment.method === 'bank' ? 'Transfer Bank' : 'COD (Bayar di Tempat)';
+        notifyUser({
+            userId: req.user.id,
+            email: req.user.email,
+            title: "Pesanan Baru Berhasil Dibuat",
+            emailSubject: `Goede Shoes - Pemesanan Baru ${newOrder.orderId}`,
+            message: `Halo ${req.user.name},\n\nTerima kasih telah melakukan pemesanan di Goede Shoes!\n\nPesanan Anda dengan ID ${newOrder.orderId} telah berhasil dibuat.\nTotal Pembayaran: Rp ${newOrder.totalPrice.toLocaleString('id-ID')}\nMetode Pembayaran: ${paymentMethodLabel}\n\nKami akan segera memproses pesanan Anda. Anda dapat memantau status pesanan langsung melalui dashboard akun Anda.\n\nSalam hangat,\nGoede Shoes Team`,
+            type: "order",
+            link: "/customer/my-orders"
+        });
+
+        // Kirim Notifikasi Ganda ke Semua Staff & Admin
+        try {
+            const adminAndStaff = await User.find({ role: { $in: ["admin", "staff"] } });
+            for (const staffMember of adminAndStaff) {
+                notifyUser({
+                    userId: staffMember._id,
+                    email: staffMember.email,
+                    title: "Pesanan Masuk Baru!",
+                    emailSubject: `Goede Shoes - Pesanan Baru Masuk ${newOrder.orderId}`,
+                    message: `Halo ${staffMember.name},\n\nAda pesanan masuk baru dengan ID ${newOrder.orderId} dari pelanggan ${req.user.name}.\nTotal Pembayaran: Rp ${newOrder.totalPrice.toLocaleString('id-ID')}\nMetode Pembayaran: ${paymentMethodLabel}\n\nSilakan klik notifikasi ini untuk memproses pesanan sekarang.`,
+                    type: "order",
+                    link: `/staff/order/${newOrder._id}`
+                });
+            }
+        } catch (staffNotifyErr) {
+            console.error("Gagal mengirim notifikasi ke staff/admin:", staffNotifyErr);
+        }
+
         res.status(201).json({
             status: "success",
             data: {
@@ -233,6 +263,32 @@ exports.updateOrderStatus = async (req, res) => {
 
         await order.save();
 
+        // Kirim Notifikasi Ganda (In-App & Email)
+        const populatedOrder = await order.populate("user");
+        const statusTranslations = {
+            pending: "Menunggu Konfirmasi",
+            payment: "Menunggu Pembayaran",
+            pickup: "Proses Penjemputan",
+            received: "Sepatu Diterima di Workshop",
+            "validating-in": "Pengecekan Sepatu",
+            "in-progress": "Sedang Dicuci/Diproses",
+            "quality-check": "Pemeriksaan Kualitas (QC)",
+            delivery: "Sedang Diantar Kembali",
+            completed: "Selesai",
+            cancelled: "Dibatalkan"
+        };
+        const indonesianStatus = statusTranslations[status] || status;
+
+        notifyUser({
+            userId: populatedOrder.user.id,
+            email: populatedOrder.user.email,
+            title: `Status Pesanan: ${indonesianStatus}`,
+            emailSubject: `Goede Shoes - Status Pesanan ${order.orderId} Diperbarui`,
+            message: `Halo ${populatedOrder.user.name},\n\nStatus pesanan Anda dengan ID ${order.orderId} telah diperbarui menjadi: *${indonesianStatus}*.\n\nCatatan dari staff: ${note || '-'}\n\nSilakan cek dashboard Goede Shoes Anda untuk melihat detail selengkapnya.\n\nSalam hangat,\nGoede Shoes Team`,
+            type: "order",
+            link: "/customer/my-orders"
+        });
+
         res.status(200).json({
             status: "success",
             data: {
@@ -267,6 +323,18 @@ exports.confirmPayment = async (req, res) => {
         });
 
         await order.save();
+
+        // Kirim Notifikasi Ganda (In-App & Email)
+        const populatedOrder = await order.populate("user");
+        notifyUser({
+            userId: populatedOrder.user.id,
+            email: populatedOrder.user.email,
+            title: "Pembayaran Diterima & Terkonfirmasi",
+            emailSubject: `Goede Shoes - Pembayaran Berhasil untuk Pesanan ${order.orderId}`,
+            message: `Halo ${populatedOrder.user.name},\n\nPembayaran untuk pesanan Anda dengan ID ${order.orderId} telah berhasil kami terima dan konfirmasi!\n\nPesanan Anda akan segera dilanjutkan ke proses berikutnya.\n\nSalam hangat,\nGoede Shoes Team`,
+            type: "payment",
+            link: "/customer/my-orders"
+        });
 
         res.status(200).json({
             status: "success",
@@ -320,6 +388,30 @@ exports.handleNotification = async (req, res) => {
         }
 
         await order.save();
+
+        // Kirim Notifikasi Ganda (In-App & Email)
+        const populatedOrder = await order.populate("user");
+        if (transactionStatus == 'settlement' || (transactionStatus == 'capture' && fraudStatus == 'accept')) {
+            notifyUser({
+                userId: populatedOrder.user.id,
+                email: populatedOrder.user.email,
+                title: "Pembayaran Berhasil via Midtrans",
+                emailSubject: `Goede Shoes - Pembayaran Berhasil untuk Pesanan ${order.orderId}`,
+                message: `Halo ${populatedOrder.user.name},\n\nPembayaran untuk pesanan Anda dengan ID ${order.orderId} via Midtrans telah BERHASIL diterima!\n\nPesanan Anda sekarang masuk ke proses penjemputan (pickup).\n\nSalam hangat,\nGoede Shoes Team`,
+                type: "payment",
+                link: "/customer/my-orders"
+            });
+        } else if (transactionStatus == 'cancel' || transactionStatus == 'deny' || transactionStatus == 'expire') {
+            notifyUser({
+                userId: populatedOrder.user.id,
+                email: populatedOrder.user.email,
+                title: "Pembayaran Gagal / Kedaluwarsa",
+                emailSubject: `Goede Shoes - Pembayaran Gagal / Kedaluwarsa ${order.orderId}`,
+                message: `Halo ${populatedOrder.user.name},\n\nPembayaran untuk pesanan Anda dengan ID ${order.orderId} telah gagal, dibatalkan, atau kedaluwarsa.\n\nSilakan lakukan pemesanan ulang atau hubungi kami jika Anda memiliki pertanyaan.\n\nSalam hangat,\nGoede Shoes Team`,
+                type: "payment",
+                link: "/customer/my-orders"
+            });
+        }
 
         return res.status(200).json({
             status: "success",
@@ -379,6 +471,36 @@ exports.cancelOrder = async (req, res) => {
         });
 
         await order.save();
+
+        // Kirim Notifikasi Ganda (In-App & Email) ke Pelanggan
+        const populatedOrder = await order.populate("user");
+        notifyUser({
+            userId: populatedOrder.user.id,
+            email: populatedOrder.user.email,
+            title: "Pesanan Dibatalkan",
+            emailSubject: `Goede Shoes - Pesanan ${order.orderId} Dibatalkan`,
+            message: `Halo ${populatedOrder.user.name},\n\nPesanan Anda dengan ID ${order.orderId} telah dibatalkan.\n\nJika ini adalah kekeliruan atau Anda membutuhkan bantuan lebih lanjut, silakan hubungi tim customer service kami.\n\nSalam hangat,\nGoede Shoes Team`,
+            type: "order",
+            link: "/customer/my-orders"
+        });
+
+        // Kirim Notifikasi Ganda ke Semua Staff & Admin
+        try {
+            const adminAndStaff = await User.find({ role: { $in: ["admin", "staff"] } });
+            for (const staffMember of adminAndStaff) {
+                notifyUser({
+                    userId: staffMember._id,
+                    email: staffMember.email,
+                    title: "Pesanan Dibatalkan!",
+                    emailSubject: `Goede Shoes - Pesanan Dibatalkan ${order.orderId}`,
+                    message: `Halo ${staffMember.name},\n\nPesanan dengan ID ${order.orderId} telah dibatalkan oleh pelanggan ${populatedOrder.user.name}.\n\nSilakan periksa dashboard untuk detail pembaruan.`,
+                    type: "order",
+                    link: `/staff/order/${order._id}`
+                });
+            }
+        } catch (staffNotifyErr) {
+            console.error("Gagal mengirim notifikasi pembatalan ke staff/admin:", staffNotifyErr);
+        }
 
         res.status(200).json({
             status: "success",

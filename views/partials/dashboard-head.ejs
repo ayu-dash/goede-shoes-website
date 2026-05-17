@@ -96,9 +96,26 @@
       <i class="fa-solid fa-bars"></i>
     </button>
     <div class="topbar-right">
-      <button class="topbar-bell" aria-label="Notifications">
-        <i class="fa-regular fa-bell"></i>
-      </button>
+      <div class="topbar-bell-wrapper">
+        <button class="topbar-bell" id="notificationBell" aria-label="Notifications">
+          <i class="fa-regular fa-bell"></i>
+        </button>
+        <span class="topbar-bell-badge" id="notificationBadge" style="display: none;">0</span>
+
+        <!-- Dropdown Notifikasi (Brutalist Style) -->
+        <div class="notification-dropdown" id="notificationDropdown">
+          <div class="notification-header">
+            <span class="notification-title">Notifikasi</span>
+            <button class="notification-mark-all" id="markAllReadBtn">Tandai semua dibaca</button>
+          </div>
+          <div class="notification-list" id="notificationList">
+            <div class="notification-empty">
+              <i class="fa-regular fa-bell-slash"></i>
+              <span>Memuat notifikasi...</span>
+            </div>
+          </div>
+        </div>
+      </div>
       <a href="<%= user.role === 'admin' ? '/admin/profile' : (user.role === 'staff' ? '/staff/profile' : '/customer/profile') %>" class="topbar-user">
         <div class="topbar-user-info">
           <span class="topbar-user-name"><%= user.name %></span>

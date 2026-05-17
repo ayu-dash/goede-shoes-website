@@ -463,6 +463,144 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ==========================================
+  // NOTIFICATION SYSTEM CLIENT-SIDE LOGIC
+  // ==========================================
+  const notificationBell = document.getElementById("notificationBell");
+  const notificationDropdown = document.getElementById("notificationDropdown");
+  const notificationBadge = document.getElementById("notificationBadge");
+  const notificationList = document.getElementById("notificationList");
+  const markAllReadBtn = document.getElementById("markAllReadBtn");
+
+  if (notificationBell && notificationDropdown) {
+    // Helper to format timestamps nicely (Indonesian relative time)
+    const formatTimeAgo = (dateString) => {
+      const date = new Date(dateString);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      
+      if (seconds < 60) return "Baru saja";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} menit yang lalu`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} jam yang lalu`;
+      const days = Math.floor(hours / 24);
+      if (days === 1) return "Kemarin";
+      return `${days} hari yang lalu`;
+    };
+
+    // Fetch and render notifications
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("/api/notifications");
+        const data = await res.json();
+        
+        if (data.status === "success") {
+          const { unreadCount, data: { notifications } } = data;
+          
+          // Update Badge
+          if (unreadCount > 0) {
+            notificationBadge.innerText = unreadCount > 9 ? "9+" : unreadCount;
+            notificationBadge.style.display = "flex";
+          } else {
+            notificationBadge.style.display = "none";
+          }
+          
+          // Render List
+          if (notifications && notifications.length > 0) {
+            notificationList.innerHTML = notifications.map(notif => `
+              <div class="notification-item ${notif.isRead ? '' : 'unread'}" data-id="${notif._id}" data-link="${notif.link || '#'}">
+                <div class="notification-item-title">
+                  <span>${notif.title}</span>
+                  ${notif.isRead ? '' : '<span style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%;"></span>'}
+                </div>
+                <div class="notification-item-desc">${notif.message}</div>
+                <div class="notification-item-time">${formatTimeAgo(notif.createdAt)}</div>
+              </div>
+            `).join("");
+          } else {
+            notificationList.innerHTML = `
+              <div class="notification-empty">
+                <i class="fa-regular fa-bell-slash"></i>
+                <span>Tidak ada notifikasi baru</span>
+              </div>
+            `;
+          }
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data notifikasi:", err);
+      }
+    };
+
+    // Toggle Dropdown
+    notificationBell.addEventListener("click", (e) => {
+      e.stopPropagation();
+      notificationDropdown.classList.toggle("show");
+    });
+
+    // Close Dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!notificationDropdown.contains(e.target) && e.target !== notificationBell) {
+        notificationDropdown.classList.remove("show");
+      }
+    });
+
+    // Click individual notification item
+    notificationList.addEventListener("click", async (e) => {
+      const item = e.target.closest(".notification-item");
+      if (!item) return;
+
+      const id = item.dataset.id;
+      const link = item.dataset.link;
+
+      // Mark as read in DB if it was unread
+      if (item.classList.contains("unread")) {
+        try {
+          await fetch(`/api/notifications/${id}/read`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          });
+        } catch (err) {
+          console.error("Gagal menandai notifikasi dibaca:", err);
+        }
+      }
+
+      // Navigate to destination
+      if (link && link !== "#") {
+        window.location.href = link;
+      } else {
+        // Just refresh list and close
+        fetchNotifications();
+        notificationDropdown.classList.remove("show");
+      }
+    });
+
+    // Mark all as read
+    markAllReadBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      try {
+        const res = await fetch("/api/notifications/read-all", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          fetchNotifications();
+        }
+      } catch (err) {
+        console.error("Gagal menandai semua notifikasi dibaca:", err);
+      }
+    });
+
+    // Initial Fetch & Auto Refresh (every 30 seconds)
+    fetchNotifications();
+    setInterval(fetchNotifications, 30000);
+  }
+
   // CONFIRM ORDER LOGIC REMOVED FROM HERE
   // NOW HANDLED DIRECTLY IN create-order.ejs FOR MIDTRANS INTEGRATION
 });
