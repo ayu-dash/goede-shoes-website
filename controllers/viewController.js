@@ -84,6 +84,30 @@ exports.renderCustomerCreateOrder = async (req, res) => {
 exports.renderCustomerMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id }).sort("-createdAt");
+    
+    // Auto-sync pending bank payments with Midtrans
+    const snap = require("../utils/midtrans");
+    for (const order of orders) {
+        if (order.payment && order.payment.method === "bank" && order.payment.status === "pending") {
+            try {
+                const statusResponse = await snap.transaction.status(order.orderId);
+                const transactionStatus = statusResponse.transaction_status;
+                const fraudStatus = statusResponse.fraud_status;
+
+                if (transactionStatus === "settlement" || (transactionStatus === "capture" && fraudStatus === "accept")) {
+                    order.payment.status = "paid";
+                    order.status = order.logistics.pickupMethod === "pickup" ? "pickup" : "pending";
+                    await order.save();
+                } else if (["cancel", "deny", "expire"].includes(transactionStatus)) {
+                    order.payment.status = "failed";
+                    await order.save();
+                }
+            } catch (err) {
+                console.error(`Auto-sync failed for order ${order.orderId}:`, err.message);
+            }
+        }
+    }
+
     res.render("customer/my-orders", { 
         activePage: "my-orders", 
         orders,
@@ -102,6 +126,31 @@ exports.renderCustomerOrderDetail = async (req, res) => {
       _id: req.query.id,
       user: req.user._id,
     }).populate("user");
+
+    if (!order) {
+      return res.status(404).render("error", { message: "Pesanan tidak ditemukan." });
+    }
+
+    // Auto-sync pending bank payment with Midtrans
+    if (order.payment && order.payment.method === "bank" && order.payment.status === "pending") {
+        try {
+            const snap = require("../utils/midtrans");
+            const statusResponse = await snap.transaction.status(order.orderId);
+            const transactionStatus = statusResponse.transaction_status;
+            const fraudStatus = statusResponse.fraud_status;
+
+            if (transactionStatus === "settlement" || (transactionStatus === "capture" && fraudStatus === "accept")) {
+                order.payment.status = "paid";
+                order.status = order.logistics.pickupMethod === "pickup" ? "pickup" : "pending";
+                await order.save();
+            } else if (["cancel", "deny", "expire"].includes(transactionStatus)) {
+                order.payment.status = "failed";
+                await order.save();
+            }
+        } catch (err) {
+            console.error(`Auto-sync failed for order ${order.orderId}:`, err.message);
+        }
+    }
 
     const settings = (await Settings.findOne()) || { shippingRatePerKm: 5000 };
 
