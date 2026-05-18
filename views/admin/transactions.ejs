@@ -94,7 +94,7 @@
                                 <% } else if (order.status === 'pending') { %>
                                     <span class="badge badge-pending">Pending</span>
                                 <% } else if (order.status === 'cancelled') { %>
-                                    <span class="badge badge-pending" style="background:#fee2e2;color:#b91c1c;">Cancelled</span>
+                                    <span class="badge badge-cancelled">Dibatalkan</span>
                                 <% } else { %>
                                     <span class="badge badge-processing">
                                         <%= order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('-', ' ') %>

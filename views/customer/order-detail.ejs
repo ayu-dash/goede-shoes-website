@@ -214,7 +214,7 @@
                           <%= new Date(history.updatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %>
                         </div>
                         <div style="width: 10px; position: relative; display: flex; justify-content: center;">
-                          <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--navy); z-index: 2; position: relative;"></div>
+                          <div style="width: 10px; height: 10px; border-radius: 50%; background: <%= history.status === 'cancelled' ? '#ef4444' : 'var(--navy)' %>; z-index: 2; position: relative;"></div>
                           <div style="position: absolute; top: 10px; bottom: -25px; left: 4.5px; width: 1px; background: #e2e8f0; z-index: 1;"></div>
                         </div>
                         <div style="flex: 1;">

@@ -302,6 +302,15 @@
   background: #ea580c;
 }
 
+.badge-cancelled {
+  background: #ffe4e6;
+  color: #ef4444;
+}
+
+.badge-cancelled::before {
+  background: #ef4444;
+}
+
 .badge-layanan-blue {
   background: #e0e7ff;
   color: #4f46e5;

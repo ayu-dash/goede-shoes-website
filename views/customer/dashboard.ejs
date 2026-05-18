@@ -66,10 +66,20 @@
                   <%= new Date(order.createdAt).toLocaleDateString('id-ID', { day: 'numeric' , month: 'short' }) %>
                 </span>
               </div>
-              <div
-                class="dash-activity-status dash-activity-status--<%= order.status === 'completed' ? 'done' : 'process' %>">
-                <i class="fa-solid <%= order.status === 'completed' ? 'fa-circle-check' : 'fa-circle' %>"></i>
-                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+              <% 
+                var actStatusClass = "process";
+                var actIcon = "fa-circle";
+                if (order.status === 'completed') {
+                  actStatusClass = "done";
+                  actIcon = "fa-circle-check";
+                } else if (order.status === 'cancelled') {
+                  actStatusClass = "cancel";
+                  actIcon = "fa-circle-xmark";
+                }
+              %>
+              <div class="dash-activity-status dash-activity-status--<%= actStatusClass %>">
+                <i class="fa-solid <%= actIcon %>"></i>
+                <%= order.statusLabel.toUpperCase() %>
               </div>
             </a>
             <% }) %>

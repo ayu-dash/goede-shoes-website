@@ -237,8 +237,14 @@
 }
 
 .status-badge--cancel {
-  background: #ef4444;
-  color: var(--white);
+  background: #ef4444 !important;
+  color: var(--white) !important;
+}
+
+.history-status-badge--cancelled {
+  background: #ef4444 !important;
+  color: var(--white) !important;
+  border: none !important;
 }
 
 /* ===========================
@@ -492,6 +498,10 @@
 
 .dash-activity-status--done {
   color: #10b981;
+}
+
+.dash-activity-status--cancel {
+  color: #ef4444;
 }
 
 /* Tips Card */
