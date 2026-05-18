@@ -478,7 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalSubmitBtn = document.getElementById('modalSubmitBtn');
     if (modalSubmitBtn) {
         modalSubmitBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) {
                 showCustomAlert("Peringatan", "Harap unggah minimal 1 foto sebagai bukti.", "warning");
+                return;
+            }
             const note = document.getElementById('noteInput').value;
             await performStatusUpdate(activeStatus, note, selectedFiles);
         });
