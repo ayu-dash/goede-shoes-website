@@ -64,6 +64,12 @@
               <% 
                 let progress = 10;
                 let effectiveStatus = order.status;
+                
+                // If delivery is self and status is quality-check, it means it's ready to pickup!
+                if (order.logistics && order.logistics.deliveryMethod === 'self' && effectiveStatus === 'quality-check') {
+                  effectiveStatus = 'ready-to-pickup';
+                }
+
                 if (effectiveStatus === 'received') effectiveStatus = 'pickup';
                 else if (effectiveStatus === 'ready-to-pickup') effectiveStatus = 'delivery';
                 else if (effectiveStatus === 'payment-cod') effectiveStatus = 'delivery';
