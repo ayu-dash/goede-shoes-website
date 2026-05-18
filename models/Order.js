@@ -350,6 +350,13 @@ orderSchema.pre("save", async function () {
 
 // 1. Localized Status Label
 orderSchema.virtual("statusLabel").get(function () {
+    if (this.status === "pending") {
+        if (this.logistics && this.logistics.pickupMethod === "self") {
+            return "Menunggu Antaran";
+        }
+        return "Menunggu Konfirmasi";
+    }
+
     if (this.status === "pickup") {
         if (this.logistics && this.logistics.pickupMethod === "self") {
             return "Menunggu Drop-off";
@@ -359,18 +366,17 @@ orderSchema.virtual("statusLabel").get(function () {
     
     if (this.status === "delivery") {
         if (this.logistics && this.logistics.deliveryMethod === "self") {
-            return "Siap Diambil di Gerai";
+            return "Siap Diambil";
         }
         return "Sedang Diantar";
     }
 
     const statusTranslations = {
-        pending: "Menunggu Konfirmasi",
         payment: "Menunggu Pembayaran",
-        received: "Diterima di Workshop",
-        "validating-in": "Pengecekan Awal",
-        "in-progress": "Sedang Dicuci",
-        "quality-check": "Pemeriksaan Kualitas (QC)",
+        received: "Diterima",
+        "validating-in": "Cek Kondisi",
+        "in-progress": "Pencucian",
+        "quality-check": "Cek Hasil",
         completed: "Selesai",
         cancelled: "Dibatalkan",
     };
