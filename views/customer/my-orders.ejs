@@ -17,7 +17,7 @@
 <div class="orders-section" id="active-orders-section">
   <div class="orders-section-header">
     <h3 class="dash-subtitle dash-subtitle--upper">PESANAN AKTIF</h3>
-    <% const activeOrders = orders.filter(function(o) { return ["pending", "pickup", "in-progress", "delivery"].includes(o.status) }) %>
+    <% const activeOrders = orders.filter(function(o) { return !["completed", "cancelled"].includes(o.status) }) %>
     <span class="orders-badge"><%= activeOrders.length %> BERLANGSUNG</span>
   </div>
 
@@ -63,9 +63,17 @@
             <div class="progress-bar">
               <% 
                 let progress = 10;
-                if(order.status === 'pickup') progress = 30;
-                if(order.status === 'in-progress') progress = 60;
-                if(order.status === 'delivery') progress = 90;
+                let effectiveStatus = order.status;
+                if (effectiveStatus === 'received') effectiveStatus = 'pickup';
+                else if (effectiveStatus === 'ready-to-pickup') effectiveStatus = 'delivery';
+                else if (effectiveStatus === 'payment-cod') effectiveStatus = 'delivery';
+
+                if (effectiveStatus === 'payment') progress = 20;
+                else if (effectiveStatus === 'pickup') progress = 35;
+                else if (effectiveStatus === 'validating-in') progress = 50;
+                else if (effectiveStatus === 'in-progress') progress = 65;
+                else if (effectiveStatus === 'quality-check') progress = 80;
+                else if (effectiveStatus === 'delivery') progress = 90;
               %>
               <div class="progress-fill" data-progress="<%= progress %>"></div>
             </div>
@@ -129,6 +137,53 @@
       if (el.dataset.progress) {
         el.style.width = el.dataset.progress + '%';
       }
+    });
+
+    // Interactive filter tabs
+    const tabs = document.querySelectorAll('.order-tab');
+    const activeCards = document.querySelectorAll('.active-order-card');
+    const historyCards = document.querySelectorAll('.history-card');
+    const activeSection = document.getElementById('active-orders-section');
+    const historySection = document.getElementById('history-orders-section');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const filter = tab.dataset.filter;
+
+        if (filter === 'all') {
+          activeSection.style.display = 'block';
+          historySection.style.display = 'block';
+          activeCards.forEach(c => c.style.display = 'flex');
+          historyCards.forEach(c => c.style.display = 'flex');
+        } else if (filter === 'proses') {
+          activeSection.style.display = 'block';
+          historySection.style.display = 'none';
+          activeCards.forEach(c => c.style.display = 'flex');
+        } else if (filter === 'selesai') {
+          activeSection.style.display = 'none';
+          historySection.style.display = 'block';
+          historyCards.forEach(c => {
+            if (c.dataset.orderStatus === 'selesai') {
+              c.style.display = 'flex';
+            } else {
+              c.style.display = 'none';
+            }
+          });
+        } else if (filter === 'batal') {
+          activeSection.style.display = 'none';
+          historySection.style.display = 'block';
+          historyCards.forEach(c => {
+            if (c.dataset.orderStatus === 'batal') {
+              c.style.display = 'flex';
+            } else {
+              c.style.display = 'none';
+            }
+          });
+        }
+      });
     });
   });
 </script>
