@@ -55,6 +55,7 @@
                   { key: 'pending' , label: 'Submit' , icon: 'fa-file-invoice' }, 
                   { key: 'payment' , label: 'Pembayaran' , icon: 'fa-credit-card' }, 
                   { key: 'pickup' , label: pickupLabel , icon: pickupIcon }, 
+                  { key: 'received' , label: 'Diterima' , icon: 'fa-box-open' }, 
                   { key: 'validating-in' , label: 'Cek Kondisi' , icon: 'fa-clipboard-check' }, 
                   { key: 'in-progress' , label: 'Pencucian' , icon: 'fa-soap' }, 
                   { key: 'quality-check' , label: 'Cek Hasil' , icon: 'fa-magnifying-glass' }, 
@@ -64,9 +65,7 @@
                 var effectiveStatus=order.status; 
                 
                 // Map intermediate/internal statuses to customer-friendly steps
-                if (effectiveStatus === 'received') {
-                  effectiveStatus = 'pickup';
-                } else if (effectiveStatus === 'ready-to-pickup') {
+                if (effectiveStatus === 'ready-to-pickup') {
                   effectiveStatus = 'delivery';
                 } else if (effectiveStatus === 'payment-cod') {
                   effectiveStatus = 'delivery';
